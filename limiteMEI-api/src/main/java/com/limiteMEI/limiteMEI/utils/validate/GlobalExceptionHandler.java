@@ -10,8 +10,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<MessageException> handleApplicationException(ApplicationException ex) {
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessageException());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<MessageException> handleGenericException(Exception ex) {
+
+        MessageException message = new MessageException(ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(message);
     }
 }

@@ -14,59 +14,58 @@ public class SpecificationBuilder<T> implements Specification<T> {
         return new SpecificationBuilder<>();
     }
 
+    private void addSpec(Specification<T> spec) {
+        specs.add(spec);
+    }
+
+    private Path<?> resolvePath(Root<T> root, String field) {
+        String[] parts = field.split("\\.");
+        Path<?> path = root.get(parts[0]);
+
+        for (int i = 1; i < parts.length; i++) {
+            path = path.get(parts[i]);
+        }
+
+        return path;
+    }
+
     public SpecificationBuilder<T> equal(String field, Object value) {
         if (value != null) {
-            specs.add((root, query, cb) -> cb.equal(root.get(field), value));
+            addSpec((root, query, cb) ->
+                    cb.equal(resolvePath(root, field), value));
         }
         return this;
     }
 
     public SpecificationBuilder<T> likeIgnoreCase(String field, String value) {
         if (value != null && !value.isEmpty()) {
-            specs.add((root, query, cb) ->
-                    cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%")
-            );
+            addSpec((root, query, cb) ->
+                    cb.like(
+                            cb.lower(resolvePath(root, field).as(String.class)),
+                            "%" + value.toLowerCase() + "%"
+                    ));
         }
         return this;
     }
 
     public SpecificationBuilder<T> in(String field, List<?> values) {
         if (values != null && !values.isEmpty()) {
-            specs.add((root, query, cb) -> root.get(field).in(values));
+            addSpec((root, query, cb) ->
+                    resolvePath(root, field).in(values));
         }
         return this;
     }
-
-// TODO: Data nao ta pegando no mesmo dia, verificar
-    public <Y extends Comparable<? super Y>> SpecificationBuilder<T> between(String field, Y start, Y end) {
-        if (start != null && end != null) {
-            specs.add((root, query, cb) -> {
-                Path<Y> path = root.get(field);
-                return cb.between(path.as((Class<Y>) start.getClass()), start, end);
-            });
-        } else if (start != null) {
-            specs.add((root, query, cb) -> {
-                Path<Y> path = root.get(field);
-                return cb.greaterThanOrEqualTo(path.as((Class<Y>) start.getClass()), start);
-            });
-        } else if (end != null) {
-            specs.add((root, query, cb) -> {
-                Path<Y> path = root.get(field);
-                return cb.lessThanOrEqualTo(path.as((Class<Y>) end.getClass()), end);
-            });
-        }
-        return this;
-    }
-
 
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-        List<Predicate> predicates = new ArrayList<>();
-        for (Specification<T> spec : specs) {
-            Predicate p = spec.toPredicate(root, query, cb);
-            if (p != null) predicates.add(p);
-        }
-        return predicates.isEmpty() ? cb.conjunction() : cb.and(predicates.toArray(new Predicate[0]));
+
+        List<Predicate> predicates = specs.stream()
+                .map(spec -> spec.toPredicate(root, query, cb))
+                .filter(p -> p != null)
+                .toList();
+
+        return predicates.isEmpty()
+                ? cb.conjunction()
+                : cb.and(predicates.toArray(new Predicate[0]));
     }
 }
-
