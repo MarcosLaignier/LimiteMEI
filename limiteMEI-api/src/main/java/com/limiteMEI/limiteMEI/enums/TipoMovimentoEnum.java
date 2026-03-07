@@ -3,16 +3,15 @@ package com.limiteMEI.limiteMEI.enums;
 import lombok.Getter;
 
 @Getter
-public enum RoleEnum {
+public enum TipoMovimentoEnum {
 
-    ADMIN("Administrador"),
-    USER("Usuário");
+    RECEITA("Receita"),
+    DESPESA("Despesa");
 
     private final String nome;
 
-    RoleEnum(String nome) {
+    TipoMovimentoEnum(String nome) {
         this.nome = nome;
     }
-
 
 }

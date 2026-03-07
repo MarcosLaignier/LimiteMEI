@@ -1,4 +1,4 @@
-package com.limiteMEI.limiteMEI.model;
+package com.limiteMEI.limiteMEI.domain;
 
 import com.limiteMEI.limiteMEI.enums.RoleEnum;
 import jakarta.persistence.*;
@@ -6,7 +6,7 @@ import lombok.*;
 
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuario")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,7 +17,7 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String nome;

@@ -1,14 +1,14 @@
-package com.limiteMEI.limiteMEI.model;
+package com.limiteMEI.limiteMEI.domain;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
+
 import lombok.*;
 
 
 @Entity
-@Table(name = "empresas")
+@Table(name = "empresa")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,10 +19,10 @@ public class Empresa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @JoinColumn(name = "usuario", nullable = false)
     private Usuario usuario;
 
     @Column(nullable = false, unique = true)
@@ -37,7 +37,7 @@ public class Empresa {
     private LocalDate dataAbertura;
 
     @Column(nullable = false)
-    private BigDecimal limiteAnual = new BigDecimal("81000.00");
+    private BigDecimal limiteAnual;
 
     @Column(nullable = false)
     private Boolean ativo = true;
