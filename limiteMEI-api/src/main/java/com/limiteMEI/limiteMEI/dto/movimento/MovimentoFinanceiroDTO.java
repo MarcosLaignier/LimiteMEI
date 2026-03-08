@@ -23,6 +23,8 @@ public class MovimentoFinanceiroDTO {
 
     private TipoMovimentoEnum tipo;
 
+    private Long empresaId;
+
     private Long categoriaId;
 
 }

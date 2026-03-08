@@ -14,6 +14,8 @@ public class EmpresaDTO {
 
     private Long id;
 
+    private Long usuarioId;
+
     private String cnpj;
 
     private String razaoSocial;
@@ -24,4 +26,5 @@ public class EmpresaDTO {
 
     private BigDecimal limiteAnual;
 
+    private Boolean ativo;
 }

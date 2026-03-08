@@ -1,15 +1,18 @@
 package com.limiteMEI.limiteMEI.mapper;
 
 import com.limiteMEI.limiteMEI.domain.Usuario;
+import com.limiteMEI.limiteMEI.dto.usuario.UsuarioDTO;
 import com.limiteMEI.limiteMEI.dto.usuario.UsuarioCreateDTO;
-import com.limiteMEI.limiteMEI.dto.usuario.UsuarioResponseDTO;
+import com.limiteMEI.limiteMEI.utils.BaseMapper;
+import org.springframework.stereotype.Component;
 
-public class UsuarioMapper {
+@Component
+public class UsuarioMapper implements BaseMapper<Usuario, UsuarioDTO, UsuarioCreateDTO> {
 
-    public static UsuarioResponseDTO toDTO(Usuario usuario) {
+    @Override
+    public UsuarioDTO toDTO(Usuario usuario) {
         if (usuario == null) return null;
-
-        return UsuarioResponseDTO.builder()
+        return UsuarioDTO.builder()
                 .id(usuario.getId())
                 .nome(usuario.getNome())
                 .email(usuario.getEmail())
@@ -18,15 +21,15 @@ public class UsuarioMapper {
                 .build();
     }
 
-    public static Usuario toEntity(UsuarioCreateDTO dto, String senhaHash) {
+    @Override
+    public Usuario toEntity(UsuarioCreateDTO dto) {
         if (dto == null) return null;
-
-        return Usuario.builder()
-                .nome(dto.getNome())
-                .email(dto.getEmail())
-                .senhaHash(senhaHash)
-                .ativo(true)
-                .build();
+        Usuario usuario = new Usuario();
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setSenhaHash(dto.getSenha());
+        usuario.setRoleEnum(dto.getRole());
+        usuario.setAtivo(true);
+        return usuario;
     }
-
 }

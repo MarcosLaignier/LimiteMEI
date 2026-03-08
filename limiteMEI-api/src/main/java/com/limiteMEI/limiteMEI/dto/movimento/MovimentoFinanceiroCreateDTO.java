@@ -25,6 +25,8 @@ public class MovimentoFinanceiroCreateDTO {
     @NotNull
     private TipoMovimentoEnum tipo;
 
+    private Long empresaId;
+
     private Long categoriaId;
 
 }

@@ -13,6 +13,8 @@ import java.time.LocalDate;
 @Builder
 public class EmpresaCreateDTO {
 
+    private Long usuarioId;
+
     @NotBlank
     private String cnpj;
 

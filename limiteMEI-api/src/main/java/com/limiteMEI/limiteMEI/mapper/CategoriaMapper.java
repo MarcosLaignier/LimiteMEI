@@ -4,10 +4,14 @@ import com.limiteMEI.limiteMEI.domain.Categoria;
 import com.limiteMEI.limiteMEI.domain.Empresa;
 import com.limiteMEI.limiteMEI.dto.categoria.CategoriaCreateDTO;
 import com.limiteMEI.limiteMEI.dto.categoria.CategoriaDTO;
+import com.limiteMEI.limiteMEI.utils.BaseMapper;
+import org.springframework.stereotype.Component;
 
-public class CategoriaMapper {
+@Component
+public class CategoriaMapper implements BaseMapper<Categoria, CategoriaDTO, CategoriaCreateDTO> {
 
-    public static CategoriaDTO toDTO(Categoria categoria) {
+    @Override
+    public CategoriaDTO toDTO(Categoria categoria) {
         if (categoria == null) return null;
 
         return CategoriaDTO.builder()
@@ -17,14 +21,13 @@ public class CategoriaMapper {
                 .build();
     }
 
-    public static Categoria toEntity(CategoriaCreateDTO dto, Empresa empresa) {
-        if (dto == null) return null;
+    @Override
+    public Categoria toEntity(CategoriaCreateDTO createDTO) {
+        if (createDTO == null) return null;
 
         return Categoria.builder()
-                .nome(dto.getNome())
-                .tipo(dto.getTipo())
-                .empresa(empresa)
+                .nome(createDTO.getNome())
+                .tipo(createDTO.getTipo())
                 .build();
     }
-
 }

@@ -1,37 +1,40 @@
 package com.limiteMEI.limiteMEI.mapper;
 
 import com.limiteMEI.limiteMEI.domain.Empresa;
-import com.limiteMEI.limiteMEI.domain.Usuario;
-import com.limiteMEI.limiteMEI.dto.empresa.EmpresaCreateDTO;
 import com.limiteMEI.limiteMEI.dto.empresa.EmpresaDTO;
+import com.limiteMEI.limiteMEI.dto.empresa.EmpresaCreateDTO;
+import com.limiteMEI.limiteMEI.utils.BaseMapper;
+import org.springframework.stereotype.Component;
 
-public class EmpresaMapper {
+@Component
+public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCreateDTO> {
 
-    public static EmpresaDTO toDTO(Empresa empresa) {
+    @Override
+    public EmpresaDTO toDTO(Empresa empresa) {
         if (empresa == null) return null;
-
         return EmpresaDTO.builder()
                 .id(empresa.getId())
+                .usuarioId(empresa.getUsuario().getId())
                 .cnpj(empresa.getCnpj())
                 .razaoSocial(empresa.getRazaoSocial())
                 .nomeFantasia(empresa.getNomeFantasia())
                 .dataAbertura(empresa.getDataAbertura())
                 .limiteAnual(empresa.getLimiteAnual())
+                .ativo(empresa.getAtivo())
                 .build();
     }
 
-    public static Empresa toEntity(EmpresaCreateDTO dto, Usuario usuario) {
+    @Override
+    public Empresa toEntity(EmpresaCreateDTO dto) {
         if (dto == null) return null;
-
-        return Empresa.builder()
-                .cnpj(dto.getCnpj())
-                .razaoSocial(dto.getRazaoSocial())
-                .nomeFantasia(dto.getNomeFantasia())
-                .dataAbertura(dto.getDataAbertura())
-                .limiteAnual(dto.getLimiteAnual())
-                .usuario(usuario)
-                .ativo(true)
-                .build();
+        Empresa empresa = new Empresa();
+        empresa.setCnpj(dto.getCnpj());
+        empresa.setRazaoSocial(dto.getRazaoSocial());
+        empresa.setNomeFantasia(dto.getNomeFantasia());
+        empresa.setDataAbertura(dto.getDataAbertura());
+        empresa.setLimiteAnual(dto.getLimiteAnual());
+        empresa.setAtivo(true);
+        // usuario deve ser setado no service ou via DTO com ID do usuário
+        return empresa;
     }
-
 }

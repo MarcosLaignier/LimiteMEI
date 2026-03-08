@@ -1,6 +1,6 @@
 package com.limiteMEI.limiteMEI.utils;
 
-import org.hibernate.service.spi.ServiceException;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,49 +8,39 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
-public abstract class BaseController<T, ID> {
+public abstract class BaseController<E, D, C, ID> {
 
-    protected abstract BaseService<T, ID> getService();
+    protected abstract BaseService<E, ID, C, D> getService();
 
     @GetMapping("/{id}")
-    public ResponseEntity<T> findById(@PathVariable ID id) {
-
-        T entity = getService().getById(id);
-
-        return ResponseEntity.ok(entity);
+    public ResponseEntity<D> findById(@PathVariable ID id) {
+        D dto = getService().getById(id);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping
-    public ResponseEntity<List<T>> findAll() {
-
-        List<T> entities = getService().findAll();
-
-        return ResponseEntity.ok(entities);
+    public ResponseEntity<List<D>> findAll() {
+        List<D> dtos = getService().findAll();
+        return ResponseEntity.ok(dtos);
     }
 
     @PostMapping
-    public ResponseEntity<T> create(@RequestBody T entity) {
-
-        T saved = getService().save(entity);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    public ResponseEntity<D> create(@Valid @RequestBody C createDTO) {
+        D dto = getService().save(createDTO);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(dto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<T> update(@PathVariable ID id, @RequestBody T entity) {
-
-        T updated = getService().update(entity);
-
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<D> update(@PathVariable ID id, @RequestBody C updateDTO) {
+        D dto = getService().update(id, updateDTO);
+        return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable ID id) {
-
-        T entity = getService().getById(id);
-
-        getService().delete(entity);
-
+        getService().delete(id);
         return ResponseEntity.noContent().build();
     }
 }

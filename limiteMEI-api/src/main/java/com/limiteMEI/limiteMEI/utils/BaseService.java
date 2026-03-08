@@ -1,28 +1,24 @@
 package com.limiteMEI.limiteMEI.utils;
 
-
 import com.limiteMEI.limiteMEI.utils.validate.GenericUniqueValidator;
 import com.limiteMEI.limiteMEI.utils.validate.ValidateMetodsUtils;
-import org.hibernate.service.spi.ServiceException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public abstract class BaseService<T, ID> {
+public abstract class BaseService<T, ID, C, D> {
 
-    protected final GenericUniqueValidator genericUniqueValidator;
+    protected final GenericUniqueValidator validator;
 
-    protected BaseService(GenericUniqueValidator genericUniqueValidator) {
-        this.genericUniqueValidator = genericUniqueValidator;
+    protected BaseService(GenericUniqueValidator validator) {
+        this.validator = validator;
     }
 
-    protected abstract JpaRepository<T, ID> getRepository();
+    protected abstract com.limiteMEI.limiteMEI.utils.BaseRepository<T, ID> getRepository();
+    protected abstract BaseMapper<T, D, C> getMapper();
 
-    /** Metodo padrao de Save
-     * Nele ha possibilidade de validar ou executar algo antes ou apos a execucao do metodo save do repositorio padrao
-     */
-    public T save(T entity) {
+    public D save(C createDTO) {
+
+        T entity = getMapper().toEntity(createDTO);
 
         validate(entity);
         beforeSave(entity);
@@ -31,13 +27,15 @@ public abstract class BaseService<T, ID> {
 
         afterSave(entity);
 
-        return entity;
+        return getMapper().toDTO(entity);
     }
 
-    /** Metodo padrao de Update
-     * Nele ha possibilidade de validar ou executar algo antes ou apos a execucao do metodo update do repositorio padrao
-     */
-    public T update(T entity) {
+    public D update(ID id, C dto) {
+
+        getRepository().findById(id)
+                .orElseThrow(() -> new RuntimeException("Registro não encontrado"));
+
+        T entity = getMapper().toEntity(dto);
 
         validate(entity);
         beforeUpdate(entity);
@@ -46,13 +44,14 @@ public abstract class BaseService<T, ID> {
 
         afterUpdate(entity);
 
-        return entity;
+        return getMapper().toDTO(entity);
     }
 
-    /** Metodo padrao de Delete
-     * Nele ha possibilidade de validar ou executar algo antes ou apos a execucao do metodo delete do repositorio padrao
-     */
-    public void delete(T entity) {
+    public void delete(ID id) {
+
+        T entity = getRepository()
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Registro não encontrado"));
 
         validateDelete(entity);
         beforeDelete(entity);
@@ -62,43 +61,33 @@ public abstract class BaseService<T, ID> {
         afterDelete(entity);
     }
 
-    /**
-     * Metodo padrao de buscar todos os dados da entity
-     */
-    public List<T> findAll() {
-        return getRepository().findAll();
-    }
+    public D getById(ID id) {
 
-    /** Metodo padrao de buscar por ID da entity */
-
-    public T getById(ID id) {
-        return getRepository()
+        T entity = getRepository()
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Registro não encontrado"));
+
+        return getMapper().toDTO(entity);
+    }
+
+    public List<D> findAll() {
+
+        return getRepository()
+                .findAll()
+                .stream()
+                .map(getMapper()::toDTO)
+                .toList();
     }
 
     protected void validate(T entity) {
-        ValidateMetodsUtils.validate(entity, genericUniqueValidator);
+        ValidateMetodsUtils.validate(entity, validator);
     }
 
-    protected void validateDelete(T entity) {
-    }
-
-    protected void beforeSave(T entity) {
-    }
-
-    protected void afterSave(T entity) {
-    }
-
-    protected void beforeUpdate(T entity) {
-    }
-
-    protected void afterUpdate(T entity) {
-    }
-
-    protected void beforeDelete(T entity) {
-    }
-
-    protected void afterDelete(T entity) {
-    }
+    protected void validateDelete(T entity) {}
+    protected void beforeSave(T entity) {}
+    protected void afterSave(T entity) {}
+    protected void beforeUpdate(T entity) {}
+    protected void afterUpdate(T entity) {}
+    protected void beforeDelete(T entity) {}
+    protected void afterDelete(T entity) {}
 }
