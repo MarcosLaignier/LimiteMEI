@@ -5,32 +5,32 @@
   </div>
 
   <div class="page-actions">
-
+    {{ listMode }}
     @if (listMode) {
-      <button class="btn-action secondary" (click)="filtrarClick($event)">
+      <button class="btn-action secondary" (click)="filtrarClick()">
         <i class="bi bi-funnel"></i>
         <span>Filtrar</span>
       </button>
 
-      <button class="btn-action primary" (click)="novoClick($event)">
+      <button class="btn-action primary" (click)="novoClick()">
         <i class="bi bi-plus-circle"></i>
         <span>Novo</span>
       </button>
     }
 
     @if (!listMode) {
-      <button class="btn-action success" (click)="salvarClick($event)">
+      <button class="btn-action success" (click)="salvarClick()">
         <i class="bi bi-check-circle"></i>
         <span>Salvar</span>
       </button>
     }
 
-    <button class="btn-action secondary" (click)="limparClick($event)">
+    <button class="btn-action secondary" (click)="limparClick()">
       <i class="bi bi-eraser"></i>
       <span>Limpar</span>
     </button>
 
-    <button class="btn-action danger" (click)="fecharClick($event)">
+    <button class="btn-action danger" (click)="fecharClick()">
       <i class="bi bi-x-circle"></i>
       <span>Fechar</span>
     </button>

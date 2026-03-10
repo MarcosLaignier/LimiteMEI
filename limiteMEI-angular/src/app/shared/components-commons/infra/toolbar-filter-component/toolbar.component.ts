@@ -1,21 +1,27 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {Location} from '@angular/common';
-import {Router, RouterModule} from "@angular/router";
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Location } from '@angular/common';
+import {Router} from '@angular/router';
 
 @Component({
-  selector: 'toolbar-filter-component',
+  selector: 'toolbar-filter',
   standalone: true,
-  imports: [
-    RouterModule
-],
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss']
-
 })
 export class ToolbarComponent {
 
-  @Input() tituloPagina: string = '';
-  @Input() listMode: boolean = true;
+  get listMode(): boolean {
+    return this._listMode;
+  }
+
+  @Input()
+  set listMode(value: boolean) {
+    console.log(value)
+    this._listMode = value;
+  }
+
+  @Input() tituloPagina = '';
+  private _listMode = true;
 
   @Output() filtrar = new EventEmitter<void>();
   @Output() novo = new EventEmitter<void>();
@@ -26,13 +32,9 @@ export class ToolbarComponent {
   constructor(private location: Location,
               private router: Router) {}
 
-  filtrarClick(event: Event) {
-    event.preventDefault();
-    this.filtrar.emit();
-  }
+  filtrarClick() { this.filtrar.emit(); }
 
-  novoClick(event: Event) {
-    event.preventDefault();
+  novoClick() {
     const currentUrl = this.router.url;
     const newUrl = `${currentUrl}/create`;
 
@@ -40,17 +42,11 @@ export class ToolbarComponent {
     this.novo.emit();
   }
 
-  salvarClick(event: Event) {
-    event.preventDefault();
-    this.salvar.emit();
-  }
-  limparClick(event: Event) {
-    event.preventDefault();
-    this.limpar.emit();
-  }
+  salvarClick() { this.salvar.emit(); }
 
-  fecharClick(event: Event) {
-    event.preventDefault();
+  limparClick() { this.limpar.emit(); }
+
+  fecharClick() {
     this.fechar.emit();
     this.location.back();
   }

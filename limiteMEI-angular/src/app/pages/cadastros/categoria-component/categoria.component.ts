@@ -1,55 +1,33 @@
-import { Component, OnInit } from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {NgForOf} from '@angular/common';
+import {Component} from '@angular/core';
+import {BaseListCrud} from '../../../shared/components-commons/core/base.list.crud';
 import {CategoriaDTO} from '../../../dtos/categoria/categoria.dto';
 import {CategoriaCreateDTO} from '../../../dtos/categoria/categoria.create.dto';
-import {TipoMovimentoEnum} from '../../../enums/tipo.movimento.enum';
 import {CategoriaService} from '../../../services/categoria.service';
+import {ToolbarComponent} from '../../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NgIf} from '@angular/common';
 
 @Component({
-  selector: 'app-categoria',
+  selector: 'categoria-component',
+  imports: [
+    ToolbarComponent,
+    NgIf
+  ],
   templateUrl: './categoria.component.html',
-  imports: [FormsModule, NgForOf]
+  standalone: true
 })
-export class CategoriaComponent implements OnInit {
+export class CategoriaComponent extends BaseListCrud<CategoriaDTO, CategoriaCreateDTO> {
 
-  categorias: CategoriaDTO[] = [];
+  protected service: CategoriaService;
+  protected routeBase = '/cadastros/categoria';
 
-  novaCategoria: CategoriaCreateDTO = {
-    nome: '',
-    tipo: TipoMovimentoEnum.DESPESA
-  };
-
-  tipos = Object.values(TipoMovimentoEnum);
-
-  constructor(private categoriaService: CategoriaService) {}
-
-  ngOnInit(): void {
-    this.carregarCategorias();
+  constructor(service: CategoriaService, router: Router, route: ActivatedRoute) {
+    super(router);
+    this.service = service;
   }
 
-  carregarCategorias() {
-    this.categoriaService.getAll().subscribe(res => {
-      this.categorias = res.body ?? [];
-    });
-  }
-
-  salvar() {
-    this.categoriaService.create(this.novaCategoria).subscribe(() => {
-
-      this.novaCategoria = {
-        nome: '',
-        tipo: TipoMovimentoEnum.DESPESA
-      };
-
-      this.carregarCategorias();
-    });
-  }
-
-  deletar(id: number) {
-    this.categoriaService.delete(id).subscribe(() => {
-      this.carregarCategorias();
-    });
+  ngOnInit() {
+    this.load();
   }
 
 }

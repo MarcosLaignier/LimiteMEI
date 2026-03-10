@@ -1,76 +1,68 @@
-<div class="container mt-4">
+<toolbar-filter
+  tituloPagina="Categorias"
+  [listMode]="true"
+  (novo)="novo()"
+  (filtrar)="doFilter()">
+</toolbar-filter>
 
-  <h3>Categorias</h3>
+<div class="container-fluid mt-3">
 
-  <!-- FORM -->
-  <div class="card mb-4">
+  <div class="card">
+
     <div class="card-body">
 
-      <div class="row">
+      <table class="table table-striped table-hover">
 
-        <div class="col-md-5">
-          <input
-            class="form-control"
-            placeholder="Nome da categoria"
-            [(ngModel)]="novaCategoria.nome">
-        </div>
+        <thead>
+        <tr>
+          <th style="width: 80px">ID</th>
+          <th>Nome</th>
+          <th style="width: 150px">Ações</th>
+        </tr>
+        </thead>
 
-        <div class="col-md-3">
-          <select class="form-control" [(ngModel)]="novaCategoria.tipo">
+        <tbody>
 
-            <option *ngFor="let tipo of tipos" [value]="tipo">
-              {{tipo}}
-            </option>
+        <tr *ngFor="let categoria of dataSource">
 
-          </select>
-        </div>
+          <td>{{ categoria.id }}</td>
 
-        <div class="col-md-2">
-          <button
-            class="btn btn-primary w-100"
-            (click)="salvar()">
-            Salvar
-          </button>
-        </div>
+          <td>{{ categoria.nome }}</td>
 
-      </div>
+          <td>
+
+            <button
+              class="btn btn-sm btn-warning me-2"
+              (click)="editar(categoria.id)">
+
+              <i class="fa-solid fa-pen"></i>
+
+            </button>
+
+            <button
+              class="btn btn-sm btn-danger"
+              (click)="delete(categoria.id)">
+
+              <i class="fa-solid fa-trash"></i>
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        <tr *ngIf="dataSource.length === 0">
+          <td colspan="3" class="text-center text-muted">
+            Nenhum registro encontrado
+          </td>
+        </tr>
+
+        </tbody>
+
+      </table>
 
     </div>
+
   </div>
-
-  <!-- LISTA -->
-
-  <table class="table table-striped">
-
-    <thead>
-    <tr>
-      <th>ID</th>
-      <th>Nome</th>
-      <th>Tipo</th>
-      <th>Ação</th>
-    </tr>
-    </thead>
-
-    <tbody>
-
-    <tr *ngFor="let c of categorias">
-
-      <td>{{c.id}}</td>
-      <td>{{c.nome}}</td>
-      <td>{{c.tipo}}</td>
-
-      <td>
-        <button
-          class="btn btn-danger btn-sm"
-          (click)="deletar(c.id)">
-          Excluir
-        </button>
-      </td>
-
-    </tr>
-
-    </tbody>
-
-  </table>
 
 </div>

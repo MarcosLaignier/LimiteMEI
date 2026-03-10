@@ -1,0 +1,16 @@
+<div>
+  <toolbar-filter tituloPagina="Categoria"
+                  [listMode]="false"
+                  (salvar)="save()">
+  </toolbar-filter>
+</div>
+
+<div class="card-body">
+
+  <div class="row g-3">
+    <text-box-component label="Nome da Categoria" colClass="col-md-4" [(dataField)]="model.nome"></text-box-component>
+  </div>
+
+</div>
+
+
