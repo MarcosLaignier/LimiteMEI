@@ -1,0 +1,107 @@
+grid-component {
+
+  display: block;
+
+  /* ===============================
+     CARD (CONTAINER DO GRID)
+     =============================== */
+  .grid-card {
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+    background-color: #ffffff;
+    overflow: hidden;
+  }
+
+
+
+
+  /* ===============================
+     TABLE
+     =============================== */
+  .table {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+  }
+
+  /* Cabeçalho da tabela */
+  .table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    background-color: #f1f3f5;
+    color: #495057;
+
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+
+    padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid #dee2e6;
+    white-space: nowrap;
+  }
+
+  /* Células */
+  .table td {
+    padding: 0.65rem 0.9rem;
+    vertical-align: middle;
+    color: #212529;
+    border-top: 1px solid #dee2e6;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ===============================
+     INTERAÇÕES
+     =============================== */
+  .table-hover tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: #f6f8fa;
+  }
+
+  .table-hover tbody tr:active {
+    background-color: #e9ecef;
+  }
+
+  /* Linha selecionada (para uso futuro) */
+  .table tbody tr.selected {
+    background-color: rgba(13, 110, 253, 0.08);
+  }
+
+  /* ===============================
+     SCROLL
+     =============================== */
+  .table-responsive {
+    scrollbar-width: thin;
+    scrollbar-color: #adb5bd #f8f9fa;
+  }
+
+  .table-responsive::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-responsive::-webkit-scrollbar-track {
+    background: #f8f9fa;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    background-color: #adb5bd;
+    border-radius: 4px;
+  }
+
+  /* ===============================
+     EMPTY STATE (opcional)
+     =============================== */
+  .grid-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.875rem;
+  }
+}

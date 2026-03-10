@@ -1,0 +1,23 @@
+<ul class="nav custom-tabs">
+  @for (tab of tabs; track tab) {
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link d-flex align-items-center gap-2"
+        [class.active]="tab.active"
+        [class.disabled]="tab.disabled"
+        (click)="selectTab(tab)">
+
+        @if (tab.icon) {
+          <i [class]="'bi ' + tab.icon"></i>
+        }
+
+        <span>{{ tab.title }}</span>
+      </button>
+    </li>
+  }
+</ul>
+
+<div class="tab-content mt-3">
+  <ng-content />
+</div>

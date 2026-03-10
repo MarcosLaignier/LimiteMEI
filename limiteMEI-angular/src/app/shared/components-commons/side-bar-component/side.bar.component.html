@@ -1,0 +1,87 @@
+<nav class="sidebar d-flex flex-column"
+     [class.collapsed]="!sidebarOpen"
+     [class.open]="sidebarOpen">
+
+  <!-- HEADER -->
+  <div class="sidebar-header d-flex align-items-center justify-content-between px-3">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-box-seam sidebar-icon"></i>
+      <span class="sidebar-title link-text ms-2">LocGestão</span>
+    </div>
+
+    <button class="btn sidebar-toggle"
+            (click)="toggleSidebar()"
+            aria-label="Abrir / Fechar menu">
+      <i class="bi bi-list"></i>
+    </button>
+  </div>
+
+  <!-- MENU -->
+  <ul class="nav flex-column mt-3 sidebar-menu">
+
+    @for (item of menuItems; track item) {
+      <li class="nav-item">
+
+        @if (item.children) {
+          <button
+            type="button"
+            class="nav-link sidebar-link d-flex align-items-center w-100"
+            (click)="toggleSubmenu(item)">
+
+            <!-- ICON + TEXTO -->
+            <span class="d-flex align-items-center sidebar-link-content">
+              <i class="bi {{ item.icon }} sidebar-icon"></i>
+              <span class="link-text ms-2">{{ item.label }}</span>
+            </span>
+
+            <!-- CHEVRON -->
+            <i class="bi bi-chevron-down chevron ms-auto"
+               [class.rotate]="item.expanded"></i>
+          </button>
+
+          <!-- SUBMENU -->
+          <ul class="submenu" [class.show]="item.expanded">
+            @for (sub of item.children; track sub) {
+              <li class="nav-item">
+                <a
+                  class="nav-link sidebar-sublink d-flex align-items-center"
+                  [routerLink]="sub.route"
+                  routerLinkActive="active"
+                  (click)="onNavigate()">
+
+                  <i class="bi {{ sub.icon }} sidebar-icon"></i>
+                  <span class="link-text ms-2">{{ sub.label }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+
+        @else {
+          <a
+            class="nav-link sidebar-link d-flex align-items-center"
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            (click)="onNavigate()">
+
+            <i class="bi {{ item.icon }} sidebar-icon"></i>
+            <span class="link-text ms-2">{{ item.label }}</span>
+          </a>
+        }
+
+      </li>
+    }
+
+  </ul>
+
+  <!-- Dps se quisermos colocar um footer-->
+  <!--  <div class="sidebar-footer mt-auto px-3 py-3">-->
+  <!--    <a class="nav-link sidebar-link d-flex align-items-center"-->
+  <!--       routerLink="/configuracoes">-->
+
+  <!--      <i class="bi bi-gear sidebar-icon"></i>-->
+  <!--      <span class="link-text ms-2">Configurações</span>-->
+  <!--    </a>-->
+  <!--  </div>-->
+
+</nav>

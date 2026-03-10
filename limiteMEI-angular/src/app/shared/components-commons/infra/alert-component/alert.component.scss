@@ -1,0 +1,85 @@
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.toast {
+  width: 80vw;
+  display: flex;
+  flex-direction: column;     // necessário p/ bolinhas ficarem embaixo remova e veja o caos
+  padding: 14px 16px;
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  animation: slideIn 0.35s ease;
+  position: relative;
+
+  &.success { background: #2ecc71; }
+  &.error   { background: #e74c3c; }
+  &.warning { background: #f39c12; }
+  &.info    { background: #3498db; }
+
+  .icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .text {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+
+  /* Botão X */
+  .close-btn {
+    border: none;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    position: absolute;
+    top: 8px;
+    right: 10px;
+  }
+
+  /*  PAGINAÇÃO COM BOLINHAS CENTRALIZADAS */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 8px;
+    margin-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: 0.25s;
+
+      &.active {
+        background: #fff;
+        transform: scale(1.2);
+      }
+
+      &:hover {
+        background: rgba(255,255,255,0.7);
+      }
+    }
+  }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

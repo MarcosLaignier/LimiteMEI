@@ -1,0 +1,40 @@
+<div class="card mb-3">
+  @if (titleGridVisible) {
+
+    <div class="card-header fw-semibold">
+      {{ titleGrid }}
+    </div>
+  }
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle mb-0">
+        <thead>
+        <tr>
+          @for (col of gridColumnConfig; track col.key) {
+            <th  [style.width]="col.width">
+              {{ col.label || formatTitle(col.key) }}
+            </th>
+          }
+        </tr>
+        </thead>
+
+        <tbody>
+          @for (row of dataSource; track row) {
+            <tr (dblclick)="editItem(row)">
+              @for (col of gridColumnConfig; track col.key) {
+                <td   [style.width]="col.width">
+                  {{ formatByType(resolveValue(row, col.key), col) }}
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer text-end fw-semibold">
+    Total de registros: {{ dataSource != null ? dataSource.length : 0 }}
+  </div>
+</div>
+

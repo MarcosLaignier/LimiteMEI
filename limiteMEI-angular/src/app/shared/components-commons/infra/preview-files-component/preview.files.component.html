@@ -1,0 +1,94 @@
+<div class="preview-host">
+  @if (modal) {
+    <button (click)="abrirModal()" class="btn-trigger">
+      <i class="bi bi-eye"></i> Visualizar Arquivo
+    </button>
+
+    @if (modalAberto) {
+      <div class="modal-overlay" (click)="fecharModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+
+          <div class="modal-header">
+            <div class="header-info">
+              <i class="bi bi-file-earmark-text"></i>
+              <h4 class="modal-title">{{ arquivoDigital?.nomeDoArquivo || 'Carregando...' }}</h4>
+            </div>
+            <button type="button" class="btn-close" (click)="fecharModal()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body custom-scrollbar">
+            <div class="viewer-wrapper">
+              <ng-container *ngTemplateOutlet="viewerContent"></ng-container>
+            </div>
+
+            @if (arquivoDigital) {
+              <div class="file-details-card">
+                <div class="detail-item">
+                  <span class="label">Tipo:</span>
+                  <span class="value">{{ arquivoDigital.tipo }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Tamanho:</span>
+                  <span class="value">{{ formatarTamanho(arquivoDigital.tamanho) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="fecharModal()">Fechar</button>
+            <button class="btn-primary" (click)="downloadArquivo(arquivoId)">
+              <i class="bi bi-download"></i> Download
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+  } @else {
+    <div class="inline-card">
+      <div class="viewer-wrapper">
+        <ng-container *ngTemplateOutlet="viewerContent"></ng-container>
+      </div>
+
+      @if (arquivoDigital) {
+        <div class="inline-footer">
+          <div class="file-meta">
+            <p class="name">{{ arquivoDigital.nomeDoArquivo }}</p>
+            <p class="meta">{{ arquivoDigital.tipo }} • {{ formatarTamanho(arquivoDigital.tamanho) }}</p>
+          </div>
+          <button class="btn-primary" (click)="downloadArquivo(arquivoId)">
+            <i class="bi bi-download"></i>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<ng-template #viewerContent>
+  <div class="viewer-container">
+    @if (imagemUrl) {
+      <img [src]="imagemUrl" [alt]="arquivoDigital?.nomeDoArquivo" class="content-img">
+    } @else if (pdfUrl) {
+      <iframe [src]="pdfUrl" class="content-pdf"></iframe>
+    } @else if (videoUrl) {
+      <video [src]="videoUrl" controls class="content-video"></video>
+    } @else if (arquivoDigital && !imagemUrl && !pdfUrl && !videoUrl) {
+      <div class="no-preview">
+        <i class="bi bi-file-earmark-lock"></i>
+        <p>Preview indisponível para este formato</p>
+        <button (click)="downloadArquivo(arquivoId)" class="btn-primary-outline">
+          Baixar para abrir
+        </button>
+      </div>
+    } @else {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <p>Carregando arquivo...</p>
+      </div>
+    }
+  </div>
+</ng-template>

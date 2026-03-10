@@ -23,7 +23,7 @@ public class Categoria {
     private TipoMovimentoEnum tipo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "empresa_id", nullable = false)
+    @JoinColumn(name = "empresa")
     private Empresa empresa;
 
 }

@@ -1,0 +1,50 @@
+.custom-tabs {
+  border-bottom: none;
+
+  .nav-link {
+    border: none;
+    color: #495057;
+    background-color: #f8f9fa;
+    margin-right: 6px;
+    padding: 10px 16px;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    i {
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    &:hover:not(.disabled) {
+      background-color: #e9ecef;
+    }
+
+    &.active {
+      background-color: #ffffff;
+      color: #212529;
+      font-weight: 600;
+
+      box-shadow:
+        0 -2px 6px rgba(0, 0, 0, 0.08),
+        0 2px 6px rgba(0, 0, 0, 0.12);
+
+      i {
+        opacity: 1;
+      }
+    }
+
+    &.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// talvez em um futuro colocar os conteudos da tab flutuando?????
+//.tab-content {
+//  background-color: #ffffff;
+//  padding: 16px;
+//  border-radius: 0 8px 8px 8px;
+//  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+//}

@@ -1,0 +1,19 @@
+<div class="overlay">
+  <div class="dialog">
+    <h5 class="dialog-title">{{ title }}</h5>
+
+    <p class="dialog-message">
+      {{ message }}
+    </p>
+
+    <div class="actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="cancel.emit()">
+        {{ cancelText }}
+      </button>
+
+      <button type="button" class="btn btn-primary" (click)="confirm.emit()">
+        {{ confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

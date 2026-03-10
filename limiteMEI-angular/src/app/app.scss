@@ -1,0 +1,26 @@
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Conteúdo principal */
+.app-content {
+  margin-left: 260px;
+  padding: 1.5rem;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+}
+
+/* Sidebar colapsada */
+.app-layout.sidebar-collapsed .app-content {
+  margin-left: 72px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .app-content {
+    margin-left: 0;
+  }
+}

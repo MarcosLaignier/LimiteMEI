@@ -1,0 +1,9 @@
+<div [ngClass]="colClass">
+  <label class="form-label">{{ label + ':'}}</label>
+  <select class="form-select" [(ngModel)]="dataField" [disabled]="disabled">
+    <option value="">{{ placeholder }}</option>
+    @for (opt of enumOptions; track opt) {
+      <option [ngValue]="opt.key">{{ opt.value }}</option>
+    }
+  </select>
+</div>

@@ -1,0 +1,21 @@
+<div class="position-relative w-100" [ngClass]="colClass">
+  <text-box-component [label]="label"
+                      [colClass]="'col-md-12'"
+                      [placeholder]="placeholder"
+                      (keyup)="filterData()"
+                      [(dataField)]="textBoxData">
+  </text-box-component>
+  @if (suggestionVisible) {
+    <div class="list-group autocomplete-suggestions">
+      @for (item of showDataSource; track item) {
+        <button type="button"
+                class="list-group-item list-group-item-action"
+                (click)="selectSuggestion(item)">
+          {{ getDisplayLabel(item) }}
+        </button>
+      } @empty {
+        <div class="list-group-item disabled">Nenhum resultado encontrado</div>
+      }
+    </div>
+  }
+</div>

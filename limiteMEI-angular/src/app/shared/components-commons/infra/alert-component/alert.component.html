@@ -1,0 +1,28 @@
+<div class="toast-container">
+  @for (t of toasts; track t) {
+    <div class="toast" [ngClass]="t.type">
+      <!-- Página atual da mensagem -->
+      <div class="text">
+        @for (linha of getPages(t.message)[currentPage]; track linha) {
+          <div>
+            {{ linha }}
+          </div>
+        }
+      </div>
+      <!-- Navegação entre páginas -->
+      @if (getPages(t.message).length > 1) {
+        <div class="pagination">
+          @for (page of getPages(t.message); track page; let i = $index) {
+            <div
+              class="dot"
+              [class.active]="i === currentPage"
+              (click)="currentPage = i">
+            </div>
+          }
+        </div>
+      }
+      <button class="close-btn" (click)="removeToast(t)">✖</button>
+    </div>
+  }
+
+</div>

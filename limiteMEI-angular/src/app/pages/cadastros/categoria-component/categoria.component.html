@@ -1,0 +1,76 @@
+<div class="container mt-4">
+
+  <h3>Categorias</h3>
+
+  <!-- FORM -->
+  <div class="card mb-4">
+    <div class="card-body">
+
+      <div class="row">
+
+        <div class="col-md-5">
+          <input
+            class="form-control"
+            placeholder="Nome da categoria"
+            [(ngModel)]="novaCategoria.nome">
+        </div>
+
+        <div class="col-md-3">
+          <select class="form-control" [(ngModel)]="novaCategoria.tipo">
+
+            <option *ngFor="let tipo of tipos" [value]="tipo">
+              {{tipo}}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <button
+            class="btn btn-primary w-100"
+            (click)="salvar()">
+            Salvar
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LISTA -->
+
+  <table class="table table-striped">
+
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nome</th>
+      <th>Tipo</th>
+      <th>Ação</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    <tr *ngFor="let c of categorias">
+
+      <td>{{c.id}}</td>
+      <td>{{c.nome}}</td>
+      <td>{{c.tipo}}</td>
+
+      <td>
+        <button
+          class="btn btn-danger btn-sm"
+          (click)="deletar(c.id)">
+          Excluir
+        </button>
+      </td>
+
+    </tr>
+
+    </tbody>
+
+  </table>
+
+</div>

@@ -1,0 +1,178 @@
+/* ================================
+   SIDEBAR BASE
+================================ */
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1b1f3b, #141736);
+  color: #cfd3ff;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999;
+  overflow-x: hidden;
+  transition: width 0.3s ease, transform 0.3s ease;
+}
+
+/* ================================
+   MOBILE
+================================ */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 998;
+}
+
+/* ================================
+   HEADER
+================================ */
+.sidebar-header {
+  height: 56px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #7b82ff;
+  white-space: nowrap;
+}
+
+.sidebar-toggle {
+  background: none;
+  border: none;
+  color: #7b82ff;
+  font-size: 1.25rem;
+}
+
+/* ================================
+   LIST RESET
+================================ */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  list-style: none;
+}
+
+/* ================================
+   LINKS
+================================ */
+.sidebar .nav-link {
+  color: #cfd3ff;
+  background: transparent;
+  border-radius: 8px;
+  margin: 2px 8px;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  //justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.sidebar .nav-link i {
+  width: 20px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+/* Hover */
+.sidebar .nav-link:hover {
+  background: rgba(123, 130, 255, 0.15);
+  color: #ffffff;
+}
+
+/* Ativo */
+.sidebar .nav-link.active {
+  background: #5b61ff;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* ================================
+   SUBMENU
+================================ */
+.submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.submenu.show {
+  max-height: 500px;
+}
+
+.submenu .nav-link {
+  font-size: 0.85rem;
+  padding-left: 2.2rem;
+  opacity: 0.9;
+}
+
+/* ================================
+   CHEVRON
+================================ */
+.chevron {
+  font-size: 0.7rem;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chevron.rotate {
+  transform: rotate(180deg);
+}
+
+/* ================================
+   COLLAPSED
+================================ */
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebar.collapsed .sidebar-title,
+.sidebar.collapsed .link-text,
+.sidebar.collapsed .chevron {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-toggle {
+  margin: 0 auto;
+}
+
+.sidebar.collapsed .nav-link {
+  justify-content: center;
+  padding: 0.75rem 0;
+  margin: 4px auto;
+}
+
+.sidebar.collapsed .nav-link i {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.sidebar.collapsed .submenu {
+  display: none;
+}
