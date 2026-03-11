@@ -5,18 +5,20 @@ import {CategoriaCreateDTO} from '../../../dtos/categoria/categoria.create.dto';
 import {CategoriaService} from '../../../services/categoria.service';
 import {ToolbarComponent} from '../../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgIf} from '@angular/common';
+import {GridComponent} from '../../../shared/components-commons/infra/grid-column-component/grid.component';
 
 @Component({
   selector: 'categoria-component',
   imports: [
     ToolbarComponent,
-    NgIf
+    GridComponent
   ],
   templateUrl: './categoria.component.html',
   standalone: true
 })
 export class CategoriaComponent extends BaseListCrud<CategoriaDTO, CategoriaCreateDTO> {
+
+  CategoriaDTO = CategoriaDTO;
 
   protected service: CategoriaService;
   protected routeBase = '/cadastros/categoria';

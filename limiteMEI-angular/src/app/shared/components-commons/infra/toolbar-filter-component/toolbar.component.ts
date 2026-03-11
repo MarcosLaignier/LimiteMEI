@@ -16,7 +16,6 @@ export class ToolbarComponent {
 
   @Input()
   set listMode(value: boolean) {
-    console.log(value)
     this._listMode = value;
   }
 

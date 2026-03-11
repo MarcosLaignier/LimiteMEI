@@ -11,55 +11,12 @@
 
     <div class="card-body">
 
-      <table class="table table-striped table-hover">
+      <grid-component [dataSource]="dataSource"
+                      [typeDataSource]="CategoriaDTO"
+                      titleGrid="Categorias"
+                      [routerByEditDblClick]="true">
 
-        <thead>
-        <tr>
-          <th style="width: 80px">ID</th>
-          <th>Nome</th>
-          <th style="width: 150px">Ações</th>
-        </tr>
-        </thead>
-
-        <tbody>
-
-        <tr *ngFor="let categoria of dataSource">
-
-          <td>{{ categoria.id }}</td>
-
-          <td>{{ categoria.nome }}</td>
-
-          <td>
-
-            <button
-              class="btn btn-sm btn-warning me-2"
-              (click)="editar(categoria.id)">
-
-              <i class="fa-solid fa-pen"></i>
-
-            </button>
-
-            <button
-              class="btn btn-sm btn-danger"
-              (click)="delete(categoria.id)">
-
-              <i class="fa-solid fa-trash"></i>
-
-            </button>
-
-          </td>
-
-        </tr>
-
-        <tr *ngIf="dataSource.length === 0">
-          <td colspan="3" class="text-center text-muted">
-            Nenhum registro encontrado
-          </td>
-        </tr>
-
-        </tbody>
-
-      </table>
+      </grid-component>
 
     </div>
 

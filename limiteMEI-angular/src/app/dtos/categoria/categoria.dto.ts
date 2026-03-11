@@ -1,11 +1,11 @@
-import {TipoMovimentoEnum} from '../../enums/tipo.movimento.enum';
+import {GridColumn} from '../../shared/utils/directives/grid.column.decorator';
 
-export interface CategoriaDTO {
+export class CategoriaDTO {
 
-  id: number;
+  @GridColumn({ label: 'Codigo', type: 'number', ordem: 1, width: "200px"})
+  id!: number;
 
-  nome: string;
-
-  tipo?: TipoMovimentoEnum;
+  @GridColumn({ label: 'Nome', type: 'texto', ordem: 2})
+  nome!: string;
 
 }
