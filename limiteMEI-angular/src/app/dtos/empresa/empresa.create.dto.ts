@@ -6,4 +6,6 @@ export interface EmpresaCreateDTO {
   nomeFantasia: string;
   dataAbertura: string;
   tipoEmpresa: TipoEmpresaEnum;
+  ativo: boolean;
+  dataEncerramento?: string;
 }

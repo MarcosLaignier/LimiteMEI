@@ -12,11 +12,12 @@ import { EmpresaService } from '../../../../services/empresa.service';
 import { LIMITE_ANUAL_POR_TIPO, TIPO_EMPRESA_LABELS, TipoEmpresaEnum } from '../../../../enums/tipo.empresa.enum';
 import { EmpresaAtivaService } from '../../../../core/empresa-ativa.service';
 import { ValidationUtils } from '../../../../shared/utils/validation.utils';
+import { SwitchComponent } from '../../../../shared/components-commons/infra/switch-component/switch.component';
 
 @Component({
   selector: 'empresa-form',
   standalone: true,
-  imports: [ToolbarComponent, TextBoxComponent, DateBoxComponent, SelectEnumComponent, BadgeComponent],
+  imports: [ToolbarComponent, TextBoxComponent, DateBoxComponent, SelectEnumComponent, BadgeComponent, SwitchComponent],
   templateUrl: './empresa.form.component.html',
   styleUrl: './empresa.form.component.scss'
 })
@@ -52,9 +53,17 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
     this.setInitialModel();
   }
 
+  onAtivoChange(ativo: boolean): void {
+    if (ativo) this.model.dataEncerramento = undefined;
+  }
+
   override afterSave(saved?: EmpresaDTO): void {
     if (saved) {
-      this.empresaAtiva.selecionar(saved);
+      if (saved.ativo) {
+        this.empresaAtiva.selecionar(saved);
+      } else if (this.empresaAtiva.empresa()?.id === saved.id) {
+        this.empresaAtiva.limpar();
+      }
     }
 
     if (this.route.snapshot.queryParamMap.get('onboarding') === 'true') {
@@ -87,7 +96,8 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
       razaoSocial: '',
       nomeFantasia: '',
       dataAbertura: '',
-      tipoEmpresa: TipoEmpresaEnum.MEI_GERAL
+      tipoEmpresa: TipoEmpresaEnum.MEI_GERAL,
+      ativo: true
     };
   }
 }

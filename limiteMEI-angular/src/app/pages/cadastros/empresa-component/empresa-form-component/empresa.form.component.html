@@ -40,6 +40,18 @@
           </div>
           <small>O limite é definido automaticamente e não pode ser alterado manualmente.</small>
         </div>
+
+        <div class="col-auto company-status">
+          <span class="company-status__label">Situação do cadastro</span>
+          <switch-component label="Empresa ativa" [disabled]="loading" [(dataField)]="model.ativo"
+                            (dataFieldChange)="onAtivoChange($event)"></switch-component>
+          <small>Desative para impedir o uso operacional desta empresa.</small>
+        </div>
+        @if (!model.ativo) {
+          <date-box-component label="Data de Encerramento" colClass="col-auto" [clearButton]="true"
+                              [disabled]="loading" [dataField]="model.dataEncerramento ?? ''"
+                              (dataFieldChange)="model.dataEncerramento = $event || undefined"></date-box-component>
+        }
       </div>
     </div>
   </div>

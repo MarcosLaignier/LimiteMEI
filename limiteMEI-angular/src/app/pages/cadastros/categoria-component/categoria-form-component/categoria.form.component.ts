@@ -14,6 +14,7 @@ import { SelectEnumComponent } from '../../../../shared/components-commons/infra
 import { TipoMovimentoEnum } from '../../../../enums/tipo.movimento.enum';
 import { ValidationUtils } from '../../../../shared/utils/validation.utils';
 import { NATUREZA_RECEITA_LABELS, NaturezaReceitaEnum } from '../../../../enums/natureza.receita.enum';
+import { SwitchComponent } from '../../../../shared/components-commons/infra/switch-component/switch.component';
 
 @Component({
   selector: 'categoria-form',
@@ -23,9 +24,11 @@ import { NATUREZA_RECEITA_LABELS, NaturezaReceitaEnum } from '../../../../enums/
     FormsModule,
     ToolbarComponent,
     TextBoxComponent,
-    SelectEnumComponent
+    SelectEnumComponent,
+    SwitchComponent
   ],
-  templateUrl: './categoria.form.component.html'
+  templateUrl: './categoria.form.component.html',
+  styleUrl: './categoria.form.component.scss'
 })
 export class CategoriaFormComponent
   extends BaseFormCrud<CategoriaDTO, CategoriaCreateDTO>
@@ -47,11 +50,15 @@ export class CategoriaFormComponent
     this.service = service;
 
     /** garante model inicializado */
-    this.model = {} as CategoriaCreateDTO;
+    this.setInitialModel();
   }
 
   ngOnInit(): void {
     this.initForm();
+  }
+
+  override clear(): void {
+    this.setInitialModel();
   }
 
   override validateSave(): boolean {
@@ -72,6 +79,10 @@ export class CategoriaFormComponent
 
   onTipoChange(tipo: TipoMovimentoEnum): void {
     if (tipo === TipoMovimentoEnum.DESPESA) this.model.naturezaReceita = undefined;
+  }
+
+  private setInitialModel(): void {
+    this.model = { nome: '', ativo: true } as CategoriaCreateDTO;
   }
 
 }

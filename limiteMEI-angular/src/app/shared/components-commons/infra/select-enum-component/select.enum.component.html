@@ -1,4 +1,4 @@
-<div [ngClass]="colClass">
+<div [ngClass]="colClass" [style.width]="width" [style.max-width]="'100%'">
   <label class="form-label">{{ label + ':'}}</label>
   <select class="form-select" [(ngModel)]="dataField" [disabled]="disabled">
     <option value="">{{ placeholder }}</option>

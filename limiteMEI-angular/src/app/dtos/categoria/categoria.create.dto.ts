@@ -9,4 +9,6 @@ export interface CategoriaCreateDTO {
 
   naturezaReceita?: NaturezaReceitaEnum;
 
+  ativo: boolean;
+
 }

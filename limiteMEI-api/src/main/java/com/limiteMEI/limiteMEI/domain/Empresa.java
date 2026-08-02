@@ -47,4 +47,6 @@ public class Empresa {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    private LocalDate dataEncerramento;
+
 }

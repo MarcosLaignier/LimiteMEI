@@ -19,6 +19,7 @@ public class CategoriaMapper implements BaseMapper<Categoria, CategoriaDTO, Cate
                 .nome(categoria.getNome())
                 .tipo(categoria.getTipo())
                 .naturezaReceita(categoria.getNaturezaReceita())
+                .ativo(categoria.getAtivo())
                 .build();
     }
 
@@ -30,6 +31,7 @@ public class CategoriaMapper implements BaseMapper<Categoria, CategoriaDTO, Cate
                 .nome(createDTO.getNome())
                 .tipo(createDTO.getTipo())
                 .naturezaReceita(createDTO.getNaturezaReceita())
+                .ativo(createDTO.getAtivo() == null ? true : createDTO.getAtivo())
                 .build();
     }
 
@@ -38,5 +40,6 @@ public class CategoriaMapper implements BaseMapper<Categoria, CategoriaDTO, Cate
         categoria.setNome(dto.getNome());
         categoria.setTipo(dto.getTipo());
         categoria.setNaturezaReceita(dto.getNaturezaReceita());
+        categoria.setAtivo(dto.getAtivo() == null ? categoria.getAtivo() : dto.getAtivo());
     }
 }

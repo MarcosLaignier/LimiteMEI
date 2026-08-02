@@ -21,6 +21,7 @@ export class SelectEnumComponent  {
   @Input() optionLabels?: Record<string, string>;
   @Input() placeholder: string = 'Selecione';
   @Input() disabled: boolean = false;
+  @Input() width: string = '280px';
 
   @Output() dataFieldChange = new EventEmitter<any>();
 

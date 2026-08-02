@@ -96,7 +96,7 @@ public class CategoriaService extends BaseService<Categoria, Long, CategoriaCrea
 
     private void criarSeAusente(Empresa empresa, String nome, TipoMovimentoEnum tipo, NaturezaReceitaEnum natureza) {
         if (!repository.existsByEmpresaIdAndNomeIgnoreCaseAndTipo(empresa.getId(), nome, tipo)) {
-            repository.save(Categoria.builder().nome(nome).tipo(tipo).naturezaReceita(natureza).empresa(empresa).build());
+            repository.save(Categoria.builder().nome(nome).tipo(tipo).naturezaReceita(natureza).ativo(true).empresa(empresa).build());
         }
     }
 

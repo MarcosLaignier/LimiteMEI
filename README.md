@@ -64,6 +64,14 @@ LimiteMEI/
 - RxJS
 - Vitest
 
+### Padrão visual dos formulários
+
+- Campos de texto utilizam largura padrão de **435px**, sempre respeitando `max-width: 100%` em telas menores.
+- Datas utilizam a largura definida no componente compartilhado de data.
+- Campos de seleção devem ter largura compatível com o conteúdo, evitando ocupar grandes espaços horizontais sem necessidade.
+- Campos lado a lado devem manter espaçamento consistente e quebrar para a linha seguinte em telas menores.
+- Máscaras, validações e controles devem reutilizar os componentes compartilhados antes da criação de implementações específicas por tela.
+
 ## Estado atual
 
 Já estão presentes no backend:

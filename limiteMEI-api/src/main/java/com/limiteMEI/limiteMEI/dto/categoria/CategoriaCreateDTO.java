@@ -21,4 +21,6 @@ public class CategoriaCreateDTO {
 
     private NaturezaReceitaEnum naturezaReceita;
 
+    private Boolean ativo;
+
 }

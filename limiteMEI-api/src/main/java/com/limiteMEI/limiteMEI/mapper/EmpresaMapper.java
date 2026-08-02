@@ -22,6 +22,7 @@ public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCre
                 .tipoEmpresa(empresa.getTipoEmpresa())
                 .limiteAnual(empresa.getLimiteAnual())
                 .ativo(empresa.getAtivo())
+                .dataEncerramento(empresa.getDataEncerramento())
                 .build();
     }
 
@@ -35,7 +36,8 @@ public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCre
         empresa.setDataAbertura(dto.getDataAbertura());
         empresa.setTipoEmpresa(dto.getTipoEmpresa());
         empresa.setLimiteAnual(dto.getTipoEmpresa() != null ? dto.getTipoEmpresa().getLimiteAnual() : null);
-        empresa.setAtivo(true);
+        empresa.setAtivo(dto.getAtivo() == null ? true : dto.getAtivo());
+        empresa.setDataEncerramento(Boolean.FALSE.equals(empresa.getAtivo()) ? dto.getDataEncerramento() : null);
         // usuario deve ser setado no service ou via DTO com ID do usuário
         return empresa;
     }
@@ -48,6 +50,8 @@ public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCre
         empresa.setDataAbertura(dto.getDataAbertura());
         empresa.setTipoEmpresa(dto.getTipoEmpresa());
         empresa.setLimiteAnual(dto.getTipoEmpresa() != null ? dto.getTipoEmpresa().getLimiteAnual() : null);
+        empresa.setAtivo(dto.getAtivo() == null ? empresa.getAtivo() : dto.getAtivo());
+        empresa.setDataEncerramento(Boolean.FALSE.equals(empresa.getAtivo()) ? dto.getDataEncerramento() : null);
     }
 
     private String normalizeCnpj(String cnpj) {

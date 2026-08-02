@@ -25,4 +25,7 @@ export class EmpresaDTO {
 
   @GridColumn({ label: 'Ativa', type: 'boolean', ordem: 8, width: '90px' })
   ativo!: boolean;
+
+  @GridColumn({ label: 'Encerramento', type: 'date', ordem: 9, width: '140px' })
+  dataEncerramento?: string;
 }

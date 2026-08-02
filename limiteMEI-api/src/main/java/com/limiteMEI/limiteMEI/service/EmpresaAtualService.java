@@ -27,8 +27,12 @@ public class EmpresaAtualService {
         }
 
         try {
-            return empresaRepository.findByIdAndUsuarioEmail(Long.valueOf(empresaId), currentEmail())
+            Empresa empresa = empresaRepository.findByIdAndUsuarioEmail(Long.valueOf(empresaId), currentEmail())
                     .orElseThrow(() -> new ApplicationException("Empresa não encontrada"));
+            if (!Boolean.TRUE.equals(empresa.getAtivo())) {
+                throw new ApplicationException("A empresa selecionada está inativa");
+            }
+            return empresa;
         } catch (NumberFormatException exception) {
             throw new ApplicationException("Empresa selecionada inválida");
         }

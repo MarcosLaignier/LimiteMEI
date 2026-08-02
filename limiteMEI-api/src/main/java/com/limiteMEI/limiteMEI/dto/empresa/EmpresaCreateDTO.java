@@ -33,4 +33,8 @@ public class EmpresaCreateDTO {
     @NotNull(message = "O tipo da empresa é obrigatório")
     private TipoEmpresaEnum tipoEmpresa;
 
+    private Boolean ativo;
+
+    private LocalDate dataEncerramento;
+
 }

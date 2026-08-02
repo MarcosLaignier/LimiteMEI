@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 export type EmpresaLoginDestination =
   | '/app/dashboard'
   | '/app/selecionar-empresa'
+  | '/app/cadastros/empresa'
   | '/app/cadastros/empresa/create?onboarding=true';
 
 @Injectable({ providedIn: 'root' })
@@ -26,16 +27,23 @@ export class EmpresaAtivaService {
   resolverAposLogin(): Observable<EmpresaLoginDestination> {
     return this.carregarEmpresas().pipe(
       map(empresas => {
+        const empresasAtivas = empresas.filter(empresa => empresa.ativo);
         if (empresas.length === 0) {
           this.limpar();
           return '/app/cadastros/empresa/create?onboarding=true';
         }
 
-        if (empresas.length === 1) {
-          this.selecionar(empresas[0]);
+        if (empresasAtivas.length === 0) {
+          this.limpar();
+          return '/app/cadastros/empresa';
+        }
+
+        if (empresasAtivas.length === 1) {
+          this.selecionar(empresasAtivas[0]);
           return '/app/dashboard';
         }
 
+        this.empresas.set(empresasAtivas);
         this.limpar();
         return '/app/selecionar-empresa';
       })
@@ -59,7 +67,7 @@ export class EmpresaAtivaService {
   }
 
   possuiEmpresaAtiva(): boolean {
-    return !!this.empresa();
+    return this.empresa()?.ativo === true;
   }
 
   private readStoredCompany(): EmpresaDTO | null {

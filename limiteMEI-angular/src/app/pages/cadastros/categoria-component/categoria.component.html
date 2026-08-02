@@ -1,27 +1,8 @@
-<toolbar-filter
-  tituloPagina="Categorias"
-  [listMode]="true"
-  [loading]="loading"
-  (novo)="novo()"
-  (filtrar)="doFilter()">
-</toolbar-filter>
+<toolbar-filter tituloPagina="Categorias" [listMode]="true" [loading]="loading"
+                (novo)="novo()" (filtrar)="doFilter()"></toolbar-filter>
 
-<div class="container-fluid mt-3">
-
-  <div class="card">
-
-    <div class="card-body">
-
-      <grid-component [dataSource]="dataSource"
-                      [loading]="loading"
-                      [typeDataSource]="CategoriaDTO"
-                      titleGrid="Categorias"
-                      [routerByEditDblClick]="true">
-
-      </grid-component>
-
-    </div>
-
-  </div>
-
-</div>
+<section class="category-list-page">
+  <header><div><span>ORGANIZAÇÃO FINANCEIRA</span><h1>Categorias</h1><p>Classifique corretamente as movimentações da empresa ativa.</p></div></header>
+  <grid-component [dataSource]="dataSource" [loading]="loading" [typeDataSource]="CategoriaDTO"
+                  titleGrid="Categorias" [routerByEditDblClick]="true"></grid-component>
+</section>

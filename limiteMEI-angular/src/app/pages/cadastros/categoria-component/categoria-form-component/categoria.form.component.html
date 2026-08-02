@@ -1,24 +1,35 @@
-<div>
-  <toolbar-filter tituloPagina="Categoria"
-                  [listMode]="false"
-                  [loading]="loading"
-                  (salvar)="save()"
-                  (limpar)="clear()">
-  </toolbar-filter>
-</div>
+<toolbar-filter tituloPagina="Categoria" [listMode]="false" [loading]="loading"
+                (salvar)="save()" (limpar)="clear()"></toolbar-filter>
 
-<div class="card-body">
+<div class="category-form-page">
+  <div class="card category-card">
+    <div class="card-body p-4">
+      <div class="section-heading">
+        <div class="section-icon"><i class="bi bi-tag"></i></div>
+        <div><h2>Dados da categoria</h2><p>Organize suas receitas e despesas para facilitar os relatórios financeiros.</p></div>
+      </div>
 
-  <div class="row g-3">
-    <text-box-component label="Nome da Categoria" colClass="col-md-4" [disabled]="loading" [(dataField)]="model.nome"></text-box-component>
-    <select-enum label="Tipo" colClass="col-md-3" placeholder="Selecione o tipo"
-                 [disabled]="loading" [enumObject]="tipoMovimentoEnum" [(dataField)]="model.tipo"
-                 (dataFieldChange)="onTipoChange($event)"></select-enum>
-    @if (model.tipo === tipoMovimentoEnum.RECEITA) {
-      <select-enum label="Natureza da Receita" colClass="col-md-3" placeholder="Selecione a natureza"
-                   [disabled]="loading" [enumObject]="naturezaReceitaEnum" [optionLabels]="naturezaReceitaLabels"
-                   [(dataField)]="model.naturezaReceita"></select-enum>
-    }
+      <div class="category-fields">
+        <text-box-component label="Nome da Categoria" colClass="" width="435px"
+                            [disabled]="loading" [(dataField)]="model.nome"></text-box-component>
+        <select-enum label="Tipo" colClass="" width="240px" placeholder="Selecione o tipo"
+                     [disabled]="loading" [enumObject]="tipoMovimentoEnum" [(dataField)]="model.tipo"
+                     (dataFieldChange)="onTipoChange($event)"></select-enum>
+        @if (model.tipo === tipoMovimentoEnum.RECEITA) {
+          <select-enum label="Natureza da Receita" colClass="" width="280px" placeholder="Selecione a natureza"
+                       [disabled]="loading" [enumObject]="naturezaReceitaEnum" [optionLabels]="naturezaReceitaLabels"
+                       [(dataField)]="model.naturezaReceita"></select-enum>
+        }
+        <div class="category-status">
+          <span>Situação</span>
+          <switch-component label="Categoria ativa" [disabled]="loading" [(dataField)]="model.ativo"></switch-component>
+          <small>Categorias inativas deixam de ser usadas em novos lançamentos.</small>
+        </div>
+      </div>
+
+      @if (model.tipo === tipoMovimentoEnum.RECEITA) {
+        <div class="category-hint"><i class="bi bi-info-circle"></i><span>A natureza será utilizada na composição do Relatório Mensal de Receitas Brutas do MEI.</span></div>
+      }
+    </div>
   </div>
-
 </div>

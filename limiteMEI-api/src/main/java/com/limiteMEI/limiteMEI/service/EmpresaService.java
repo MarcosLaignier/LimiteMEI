@@ -46,6 +46,15 @@ public class EmpresaService extends BaseService<Empresa, Long, EmpresaCreateDTO,
     }
 
     @Override
+    protected void validate(Empresa empresa) {
+        if (empresa.getDataEncerramento() != null && empresa.getDataAbertura() != null
+                && empresa.getDataEncerramento().isBefore(empresa.getDataAbertura())) {
+            throw new ApplicationException("A data de encerramento não pode ser anterior à data de abertura");
+        }
+        super.validate(empresa);
+    }
+
+    @Override
     protected void beforeSave(Empresa empresa) {
         empresa.setUsuario(usuarioRepository.findByEmail(currentEmail())
                 .orElseThrow(() -> new ApplicationException("Usuário autenticado não encontrado")));

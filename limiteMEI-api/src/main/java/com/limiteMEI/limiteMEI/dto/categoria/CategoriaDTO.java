@@ -19,4 +19,6 @@ public class CategoriaDTO {
 
     private NaturezaReceitaEnum naturezaReceita;
 
+    private Boolean ativo;
+
 }

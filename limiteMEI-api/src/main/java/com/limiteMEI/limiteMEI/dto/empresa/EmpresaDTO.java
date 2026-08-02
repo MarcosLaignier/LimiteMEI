@@ -30,4 +30,6 @@ public class EmpresaDTO {
     private BigDecimal limiteAnual;
 
     private Boolean ativo;
+
+    private LocalDate dataEncerramento;
 }

@@ -16,4 +16,7 @@ export class CategoriaDTO {
   @GridColumn({ label: 'Natureza da receita', type: 'enum', ordem: 4, width: "210px", enumLabels: NATUREZA_RECEITA_LABELS})
   naturezaReceita?: NaturezaReceitaEnum;
 
+  @GridColumn({ label: 'Ativa', type: 'boolean', ordem: 5, width: "100px"})
+  ativo!: boolean;
+
 }

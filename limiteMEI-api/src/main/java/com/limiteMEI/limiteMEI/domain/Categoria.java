@@ -26,6 +26,10 @@ public class Categoria {
     @Enumerated(EnumType.STRING)
     private NaturezaReceitaEnum naturezaReceita;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean ativo = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;

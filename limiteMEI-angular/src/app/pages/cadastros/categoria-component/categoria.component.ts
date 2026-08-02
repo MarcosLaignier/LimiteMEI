@@ -14,6 +14,7 @@ import {GridComponent} from '../../../shared/components-commons/infra/grid-colum
     GridComponent
   ],
   templateUrl: './categoria.component.html',
+  styleUrl: './categoria.component.scss',
   standalone: true
 })
 export class CategoriaComponent extends BaseListCrud<CategoriaDTO, CategoriaCreateDTO> {
