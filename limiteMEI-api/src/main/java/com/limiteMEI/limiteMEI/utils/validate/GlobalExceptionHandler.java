@@ -3,6 +3,7 @@ package com.limiteMEI.limiteMEI.utils.validate;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,13 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<MessageException> handleAuthenticationException(AuthenticationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new MessageException("E-mail ou senha inválidos"));
+    }
 
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<MessageException> handleApplicationException(ApplicationException ex) {

@@ -34,4 +34,12 @@ public class MovimentoFinanceiroMapper implements BaseMapper<MovimentoFinanceiro
         // empresa e categoria devem ser resolvidos no service via ID
         return mov;
     }
+
+    @Override
+    public void updateEntity(MovimentoFinanceiro mov, MovimentoFinanceiroCreateDTO dto) {
+        mov.setDescricao(dto.getDescricao());
+        mov.setValor(dto.getValor());
+        mov.setData(dto.getData());
+        mov.setTipo(dto.getTipo());
+    }
 }

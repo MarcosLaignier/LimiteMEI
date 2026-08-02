@@ -1,10 +1,1 @@
-<div class="app-layout" [class.sidebar-collapsed]="!sidebarOpen">
-  <side-bar-component  (sidebarToggle)="sidebarOpen = $event">
-  </side-bar-component>
-
-  <main class="app-content">
-    <router-outlet></router-outlet>
-  </main>
-
-<!--  <alert-component></alert-component>-->
-</div>
+<router-outlet></router-outlet>

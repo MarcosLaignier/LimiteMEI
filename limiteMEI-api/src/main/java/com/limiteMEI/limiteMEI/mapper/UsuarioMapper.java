@@ -32,4 +32,11 @@ public class UsuarioMapper implements BaseMapper<Usuario, UsuarioDTO, UsuarioCre
         usuario.setAtivo(true);
         return usuario;
     }
+
+    @Override
+    public void updateEntity(Usuario usuario, UsuarioCreateDTO dto) {
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setRoleEnum(dto.getRole());
+    }
 }
