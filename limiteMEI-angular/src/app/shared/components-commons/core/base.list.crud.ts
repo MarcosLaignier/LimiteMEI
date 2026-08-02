@@ -1,4 +1,4 @@
-import { Directive, inject } from "@angular/core";
+import { ChangeDetectorRef, Directive, inject } from "@angular/core";
 import { Router } from "@angular/router";
 import {BaseCrud} from './base.crud';
 import { AlertService } from '../infra/alert-component/alert.service';
@@ -9,6 +9,7 @@ import { finalize } from 'rxjs';
 export abstract class BaseListCrud<D, C, F = any, ID = number> extends BaseCrud<D, C, F, ID> {
   protected readonly alertService = inject(AlertService);
   protected readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
   readonly deletingIds = new Set<ID>();
 
   /** rota base do CRUD */
@@ -22,9 +23,17 @@ export abstract class BaseListCrud<D, C, F = any, ID = number> extends BaseCrud<
 
   load(): void {
     this.loading = true;
-    this.service.getAll().pipe(finalize(() => this.loading = false)).subscribe({
-      next: res => this.dataSource = res.body ?? [],
-      error: err => this.alertService.error(this.errorMessage(err, 'Não foi possível carregar os registros.'))
+    this.service.getAll().subscribe({
+      next: res => {
+        this.dataSource = res.body ?? [];
+        this.loading = false;
+        this.changeDetector.markForCheck();
+      },
+      error: err => {
+        this.loading = false;
+        this.changeDetector.markForCheck();
+        this.alertService.error(this.errorMessage(err, 'Não foi possível carregar os registros.'));
+      }
     });
 
   }

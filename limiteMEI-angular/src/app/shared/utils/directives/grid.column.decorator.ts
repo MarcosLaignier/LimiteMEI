@@ -11,6 +11,7 @@ export interface GridColumnOptions {
   width?: string;
   isObject?: boolean;           // true se quiser passar um objeto
   displayProperty?: string;     // qual propriedade do objeto exibir
+  enumLabels?: Record<string, string>;
   isExtendsConstructor?: boolean;
   expandColumns?: GridColumnExpand[];
 }
@@ -23,6 +24,7 @@ export interface GridColumnExpand {
   mask?: string;
   hidden?: boolean;
   width?: string;
+  enumLabels?: Record<string, string>;
 }
 
 export function GridColumn(options: GridColumnOptions = {}) {

@@ -169,7 +169,7 @@ export class GridComponent {
         return MaskUtils.formatField(value, 'telefone');
 
       case 'enum':
-        return value;
+        return col.enumLabels?.[value] ?? value;
 
       case 'boolean':
         return value == true ? 'Sim' : 'Não'
