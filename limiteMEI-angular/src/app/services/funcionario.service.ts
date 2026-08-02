@@ -1,0 +1,2 @@
+import {Injectable} from '@angular/core';import {HttpClient} from '@angular/common/http';import {BaseService} from '../shared/utils/base.service';import {FuncionarioDTO} from '../dtos/funcionario/funcionario.dto';import {FuncionarioCreateDTO} from '../dtos/funcionario/funcionario.create.dto';
+@Injectable({providedIn:'root'}) export class FuncionarioService extends BaseService<FuncionarioDTO,FuncionarioCreateDTO>{constructor(http:HttpClient){super(http,'funcionarios');}}

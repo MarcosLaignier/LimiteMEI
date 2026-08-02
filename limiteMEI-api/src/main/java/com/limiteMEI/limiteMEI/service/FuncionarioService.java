@@ -1,6 +1,8 @@
 package com.limiteMEI.limiteMEI.service;
 import com.limiteMEI.limiteMEI.domain.*; import com.limiteMEI.limiteMEI.dto.funcionario.*; import com.limiteMEI.limiteMEI.enums.PapelPessoaEnum; import com.limiteMEI.limiteMEI.mapper.FuncionarioMapper; import com.limiteMEI.limiteMEI.repository.FuncionarioRepository; import com.limiteMEI.limiteMEI.utils.BaseService; import com.limiteMEI.limiteMEI.utils.validate.*; import org.springframework.stereotype.Service; import java.util.*;
+import org.springframework.transaction.annotation.Transactional;
 @Service
+@Transactional
 public class FuncionarioService extends BaseService<Funcionario,Long,FuncionarioCreateDTO,FuncionarioDTO>{
  private final FuncionarioRepository repository;private final FuncionarioMapper mapper;private final PessoaService pessoas;private final PessoaPapelService papeis;private final EmpresaAtualService empresaAtual;
  public FuncionarioService(FuncionarioRepository r,FuncionarioMapper m,PessoaService p,PessoaPapelService pp,EmpresaAtualService e,GenericUniqueValidator v){super(v);repository=r;mapper=m;pessoas=p;papeis=pp;empresaAtual=e;}

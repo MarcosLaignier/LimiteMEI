@@ -1,6 +1,8 @@
 package com.limiteMEI.limiteMEI.service;
 import com.limiteMEI.limiteMEI.domain.*; import com.limiteMEI.limiteMEI.dto.pessoa.PessoaDTO; import com.limiteMEI.limiteMEI.enums.PapelPessoaEnum; import com.limiteMEI.limiteMEI.mapper.PessoaMapper; import com.limiteMEI.limiteMEI.repository.PessoaPapelRepository; import org.springframework.stereotype.Service; import java.util.*;
+import org.springframework.transaction.annotation.Transactional;
 @Service
+@Transactional
 public class PessoaPapelService{
  private final PessoaPapelRepository repository; private final PessoaService pessoas; private final PessoaMapper mapper; private final EmpresaAtualService empresaAtual;
  public PessoaPapelService(PessoaPapelRepository r,PessoaService p,PessoaMapper m,EmpresaAtualService e){repository=r;pessoas=p;mapper=m;empresaAtual=e;}

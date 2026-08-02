@@ -1,0 +1,6 @@
+<div class="person-selector"><label>{{label}}:</label>
+ @if(pessoa){<div class="selected-person"><i class="bi bi-person-check"></i><div><strong>{{pessoa.nomeRazaoSocial}}</strong><small>{{pessoa.cpfCnpj||pessoa.email||'Sem documento informado'}}</small></div><button type="button" [disabled]="disabled" (click)="limpar()"><i class="bi bi-x"></i></button></div>}
+ @else {<div class="search-box"><i class="bi bi-search"></i><input class="form-control" [disabled]="disabled" [ngModel]="termo" (ngModelChange)="pesquisar($event)" placeholder="Digite nome, CPF ou CNPJ">@if(loading){<span class="spinner-border spinner-border-sm"></span>}</div>
+ @if(resultados.length){<div class="results">@for(item of resultados;track item.id){<button type="button" (click)="selecionar(item)"><strong>{{item.nomeRazaoSocial}}</strong><small>{{item.cpfCnpj||item.email||'Sem documento'}}</small></button>}</div>}
+ @else if(termo.length>=2&&!loading){<button type="button" class="new-person" (click)="novaPessoa.emit()"><i class="bi bi-plus-circle"></i> Cadastrar nova pessoa</button>}}
+</div>

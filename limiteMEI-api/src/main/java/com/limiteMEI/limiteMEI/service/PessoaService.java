@@ -1,6 +1,8 @@
 package com.limiteMEI.limiteMEI.service;
 import com.limiteMEI.limiteMEI.domain.Pessoa; import com.limiteMEI.limiteMEI.dto.pessoa.*; import com.limiteMEI.limiteMEI.mapper.PessoaMapper; import com.limiteMEI.limiteMEI.repository.PessoaRepository; import com.limiteMEI.limiteMEI.utils.BaseService; import com.limiteMEI.limiteMEI.utils.validate.*; import org.springframework.stereotype.Service; import java.util.*;
+import org.springframework.transaction.annotation.Transactional;
 @Service
+@Transactional
 public class PessoaService extends BaseService<Pessoa,Long,PessoaCreateDTO,PessoaDTO>{
  private final PessoaRepository repository; private final PessoaMapper mapper; private final EmpresaAtualService empresaAtual;
  public PessoaService(PessoaRepository r,PessoaMapper m,EmpresaAtualService e,GenericUniqueValidator v){super(v);repository=r;mapper=m;empresaAtual=e;}
