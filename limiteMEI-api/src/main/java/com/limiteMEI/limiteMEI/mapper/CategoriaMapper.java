@@ -18,6 +18,7 @@ public class CategoriaMapper implements BaseMapper<Categoria, CategoriaDTO, Cate
                 .id(categoria.getId())
                 .nome(categoria.getNome())
                 .tipo(categoria.getTipo())
+                .naturezaReceita(categoria.getNaturezaReceita())
                 .build();
     }
 
@@ -28,6 +29,7 @@ public class CategoriaMapper implements BaseMapper<Categoria, CategoriaDTO, Cate
         return Categoria.builder()
                 .nome(createDTO.getNome())
                 .tipo(createDTO.getTipo())
+                .naturezaReceita(createDTO.getNaturezaReceita())
                 .build();
     }
 
@@ -35,5 +37,6 @@ public class CategoriaMapper implements BaseMapper<Categoria, CategoriaDTO, Cate
     public void updateEntity(Categoria categoria, CategoriaCreateDTO dto) {
         categoria.setNome(dto.getNome());
         categoria.setTipo(dto.getTipo());
+        categoria.setNaturezaReceita(dto.getNaturezaReceita());
     }
 }

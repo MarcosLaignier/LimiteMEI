@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.domain;
 
 import com.limiteMEI.limiteMEI.enums.TipoMovimentoEnum;
+import com.limiteMEI.limiteMEI.enums.NaturezaReceitaEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,9 @@ public class Categoria {
 
     @Enumerated(EnumType.STRING)
     private TipoMovimentoEnum tipo;
+
+    @Enumerated(EnumType.STRING)
+    private NaturezaReceitaEnum naturezaReceita;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "empresa_id", nullable = false)

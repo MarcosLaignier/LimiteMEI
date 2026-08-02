@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.limiteMEI.limiteMEI.domain.Empresa;
 import com.limiteMEI.limiteMEI.enums.TipoMovimentoEnum;
+import com.limiteMEI.limiteMEI.enums.NaturezaReceitaEnum;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
 import java.util.List;
 
@@ -49,6 +50,17 @@ public class CategoriaService extends BaseService<Categoria, Long, CategoriaCrea
     }
 
     @Override
+    protected void validate(Categoria categoria) {
+        if (categoria.getTipo() == TipoMovimentoEnum.RECEITA && categoria.getNaturezaReceita() == null) {
+            throw new ApplicationException("A natureza da receita é obrigatória para categorias de receita");
+        }
+        if (categoria.getTipo() == TipoMovimentoEnum.DESPESA) {
+            categoria.setNaturezaReceita(null);
+        }
+        super.validate(categoria);
+    }
+
+    @Override
     public CategoriaDTO getById(Long id) {
         return mapper.toDTO(findOwned(id));
     }
@@ -76,15 +88,15 @@ public class CategoriaService extends BaseService<Categoria, Long, CategoriaCrea
     }
 
     public void criarCategoriasIniciais(Empresa empresa) {
-        criarSeAusente(empresa, "Vendas", TipoMovimentoEnum.RECEITA);
-        criarSeAusente(empresa, "Serviços", TipoMovimentoEnum.RECEITA);
-        criarSeAusente(empresa, "Aluguel", TipoMovimentoEnum.DESPESA);
-        criarSeAusente(empresa, "Fornecedores", TipoMovimentoEnum.DESPESA);
+        criarSeAusente(empresa, "Vendas", TipoMovimentoEnum.RECEITA, NaturezaReceitaEnum.COMERCIO);
+        criarSeAusente(empresa, "Serviços", TipoMovimentoEnum.RECEITA, NaturezaReceitaEnum.SERVICOS);
+        criarSeAusente(empresa, "Aluguel", TipoMovimentoEnum.DESPESA, null);
+        criarSeAusente(empresa, "Fornecedores", TipoMovimentoEnum.DESPESA, null);
     }
 
-    private void criarSeAusente(Empresa empresa, String nome, TipoMovimentoEnum tipo) {
+    private void criarSeAusente(Empresa empresa, String nome, TipoMovimentoEnum tipo, NaturezaReceitaEnum natureza) {
         if (!repository.existsByEmpresaIdAndNomeIgnoreCaseAndTipo(empresa.getId(), nome, tipo)) {
-            repository.save(Categoria.builder().nome(nome).tipo(tipo).empresa(empresa).build());
+            repository.save(Categoria.builder().nome(nome).tipo(tipo).naturezaReceita(natureza).empresa(empresa).build());
         }
     }
 

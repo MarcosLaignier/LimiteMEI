@@ -13,6 +13,7 @@ import { TextBoxComponent } from '../../../../shared/components-commons/infra/te
 import { SelectEnumComponent } from '../../../../shared/components-commons/infra/select-enum-component/select.enum.component';
 import { TipoMovimentoEnum } from '../../../../enums/tipo.movimento.enum';
 import { ValidationUtils } from '../../../../shared/utils/validation.utils';
+import { NATUREZA_RECEITA_LABELS, NaturezaReceitaEnum } from '../../../../enums/natureza.receita.enum';
 
 @Component({
   selector: 'categoria-form',
@@ -34,6 +35,8 @@ export class CategoriaFormComponent
 
   protected routeBase = '/app/cadastros/categoria';
   protected readonly tipoMovimentoEnum = TipoMovimentoEnum;
+  protected readonly naturezaReceitaEnum = NaturezaReceitaEnum;
+  protected readonly naturezaReceitaLabels = NATUREZA_RECEITA_LABELS;
 
   constructor(
     service: CategoriaService,
@@ -60,7 +63,15 @@ export class CategoriaFormComponent
       this.alertService.warning('Selecione o tipo da categoria.');
       return false;
     }
+    if (this.model.tipo === TipoMovimentoEnum.RECEITA && !ValidationUtils.required(this.model.naturezaReceita)) {
+      this.alertService.warning('Selecione a natureza da receita.');
+      return false;
+    }
     return true;
+  }
+
+  onTipoChange(tipo: TipoMovimentoEnum): void {
+    if (tipo === TipoMovimentoEnum.DESPESA) this.model.naturezaReceita = undefined;
   }
 
 }

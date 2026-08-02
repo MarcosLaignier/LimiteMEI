@@ -12,7 +12,13 @@
   <div class="row g-3">
     <text-box-component label="Nome da Categoria" colClass="col-md-4" [disabled]="loading" [(dataField)]="model.nome"></text-box-component>
     <select-enum label="Tipo" colClass="col-md-3" placeholder="Selecione o tipo"
-                 [disabled]="loading" [enumObject]="tipoMovimentoEnum" [(dataField)]="model.tipo"></select-enum>
+                 [disabled]="loading" [enumObject]="tipoMovimentoEnum" [(dataField)]="model.tipo"
+                 (dataFieldChange)="onTipoChange($event)"></select-enum>
+    @if (model.tipo === tipoMovimentoEnum.RECEITA) {
+      <select-enum label="Natureza da Receita" colClass="col-md-3" placeholder="Selecione a natureza"
+                   [disabled]="loading" [enumObject]="naturezaReceitaEnum" [optionLabels]="naturezaReceitaLabels"
+                   [(dataField)]="model.naturezaReceita"></select-enum>
+    }
   </div>
 
 </div>

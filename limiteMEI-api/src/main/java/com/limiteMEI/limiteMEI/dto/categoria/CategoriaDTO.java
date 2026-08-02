@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.dto.categoria;
 
 import com.limiteMEI.limiteMEI.enums.TipoMovimentoEnum;
+import com.limiteMEI.limiteMEI.enums.NaturezaReceitaEnum;
 import lombok.*;
 
 @Getter
@@ -15,5 +16,7 @@ public class CategoriaDTO {
     private String nome;
 
     private TipoMovimentoEnum tipo;
+
+    private NaturezaReceitaEnum naturezaReceita;
 
 }

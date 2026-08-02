@@ -1,5 +1,6 @@
 import {GridColumn} from '../../shared/utils/directives/grid.column.decorator';
 import {TipoMovimentoEnum} from '../../enums/tipo.movimento.enum';
+import {NATUREZA_RECEITA_LABELS, NaturezaReceitaEnum} from '../../enums/natureza.receita.enum';
 
 export class CategoriaDTO {
 
@@ -11,5 +12,8 @@ export class CategoriaDTO {
 
   @GridColumn({ label: 'Tipo', type: 'enum', ordem: 3, width: "180px"})
   tipo!: TipoMovimentoEnum;
+
+  @GridColumn({ label: 'Natureza da receita', type: 'enum', ordem: 4, width: "210px", enumLabels: NATUREZA_RECEITA_LABELS})
+  naturezaReceita?: NaturezaReceitaEnum;
 
 }

@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.dto.categoria;
 
 import com.limiteMEI.limiteMEI.enums.TipoMovimentoEnum;
+import com.limiteMEI.limiteMEI.enums.NaturezaReceitaEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -17,5 +18,7 @@ public class CategoriaCreateDTO {
 
     @NotNull(message = "O tipo da categoria é obrigatório")
     private TipoMovimentoEnum tipo;
+
+    private NaturezaReceitaEnum naturezaReceita;
 
 }
