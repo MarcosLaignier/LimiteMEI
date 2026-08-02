@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import lombok.*;
+import com.limiteMEI.limiteMEI.enums.TipoEmpresaEnum;
 
 
 @Entity
@@ -35,6 +36,10 @@ public class Empresa {
 
     @Column(nullable = false)
     private LocalDate dataAbertura;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoEmpresaEnum tipoEmpresa;
 
     @Column(nullable = false)
     private BigDecimal limiteAnual;

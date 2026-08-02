@@ -1,13 +1,14 @@
 import {Routes} from "@angular/router";
 
 export const CADASTROS_ROUTES: Routes = [
-  // {
-  //   path: 'empresa',
-  //   children: [
-  //     {path: '', loadComponent: () => import('./empresa-component/empresa.component').then(c => c.EmpresaComponent)},
-  //     {path: 'editar/:id', loadComponent: () => import('./empresa-component/empresa.component').then(c => c.EmpresaComponent)}
-  //   ]
-  // },
+  {
+    path: 'empresa',
+    children: [
+      {path: '', loadComponent: () => import('./empresa-component/empresa.component').then(c => c.EmpresaComponent)},
+      {path: 'create', loadComponent: () => import('./empresa-component/empresa-form-component/empresa.form.component').then(c => c.EmpresaFormComponent)},
+      {path: 'editar/:id', loadComponent: () => import('./empresa-component/empresa-form-component/empresa.form.component').then(c => c.EmpresaFormComponent)}
+    ]
+  },
 
   {
     path: 'categoria',

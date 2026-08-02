@@ -13,4 +13,8 @@ public interface EmpresaRepository extends BaseRepository<Empresa, Long> {
 
     List<Empresa> findByUsuarioId(Long usuarioId);
 
+    List<Empresa> findByUsuarioEmail(String email);
+
+    Optional<Empresa> findByIdAndUsuarioEmail(Long id, String email);
+
 }

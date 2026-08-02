@@ -1,7 +1,8 @@
 <div>
   <toolbar-filter tituloPagina="Categoria"
                   [listMode]="false"
-                  (salvar)="save()">
+                  (salvar)="save()"
+                  (limpar)="clear()">
   </toolbar-filter>
 </div>
 
@@ -9,8 +10,8 @@
 
   <div class="row g-3">
     <text-box-component label="Nome da Categoria" colClass="col-md-4" [(dataField)]="model.nome"></text-box-component>
+    <select-enum label="Tipo" colClass="col-md-3" placeholder="Selecione o tipo"
+                 [enumObject]="tipoMovimentoEnum" [(dataField)]="model.tipo"></select-enum>
   </div>
 
 </div>
-
-

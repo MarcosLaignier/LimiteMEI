@@ -9,8 +9,9 @@ import { BaseFormCrud } from '../../../../shared/components-commons/core/base.fo
 import { CategoriaDTO } from '../../../../dtos/categoria/categoria.dto';
 import { CategoriaCreateDTO } from '../../../../dtos/categoria/categoria.create.dto';
 
-import { TextAreaComponent } from '../../../../shared/components-commons/infra/text-area-component/text.area.component';
 import { TextBoxComponent } from '../../../../shared/components-commons/infra/text-box-component/text.box.component';
+import { SelectEnumComponent } from '../../../../shared/components-commons/infra/select-enum-component/select.enum.component';
+import { TipoMovimentoEnum } from '../../../../enums/tipo.movimento.enum';
 
 @Component({
   selector: 'categoria-form',
@@ -19,8 +20,8 @@ import { TextBoxComponent } from '../../../../shared/components-commons/infra/te
     ReactiveFormsModule,
     FormsModule,
     ToolbarComponent,
-    TextAreaComponent,
-    TextBoxComponent
+    TextBoxComponent,
+    SelectEnumComponent
   ],
   templateUrl: './categoria.form.component.html'
 })
@@ -30,7 +31,8 @@ export class CategoriaFormComponent
 
   protected service: CategoriaService;
 
-  protected routeBase = '/cadastros/categoria';
+  protected routeBase = '/app/cadastros/categoria';
+  protected readonly tipoMovimentoEnum = TipoMovimentoEnum;
 
   constructor(
     service: CategoriaService,
@@ -46,6 +48,18 @@ export class CategoriaFormComponent
 
   ngOnInit(): void {
     this.initForm();
+  }
+
+  override validateSave(): boolean {
+    if (!this.model.nome?.trim()) {
+      this.alertService.warning('Informe o nome da categoria.');
+      return false;
+    }
+    if (!this.model.tipo) {
+      this.alertService.warning('Selecione o tipo da categoria.');
+      return false;
+    }
+    return true;
   }
 
 }

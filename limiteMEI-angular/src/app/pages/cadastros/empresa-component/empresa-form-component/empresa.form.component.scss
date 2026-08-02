@@ -1,0 +1,56 @@
+.company-card {
+  border: 1px solid #e2ebe7;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(27, 69, 58, .06);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid #edf2f0;
+}
+
+.section-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  color: #0d946d;
+  background: #e7faf4;
+  font-size: 1.15rem;
+}
+
+.section-heading h2 {
+  margin: 0 0 .2rem;
+  color: #18384a;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.section-heading p {
+  margin: 0;
+  color: #718493;
+  font-size: .85rem;
+}
+
+.classification-panel {
+  padding: 1.25rem;
+  border: 1px solid #dcece6;
+  border-radius: 13px;
+  background: #f5fbf8;
+}
+
+.limit-information small {
+  display: block;
+  margin-top: .55rem;
+  color: #718493;
+  font-size: .76rem;
+}
+
+.company-identification-row {
+  padding-inline: .35rem;
+}

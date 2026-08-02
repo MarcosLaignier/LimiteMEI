@@ -1,0 +1,46 @@
+<toolbar-filter tituloPagina="Empresa" [listMode]="false"
+                (salvar)="save()" (limpar)="clear()"></toolbar-filter>
+
+<div class="card company-card mt-3">
+  <div class="card-body p-4">
+    <div class="section-heading">
+      <div class="section-icon"><i class="bi bi-building"></i></div>
+      <div>
+        <h2>Dados da empresa</h2>
+        <p>Informe os dados cadastrais e selecione o enquadramento do MEI.</p>
+      </div>
+    </div>
+
+    <div class="row gx-5 gy-4 mt-1 align-items-end company-identification-row">
+      <text-box-component label="CNPJ" mask="cnpj" placeholder="XX.XXX.XXX/XXXX-XX"
+                          width="245px" colClass="col-auto px-md-3" [(dataField)]="model.cnpj"></text-box-component>
+      <date-box-component label="Data de Abertura" colClass="col-auto px-md-3" [clearButton]="true"
+                          [(dataField)]="model.dataAbertura"></date-box-component>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <text-box-component label="Razão Social" colClass="col-auto" [(dataField)]="model.razaoSocial"></text-box-component>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <text-box-component label="Nome Fantasia" colClass="col-auto" [(dataField)]="model.nomeFantasia"></text-box-component>
+    </div>
+
+    <div class="classification-panel mt-4">
+      <div class="row g-4 align-items-end">
+        <select-enum label="Tipo da Empresa" colClass="col-md-5" placeholder="Selecione o tipo"
+                     [enumObject]="tipoEmpresaEnum" [optionLabels]="tipoEmpresaLabels"
+                     [(dataField)]="model.tipoEmpresa"></select-enum>
+
+        <div class="col-md-5 limit-information">
+          <label class="form-label">Limite anual definido pelo enquadramento:</label>
+          <div>
+            <badge-component icon="bi-shield-check" color="success" size="lg" [pill]="true"
+                             [text]="limiteAnualFormatado"></badge-component>
+          </div>
+          <small>O limite é definido automaticamente e não pode ser alterado manualmente.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -21,7 +21,7 @@ export class CategoriaComponent extends BaseListCrud<CategoriaDTO, CategoriaCrea
   CategoriaDTO = CategoriaDTO;
 
   protected service: CategoriaService;
-  protected routeBase = '/cadastros/categoria';
+  protected routeBase = '/app/cadastros/categoria';
 
   constructor(service: CategoriaService, router: Router, route: ActivatedRoute) {
     super(router);

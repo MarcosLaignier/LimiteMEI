@@ -30,4 +30,10 @@ public class CategoriaMapper implements BaseMapper<Categoria, CategoriaDTO, Cate
                 .tipo(createDTO.getTipo())
                 .build();
     }
+
+    @Override
+    public void updateEntity(Categoria categoria, CategoriaCreateDTO dto) {
+        categoria.setNome(dto.getNome());
+        categoria.setTipo(dto.getTipo());
+    }
 }

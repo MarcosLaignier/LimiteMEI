@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.dto.empresa;
 
 import lombok.*;
+import com.limiteMEI.limiteMEI.enums.TipoEmpresaEnum;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,6 +24,8 @@ public class EmpresaDTO {
     private String nomeFantasia;
 
     private LocalDate dataAbertura;
+
+    private TipoEmpresaEnum tipoEmpresa;
 
     private BigDecimal limiteAnual;
 

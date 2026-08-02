@@ -1,0 +1,7 @@
+<toolbar-filter tituloPagina="Empresas" [listMode]="true"
+                (novo)="novo()" (filtrar)="doFilter()"></toolbar-filter>
+
+<div class="container-fluid mt-3">
+  <grid-component [dataSource]="dataSource" [typeDataSource]="EmpresaDTO"
+                  titleGrid="Empresas" [routerByEditDblClick]="true"></grid-component>
+</div>
