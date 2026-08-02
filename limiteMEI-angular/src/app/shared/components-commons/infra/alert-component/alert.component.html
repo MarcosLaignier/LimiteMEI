@@ -1,6 +1,6 @@
 <div class="toast-container">
   @for (t of toasts; track t) {
-    <div class="toast" [ngClass]="t.type">
+    <div class="toast show" [ngClass]="t.type">
       <!-- Página atual da mensagem -->
       <div class="text">
         @for (linha of getPages(t.message)[currentPage]; track linha) {
