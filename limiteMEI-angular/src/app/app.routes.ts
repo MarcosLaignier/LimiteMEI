@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
+import { empresaAtivaGuard } from './core/empresa-ativa.guard';
 
 export const routes: Routes = [
   {
@@ -17,13 +18,22 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [empresaAtivaGuard],
         loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'inicio',
+        loadComponent: () => import('./pages/empresa-context/empresa-start.component').then(m => m.EmpresaStartComponent)
+      },
+      {
+        path: 'selecionar-empresa',
+        loadComponent: () => import('./pages/empresa-context/empresa-select.component').then(m => m.EmpresaSelectComponent)
       },
       {
         path: 'cadastros',
         loadChildren: () => import('./pages/cadastros/cadastros.routes').then(m => m.CADASTROS_ROUTES)
       },
-      { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
+      { path: '', pathMatch: 'full', redirectTo: 'inicio' }
     ]
   },
   { path: '**', redirectTo: '' }

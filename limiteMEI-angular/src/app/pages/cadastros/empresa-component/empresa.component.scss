@@ -1,0 +1,5 @@
+.minhas-empresas { max-width:1120px; margin:2rem auto; padding:0 1rem; }.minhas-empresas__header { display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; margin-bottom:1.5rem; }
+.minhas-empresas__header span { color:#12a87b; font-size:.72rem; font-weight:800; letter-spacing:.14em; }.minhas-empresas__header h1 { margin:.3rem 0; color:#17384a; font-size:1.8rem; font-weight:800; }.minhas-empresas__header p { margin:0; color:#718493; }.minhas-empresas__header .btn { flex:0 0 auto; border-radius:9px; font-weight:700; }
+.minhas-empresas__cards { display:grid; gap:1.25rem; }.minhas-empresas__vazio { min-height:320px; display:grid; place-items:center; align-content:center; gap:.6rem; padding:2rem; text-align:center; border:1px dashed #bcd3cb; border-radius:18px; background:#fff; }
+.minhas-empresas__vazio>i { color:#12a87b; font-size:2.2rem; }.minhas-empresas__vazio h2,.minhas-empresas__vazio p { margin:0; }.minhas-empresas__vazio h2 { color:#17384a; }.minhas-empresas__vazio p { color:#718493; }
+@media (max-width:600px) { .minhas-empresas__header { align-items:flex-start; flex-direction:column; }.minhas-empresas__header .btn { width:100%; } }

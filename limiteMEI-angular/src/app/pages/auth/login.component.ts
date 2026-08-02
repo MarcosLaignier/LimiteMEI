@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
+import { EmpresaAtivaService } from '../../core/empresa-ativa.service';
 
 @Component({
   standalone: true,
@@ -18,10 +19,11 @@ export class LoginComponent implements OnInit {
   email = '';
   senha = '';
 
-  constructor(private auth: AuthService, private router: Router, private route: ActivatedRoute) {}
+  constructor(private auth: AuthService, private empresaAtiva: EmpresaAtivaService,
+              private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    if (this.auth.isAuthenticated()) this.router.navigate(['/app/dashboard']);
+    if (this.auth.isAuthenticated()) this.router.navigate(['/app/inicio']);
     this.registerMode = this.route.snapshot.queryParamMap.get('cadastro') === 'true';
   }
 
@@ -37,7 +39,18 @@ export class LoginComponent implements OnInit {
       : this.auth.login(this.email, this.senha);
 
     request$.pipe(finalize(() => this.loading = false)).subscribe({
-      next: () => this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') || '/app/dashboard'),
+      next: () => this.empresaAtiva.resolverAposLogin().subscribe({
+        next: destination => {
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+          if (destination === '/app/selecionar-empresa' && returnUrl) {
+            this.router.navigate(['/app/selecionar-empresa'], { queryParams: { returnUrl } });
+            return;
+          }
+          const target = destination === '/app/dashboard' && returnUrl ? returnUrl : destination;
+          this.router.navigateByUrl(target);
+        },
+        error: () => this.error = 'Não foi possível carregar suas empresas.'
+      }),
       error: error => this.error = error.error?.messages?.[0] || 'Não foi possível entrar. Verifique os dados informados.'
     });
   }

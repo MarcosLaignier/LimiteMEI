@@ -1,0 +1,8 @@
+:host { display: block; padding: .75rem .5rem .25rem; }
+.active-company { width: 100%; display: flex; align-items: center; gap: .65rem; padding: .7rem; overflow: hidden; text-align: left; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; color: #dce0ff; background: rgba(255,255,255,.055); }
+.active-company:hover { background: rgba(123,130,255,.14); }.company-symbol { width: 30px; height: 30px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 8px; color: #8f96ff; background: rgba(123,130,255,.16); }
+.company-data { min-width: 0; flex: 1; }.company-data small, .company-data strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.company-data small { color: #8990b4; font-size: .58rem; letter-spacing: .08em; }.company-data strong { color: #f4f5ff; font-size: .78rem; }.switch-icon { color: #8990b4; font-size: .8rem; }
+:host-context(.collapsed) { padding-inline: .4rem; }.empty .company-symbol { color: #e1b456; }
+:host-context(.sidebar.collapsed) .company-data,
+:host-context(.sidebar.collapsed) .switch-icon { display: none; }
+:host-context(.sidebar.collapsed) .active-company { justify-content: center; padding-inline: .25rem; }

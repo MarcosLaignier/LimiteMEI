@@ -10,6 +10,7 @@ import { EmpresaDTO } from '../../../../dtos/empresa/empresa.dto';
 import { EmpresaCreateDTO } from '../../../../dtos/empresa/empresa.create.dto';
 import { EmpresaService } from '../../../../services/empresa.service';
 import { LIMITE_ANUAL_POR_TIPO, TIPO_EMPRESA_LABELS, TipoEmpresaEnum } from '../../../../enums/tipo.empresa.enum';
+import { EmpresaAtivaService } from '../../../../core/empresa-ativa.service';
 
 @Component({
   selector: 'empresa-form',
@@ -24,7 +25,8 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
   protected readonly tipoEmpresaEnum = TipoEmpresaEnum;
   protected readonly tipoEmpresaLabels = TIPO_EMPRESA_LABELS;
 
-  constructor(service: EmpresaService, router: Router, route: ActivatedRoute) {
+  constructor(service: EmpresaService, router: Router, route: ActivatedRoute,
+              private empresaAtiva: EmpresaAtivaService) {
     super(router, route);
     this.service = service;
     this.setInitialModel();
@@ -47,6 +49,19 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
 
   override clear(): void {
     this.setInitialModel();
+  }
+
+  override afterSave(saved?: EmpresaDTO): void {
+    if (saved) {
+      this.empresaAtiva.selecionar(saved);
+    }
+
+    if (this.route.snapshot.queryParamMap.get('onboarding') === 'true') {
+      this.router.navigate(['/app/dashboard']);
+      return;
+    }
+
+    super.afterSave(saved);
   }
 
   override validateSave(): boolean {

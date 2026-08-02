@@ -1,6 +1,7 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
+import { EmpresaAtivaComponent } from '../empresa-ativa-component/empresa.ativa.component';
 
 interface MenuItem {
   label: string;
@@ -13,7 +14,7 @@ interface MenuItem {
 @Component({
   selector: 'side-bar-component',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, EmpresaAtivaComponent],
   templateUrl: './side.bar.component.html',
   styleUrls: ['./side.bar.component.scss']
 })

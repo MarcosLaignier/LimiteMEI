@@ -1,0 +1,15 @@
+@if (context.empresa(); as empresa) {
+  <button type="button" class="active-company" (click)="trocar()" title="Trocar empresa">
+    <span class="company-symbol"><i class="bi bi-building"></i></span>
+    <span class="company-data link-text">
+      <small>EMPRESA ATIVA</small>
+      <strong>{{ empresa.nomeFantasia || empresa.razaoSocial }}</strong>
+    </span>
+    <i class="bi bi-chevron-expand switch-icon link-text"></i>
+  </button>
+} @else {
+  <button type="button" class="active-company empty" (click)="trocar()">
+    <span class="company-symbol"><i class="bi bi-building-add"></i></span>
+    <span class="company-data link-text"><small>EMPRESA</small><strong>Selecionar empresa</strong></span>
+  </button>
+}

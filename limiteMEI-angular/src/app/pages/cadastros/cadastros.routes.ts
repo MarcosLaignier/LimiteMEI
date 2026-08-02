@@ -1,4 +1,5 @@
 import {Routes} from "@angular/router";
+import {empresaAtivaGuard} from '../../core/empresa-ativa.guard';
 
 export const CADASTROS_ROUTES: Routes = [
   {
@@ -12,6 +13,7 @@ export const CADASTROS_ROUTES: Routes = [
 
   {
     path: 'categoria',
+    canActivate: [empresaAtivaGuard],
     children: [
       {path: '', loadComponent: () => import('./categoria-component/categoria.component').then(c => c.CategoriaComponent)},
        {path: 'create', loadComponent: () => import('./categoria-component/categoria-form-component/categoria.form.component').then(c => c.CategoriaFormComponent)},

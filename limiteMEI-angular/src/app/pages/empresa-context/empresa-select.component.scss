@@ -1,0 +1,13 @@
+.company-selection { max-width: 920px; margin: 2.5rem auto; }
+header { text-align: center; margin-bottom: 2rem; }
+header span { color: #12a87b; font-size: .72rem; font-weight: 800; letter-spacing: .14em; }
+header h1 { margin: .55rem 0; color: #17384a; font-size: 2rem; font-weight: 800; }
+header p { color: #718493; }
+.loading { min-height: 260px; display: grid; place-items: center; }
+.company-grid { display: grid; gap: 1rem; }
+.company-option { position: relative; width: 100%; display: flex; align-items: center; gap: 1rem; padding: 1.25rem; text-align: left; border: 1px solid #dfe9e5; border-radius: 15px; background: white; transition: border .2s, transform .2s, box-shadow .2s; }
+.company-option:hover { transform: translateY(-2px); border-color: #57c6a5; box-shadow: 0 12px 28px rgba(28, 83, 67, .09); }
+.company-icon { width: 48px; height: 48px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 13px; color: #0d946d; background: #e7faf4; font-size: 1.2rem; }
+.company-copy { min-width: 0; flex: 1; }.company-copy h2 { margin: 0; color: #17384a; font-size: 1.05rem; font-weight: 800; }.company-copy p { margin: .2rem 0; color: #718493; }.company-copy small { color: #93a29d; }
+.arrow { margin-left: .5rem; color: #12a87b; }.new-company { display: block; width: fit-content; margin: 1.5rem auto 0; color: #0d946d; font-weight: 700; text-decoration: none; }
+@media (max-width: 600px) { .company-option { align-items: flex-start; flex-wrap: wrap; }.arrow { position: absolute; right: 1rem; top: 1rem; } }

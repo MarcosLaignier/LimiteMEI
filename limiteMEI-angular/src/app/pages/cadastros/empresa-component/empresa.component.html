@@ -1,7 +1,20 @@
-<toolbar-filter tituloPagina="Empresas" [listMode]="true"
-                (novo)="novo()" (filtrar)="doFilter()"></toolbar-filter>
-
-<div class="container-fluid mt-3">
-  <grid-component [dataSource]="dataSource" [typeDataSource]="EmpresaDTO"
-                  titleGrid="Empresas" [routerByEditDblClick]="true"></grid-component>
-</div>
+@if (isAdmin) {
+  <toolbar-filter tituloPagina="Empresas" [listMode]="true" (novo)="novo()" (filtrar)="doFilter()"></toolbar-filter>
+  <div class="container-fluid mt-3"><grid-component [dataSource]="dataSource" [typeDataSource]="EmpresaDTO" titleGrid="Empresas" [routerByEditDblClick]="true"></grid-component></div>
+} @else {
+  <section class="minhas-empresas">
+    <header class="minhas-empresas__header">
+      <div><span>MEU NEGÓCIO</span><h1>Dados da empresa</h1><p>Consulte e mantenha atualizadas as informações da sua empresa.</p></div>
+      <button type="button" class="btn btn-outline-success" (click)="novo()"><i class="bi bi-plus-circle"></i> Nova empresa</button>
+    </header>
+    @if (dataSource.length) {
+      <div class="minhas-empresas__cards">
+        @for (empresa of dataSource; track empresa.id) {
+          <empresa-card-component [empresa]="empresa" [selecionada]="empresaAtiva.empresa()?.id === empresa.id" [permitirSelecao]="dataSource.length > 1" (editar)="editar($event)" (selecionar)="selecionarEmpresa($event)" />
+        }
+      </div>
+    } @else {
+      <div class="minhas-empresas__vazio"><i class="bi bi-building-add"></i><h2>Nenhuma empresa cadastrada</h2><p>Cadastre sua empresa para começar a utilizar o Limite MEI.</p><button type="button" class="btn btn-success" (click)="novo()">Cadastrar empresa</button></div>
+    }
+  </section>
+}

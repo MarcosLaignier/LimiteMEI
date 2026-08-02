@@ -1,0 +1,27 @@
+<section class="company-selection">
+  <header>
+    <span>AMBIENTE DE TRABALHO</span>
+    <h1>Qual empresa você quer acessar?</h1>
+    <p>Selecione uma empresa para carregar os dados e iniciar sua gestão.</p>
+  </header>
+
+  @if (loading) {
+    <div class="loading"><span class="spinner-border text-success"></span></div>
+  } @else {
+    <div class="company-grid">
+      @for (empresa of context.empresas(); track empresa.id) {
+        <button type="button" class="company-option" (click)="selecionar(empresa)">
+          <div class="company-icon"><i class="bi bi-building"></i></div>
+          <div class="company-copy">
+            <h2>{{ empresa.nomeFantasia || empresa.razaoSocial }}</h2>
+            <p>{{ empresa.razaoSocial }}</p>
+            <small>{{ empresa.cnpj }}</small>
+          </div>
+          <badge-component color="success" size="sm" [pill]="true" [text]="tipoLabel(empresa)"></badge-component>
+          <i class="bi bi-arrow-right arrow"></i>
+        </button>
+      }
+    </div>
+    <a class="new-company" routerLink="/app/cadastros/empresa/create"><i class="bi bi-plus-circle"></i> Cadastrar outra empresa</a>
+  }
+</section>

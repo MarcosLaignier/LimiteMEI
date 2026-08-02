@@ -45,7 +45,7 @@ export abstract class BaseFormCrud<D, C, F = any, ID = number> extends BaseCrud<
     return null;
   }
 
-  afterSave(): void {
+  afterSave(saved?: D): void {
     this.router.navigate([this.routeBase]);
   }
 
@@ -66,10 +66,10 @@ export abstract class BaseFormCrud<D, C, F = any, ID = number> extends BaseCrud<
       : this.service.create(this.model);
 
     request$.subscribe({
-      next: () => {
+      next: response => {
         this.loading = false;
         this.alertService.success(this.id ? 'Registro atualizado com sucesso.' : 'Registro cadastrado com sucesso.');
-        this.afterSave();
+        this.afterSave(response.body ?? undefined);
       },
       error: err => {
         this.loading = false;
