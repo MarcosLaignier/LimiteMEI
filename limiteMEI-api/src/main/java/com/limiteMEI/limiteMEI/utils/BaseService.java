@@ -32,10 +32,10 @@ public abstract class BaseService<T, ID, C, D> {
 
     public D update(ID id, C dto) {
 
-        getRepository().findById(id)
+        T entity = getRepository().findById(id)
                 .orElseThrow(() -> new RuntimeException("Registro não encontrado"));
 
-        T entity = getMapper().toEntity(dto);
+        getMapper().updateEntity(entity, dto);
 
         validate(entity);
         beforeUpdate(entity);

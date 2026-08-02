@@ -33,7 +33,7 @@ public abstract class BaseController<E, D, C, ID> {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<D> update(@PathVariable ID id, @RequestBody C updateDTO) {
+    public ResponseEntity<D> update(@PathVariable ID id, @Valid @RequestBody C updateDTO) {
         D dto = getService().update(id, updateDTO);
         return ResponseEntity.ok(dto);
     }
