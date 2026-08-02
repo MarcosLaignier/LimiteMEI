@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="LimiteMEI API" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.limiteMEI.limiteMEI.LimiteMeiApplication" />
+    <module name="limiteMEI" />
+    <option name="VM_PARAMETERS" value="-Dfile.encoding=UTF-8" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/limiteMEI-api" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
