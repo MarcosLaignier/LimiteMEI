@@ -11,6 +11,7 @@ import { EmpresaCreateDTO } from '../../../../dtos/empresa/empresa.create.dto';
 import { EmpresaService } from '../../../../services/empresa.service';
 import { LIMITE_ANUAL_POR_TIPO, TIPO_EMPRESA_LABELS, TipoEmpresaEnum } from '../../../../enums/tipo.empresa.enum';
 import { EmpresaAtivaService } from '../../../../core/empresa-ativa.service';
+import { ValidationUtils } from '../../../../shared/utils/validation.utils';
 
 @Component({
   selector: 'empresa-form',
@@ -65,11 +66,15 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
   }
 
   override validateSave(): boolean {
-    if (!this.model.cnpj?.trim() || !this.model.razaoSocial?.trim()) {
+    if (!ValidationUtils.requiredFields(this.model, ['cnpj', 'razaoSocial'])) {
       this.alertService.warning('Informe o CNPJ e a razão social.');
       return false;
     }
-    if (!this.model.dataAbertura || !this.model.tipoEmpresa) {
+    if (!ValidationUtils.cnpj(this.model.cnpj)) {
+      this.alertService.warning('Informe um CNPJ válido com 14 caracteres e os dois dígitos verificadores numéricos.');
+      return false;
+    }
+    if (!ValidationUtils.requiredFields(this.model, ['dataAbertura', 'tipoEmpresa'])) {
       this.alertService.warning('Informe a data de abertura e o tipo da empresa.');
       return false;
     }

@@ -12,6 +12,7 @@ import { CategoriaCreateDTO } from '../../../../dtos/categoria/categoria.create.
 import { TextBoxComponent } from '../../../../shared/components-commons/infra/text-box-component/text.box.component';
 import { SelectEnumComponent } from '../../../../shared/components-commons/infra/select-enum-component/select.enum.component';
 import { TipoMovimentoEnum } from '../../../../enums/tipo.movimento.enum';
+import { ValidationUtils } from '../../../../shared/utils/validation.utils';
 
 @Component({
   selector: 'categoria-form',
@@ -51,11 +52,11 @@ export class CategoriaFormComponent
   }
 
   override validateSave(): boolean {
-    if (!this.model.nome?.trim()) {
+    if (!ValidationUtils.required(this.model.nome)) {
       this.alertService.warning('Informe o nome da categoria.');
       return false;
     }
-    if (!this.model.tipo) {
+    if (!ValidationUtils.required(this.model.tipo)) {
       this.alertService.warning('Selecione o tipo da categoria.');
       return false;
     }

@@ -50,6 +50,7 @@ export abstract class BaseFormCrud<D, C, F = any, ID = number> extends BaseCrud<
   }
 
   save(): void {
+    if (this.loading) return;
     if (!this.validateSave()) return;
     const before = this.beforeSave();
     if (before) {
@@ -82,7 +83,7 @@ export abstract class BaseFormCrud<D, C, F = any, ID = number> extends BaseCrud<
     this.model = {} as C;
   }
 
-  private errorMessage(error: any, fallback: string): string {
+  protected errorMessage(error: any, fallback: string): string {
     return error?.error?.messages?.join('<br>') || fallback;
   }
 }

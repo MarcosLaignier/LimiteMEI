@@ -1,6 +1,6 @@
 @if (isAdmin) {
-  <toolbar-filter tituloPagina="Empresas" [listMode]="true" (novo)="novo()" (filtrar)="doFilter()"></toolbar-filter>
-  <div class="container-fluid mt-3"><grid-component [dataSource]="dataSource" [typeDataSource]="EmpresaDTO" titleGrid="Empresas" [routerByEditDblClick]="true"></grid-component></div>
+  <toolbar-filter tituloPagina="Empresas" [listMode]="true" [loading]="loading" (novo)="novo()" (filtrar)="doFilter()"></toolbar-filter>
+  <div class="container-fluid mt-3"><grid-component [dataSource]="dataSource" [loading]="loading" [typeDataSource]="EmpresaDTO" titleGrid="Empresas" [routerByEditDblClick]="true"></grid-component></div>
 } @else {
   <section class="minhas-empresas">
     <header class="minhas-empresas__header">

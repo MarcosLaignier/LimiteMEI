@@ -20,6 +20,7 @@ export class ToolbarComponent {
   }
 
   @Input() tituloPagina = '';
+  @Input() loading = false;
   private _listMode = true;
 
   @Output() filtrar = new EventEmitter<void>();
@@ -31,15 +32,15 @@ export class ToolbarComponent {
   constructor(private location: Location,
               private router: Router) {}
 
-  filtrarClick() { this.filtrar.emit(); }
+  filtrarClick() { if (!this.loading) this.filtrar.emit(); }
 
   novoClick() {
-    this.novo.emit();
+    if (!this.loading) this.novo.emit();
   }
 
-  salvarClick() { this.salvar.emit(); }
+  salvarClick() { if (!this.loading) this.salvar.emit(); }
 
-  limparClick() { this.limpar.emit(); }
+  limparClick() { if (!this.loading) this.limpar.emit(); }
 
   fecharClick() {
     this.fechar.emit();

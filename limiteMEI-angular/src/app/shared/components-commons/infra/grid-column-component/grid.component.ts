@@ -1,8 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import * as _ from 'lodash';
-import {startCase} from 'lodash';
 import {Router, RouterModule} from "@angular/router";
 import {GridColumnExpand} from "../../../utils/directives/grid.column.decorator";
+import { MaskUtils } from '../../../utils/mask.utils';
 
 
 @Component({
@@ -22,8 +21,17 @@ export class GridComponent {
   @Input() dataSource: any[] = [];
   @Input() columns: string[] = [];
   @Input() routerByEditDblClick: boolean = false;
+  @Input() loading = false;
+  @Input() emptyTitle = 'Nenhum registro encontrado';
+  @Input() emptyMessage = 'Cadastre um novo registro ou ajuste os filtros da consulta.';
+  @Input() showRowActions = false;
+  @Input() showEditAction = true;
+  @Input() showDeleteAction = true;
+  @Input() deletingIds: ReadonlySet<any> = new Set<any>();
 
   @Output() dblClickLine = new EventEmitter<any>();
+  @Output() editLine = new EventEmitter<any>();
+  @Output() deleteLine = new EventEmitter<any>();
 
   private _typeDataSource: any;
 
@@ -35,7 +43,7 @@ export class GridComponent {
 
   @Input()
   set typeDataSource(value: new () => any) {
-    if (!value || _.isEqual(value, this._typeDataSource)) return;
+    if (!value || value === this._typeDataSource) return;
 
     this._typeDataSource = value;
 
@@ -113,30 +121,7 @@ export class GridComponent {
 
   formatTitle(col: string): string {
     if (!col) return '';
-    return startCase(col.replace(/[._]/g, ' '));
-  }
-
-  applyMask(value: any, mask: string, alphanumeric = false): string {
-    if (value === null || value === undefined) {
-      return '';
-    }
-
-    const onlyNumbers = alphanumeric
-      ? value.toString().toUpperCase().replace(/[^A-Z0-9]/g, '')
-      : value.toString().replace(/\D/g, '');
-    let result = '';
-    let valueIndex = 0;
-
-    for (let i = 0; i < mask.length && valueIndex < onlyNumbers.length; i++) {
-      if (mask[i] === '0') {
-        result += onlyNumbers[valueIndex];
-        valueIndex++;
-      } else {
-        result += mask[i];
-      }
-    }
-
-    return result;
+    return col.replace(/[._]/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
   }
 
   editItem(row: any) {
@@ -175,13 +160,13 @@ export class GridComponent {
 
       case 'documento':
         if (value.toString().replace(/\D/g, '').length <= 11 && !/[A-Z]/i.test(value.toString())) {
-          return this.applyMask(value, col.mask ?? '000.000.000-00');
+          return MaskUtils.apply(value, col.mask ?? '000.000.000-00');
         } else {
-          return this.applyMask(value, col.mask ?? '00.000.000/0000-00', true);
+          return MaskUtils.apply(value, col.mask ?? 'AA.AAA.AAA/AAAA-00');
         }
 
       case 'telefone':
-        return this.applyMask('11987654321', '(00) 00000-0000');
+        return MaskUtils.formatField(value, 'telefone');
 
       case 'enum':
         return value;
@@ -198,5 +183,15 @@ export class GridComponent {
       default:
         return value;
     }
+  }
+
+  editarLinha(row: any, event: Event): void {
+    event.stopPropagation();
+    this.editLine.emit(row);
+  }
+
+  excluirLinha(row: any, event: Event): void {
+    event.stopPropagation();
+    if (!this.deletingIds.has(row?.id)) this.deleteLine.emit(row);
   }
 }
