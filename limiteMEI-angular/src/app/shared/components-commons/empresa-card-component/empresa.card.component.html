@@ -1,0 +1,22 @@
+<article class="empresa-card" [class.empresa-card--selecionada]="selecionada">
+  <header class="empresa-card__header">
+    <div class="empresa-card__identidade">
+      <span class="empresa-card__icone"><i class="bi bi-building"></i></span>
+      <div><span class="empresa-card__rotulo">EMPRESA</span><h2>{{ empresa.nomeFantasia || empresa.razaoSocial }}</h2><p>{{ empresa.razaoSocial }}</p></div>
+    </div>
+    <div class="empresa-card__badges">
+      @if (selecionada) { <badge-component text="Empresa ativa" icon="bi-check-circle" color="success" size="sm" [pill]="true" /> }
+      <badge-component [text]="empresa.ativo ? 'Cadastro ativo' : 'Cadastro inativo'" [color]="empresa.ativo ? 'success' : 'secondary'" size="sm" [pill]="true" />
+    </div>
+  </header>
+  <div class="empresa-card__dados">
+    <div><span>CNPJ</span><strong>{{ cnpjFormatado() }}</strong></div>
+    <div><span>Data de abertura</span><strong>{{ dataAberturaFormatada() }}</strong></div>
+    <div><span>Tipo da empresa</span><strong>{{ tipoEmpresa() }}</strong></div>
+    <div><span>Limite anual</span><strong class="empresa-card__limite">{{ limiteFormatado() }}</strong></div>
+  </div>
+  <footer class="empresa-card__acoes">
+    @if (permitirSelecao && !selecionada) { <button type="button" class="btn btn-outline-success" (click)="selecionar.emit(empresa)"><i class="bi bi-check2-circle"></i> Usar esta empresa</button> }
+    <button type="button" class="btn btn-success" (click)="editar.emit(empresa.id)"><i class="bi bi-pencil-square"></i> Editar dados</button>
+  </footer>
+</article>
