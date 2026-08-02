@@ -1,0 +1,51 @@
+<div class="landing">
+  <nav class="container landing-nav">
+    <a class="brand" routerLink="/"><span>LM</span> LimiteMEI</a>
+    <div class="nav-actions">
+      <a class="link" href="#recursos">Recursos</a>
+      <a class="btn-login" routerLink="/login">Entrar</a>
+      <a class="btn-primary-custom" routerLink="/login" [queryParams]="{ cadastro: true }">Começar grátis</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="container hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><i class="bi bi-stars"></i> Gestão simples para quem faz acontecer</div>
+        <h1>Seu MEI organizado.<br><em>Seu limite sob controle.</em></h1>
+        <p>Visualize faturamento, fluxo de caixa e obrigações em um só lugar. Menos planilhas, mais clareza para cuidar do seu negócio.</p>
+        <div class="hero-actions">
+          <a class="btn-primary-custom large" routerLink="/login" [queryParams]="{ cadastro: true }">Criar minha conta <i class="bi bi-arrow-right"></i></a>
+          <a class="see-more" href="#recursos"><i class="bi bi-play-circle"></i> Conhecer recursos</a>
+        </div>
+        <small><i class="bi bi-check-circle-fill"></i> Comece gratuitamente &nbsp; <i class="bi bi-check-circle-fill"></i> Sem cartão</small>
+      </div>
+
+      <div class="dashboard-preview">
+        <div class="preview-top"><span></span><span></span><span></span><b>Visão geral</b></div>
+        <div class="limit-card">
+          <div><small>Faturamento anual</small><strong>R$ 52.480,00</strong></div>
+          <div class="percentage">64,8%</div>
+          <div class="progress"><i></i></div>
+          <p>Você ainda pode faturar <b>R$ 28.520,00</b> neste ano.</p>
+        </div>
+        <div class="mini-grid">
+          <article><i class="bi bi-arrow-up-right"></i><small>Entradas do mês</small><strong>R$ 7.320</strong></article>
+          <article><i class="bi bi-arrow-down-right"></i><small>Saídas do mês</small><strong>R$ 2.180</strong></article>
+        </div>
+        <div class="chart"><span>Faturamento nos últimos meses</span><div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      </div>
+    </section>
+
+    <section id="recursos" class="container resources">
+      <div class="section-title"><span>Feito para simplificar</span><h2>Tudo que o seu MEI precisa</h2><p>Informação clara para você tomar decisões com tranquilidade.</p></div>
+      <div class="resource-grid">
+        <article><i class="bi bi-speedometer2"></i><h3>Limite do MEI</h3><p>Acompanhe o percentual utilizado e receba alertas antes de ultrapassar o teto.</p></article>
+        <article><i class="bi bi-cash-coin"></i><h3>Fluxo de caixa</h3><p>Registre entradas e saídas e entenda para onde o dinheiro do negócio está indo.</p></article>
+        <article><i class="bi bi-file-earmark-text"></i><h3>Relatórios mensais</h3><p>Organize as receitas do mês e prepare os dados utilizados nas obrigações anuais.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="container"><a class="brand" routerLink="/"><span>LM</span> LimiteMEI</a><p>Organização para o seu negócio crescer com segurança.</p></div></footer>
+</div>
