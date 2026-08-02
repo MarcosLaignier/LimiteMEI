@@ -92,6 +92,7 @@
   background-color: #f3f4f6;
   transform: translateY(-1px);
 }
+.btn-action:disabled { opacity: .58; cursor: not-allowed; transform: none; }
 
 /* ===========================
    MOBILE

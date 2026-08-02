@@ -104,4 +104,15 @@ grid-component {
     color: #6c757d;
     font-size: 0.875rem;
   }
+  .grid-state { height: 180px; text-align: center; color: #6c757d; }
+  .grid-state > * { display: block; margin: .35rem auto; }
+  .grid-state i { color: #9aaba4; font-size: 1.8rem; }
+  .grid-state strong { color: #425a50; }
+  .grid-state span:not(.spinner-border) { font-size: .8rem; font-weight: 400; }
+  .grid-actions-column { width: 105px; text-align: center; }
+  .grid-actions { display: flex; justify-content: center; gap: .4rem; }
+  .grid-action { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid; border-radius: 7px; background: #fff; transition: background .15s; }
+  .grid-action.edit { color: #16795c; border-color: #bce2d6; }.grid-action.edit:hover { background: #eaf9f4; }
+  .grid-action.delete { color: #b42318; border-color: #f1c2bd; }.grid-action.delete:hover { background: #fff1f0; }
+  .grid-action:disabled { opacity: .55; cursor: not-allowed; }
 }

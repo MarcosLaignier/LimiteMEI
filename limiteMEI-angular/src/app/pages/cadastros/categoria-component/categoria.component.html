@@ -1,6 +1,7 @@
 <toolbar-filter
   tituloPagina="Categorias"
   [listMode]="true"
+  [loading]="loading"
   (novo)="novo()"
   (filtrar)="doFilter()">
 </toolbar-filter>
@@ -12,6 +13,7 @@
     <div class="card-body">
 
       <grid-component [dataSource]="dataSource"
+                      [loading]="loading"
                       [typeDataSource]="CategoriaDTO"
                       titleGrid="Categorias"
                       [routerByEditDblClick]="true">

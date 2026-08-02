@@ -6,30 +6,30 @@
 
   <div class="page-actions">
     @if (listMode) {
-      <button class="btn-action secondary" (click)="filtrarClick()">
-        <i class="bi bi-funnel"></i>
+      <button type="button" class="btn-action secondary" [disabled]="loading" (click)="filtrarClick()">
+        <span [class]="loading ? 'spinner-border spinner-border-sm' : 'bi bi-funnel'"></span>
         <span>Filtrar</span>
       </button>
 
-      <button class="btn-action primary" (click)="novoClick()">
+      <button type="button" class="btn-action primary" [disabled]="loading" (click)="novoClick()">
         <i class="bi bi-plus-circle"></i>
         <span>Novo</span>
       </button>
     }
 
     @if (!listMode) {
-      <button class="btn-action success" (click)="salvarClick()">
-        <i class="bi bi-check-circle"></i>
-        <span>Salvar</span>
+      <button type="button" class="btn-action success" [disabled]="loading" (click)="salvarClick()">
+        <span [class]="loading ? 'spinner-border spinner-border-sm' : 'bi bi-check-circle'"></span>
+        <span>{{ loading ? 'Salvando...' : 'Salvar' }}</span>
       </button>
     }
 
-    <button class="btn-action secondary" (click)="limparClick()">
+    <button type="button" class="btn-action secondary" [disabled]="loading" (click)="limparClick()">
       <i class="bi bi-eraser"></i>
       <span>Limpar</span>
     </button>
 
-    <button class="btn-action danger" (click)="fecharClick()">
+    <button type="button" class="btn-action danger" [disabled]="loading" (click)="fecharClick()">
       <i class="bi bi-x-circle"></i>
       <span>Fechar</span>
     </button>
