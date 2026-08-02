@@ -13,6 +13,5 @@ export class SwitchComponent extends FormFieldBase<boolean> {
   onToggle(event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
     this.dataField = checked;
-    this.dataFieldChange.emit(checked);
   }
 }
