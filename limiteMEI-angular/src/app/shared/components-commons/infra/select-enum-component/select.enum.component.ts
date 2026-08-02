@@ -18,6 +18,7 @@ import {FormsModule} from "@angular/forms";
 export class SelectEnumComponent  {
 
   @Input() enumObject: any;
+  @Input() optionLabels?: Record<string, string>;
   @Input() placeholder: string = 'Selecione';
   @Input() disabled: boolean = false;
 

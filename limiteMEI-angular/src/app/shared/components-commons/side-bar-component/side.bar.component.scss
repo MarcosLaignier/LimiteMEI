@@ -176,3 +176,8 @@
 .sidebar.collapsed .submenu {
   display: none;
 }
+
+.sidebar-footer { border-top: 1px solid rgba(255, 255, 255, .08); }
+.user-info { overflow: hidden; }
+.user-info strong, .user-info small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-info small { color: #8f96bd; font-size: .72rem; }

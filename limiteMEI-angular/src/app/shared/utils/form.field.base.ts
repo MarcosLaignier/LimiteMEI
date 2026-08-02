@@ -11,6 +11,9 @@ export abstract class FormFieldBase<T> {
 
   @Input() placeholder: string = '';
 
+  /** Largura opcional do campo. Cada componente pode fornecer um padrão visual. */
+  @Input() width?: string;
+
   /** Desabilita os campos */
   @Input() disabled: boolean = false;
 

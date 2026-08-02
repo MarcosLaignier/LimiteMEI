@@ -34,10 +34,6 @@ export class ToolbarComponent {
   filtrarClick() { this.filtrar.emit(); }
 
   novoClick() {
-    const currentUrl = this.router.url;
-    const newUrl = `${currentUrl}/create`;
-
-    this.router.navigateByUrl(newUrl);
     this.novo.emit();
   }
 

@@ -6,7 +6,7 @@
   <div class="sidebar-header d-flex align-items-center justify-content-between px-3">
     <div class="d-flex align-items-center">
       <i class="bi bi-box-seam sidebar-icon"></i>
-      <span class="sidebar-title link-text ms-2">LocGestão</span>
+      <span class="sidebar-title link-text ms-2">LimiteMEI</span>
     </div>
 
     <button class="btn sidebar-toggle"
@@ -73,6 +73,17 @@
     }
 
   </ul>
+
+  <div class="sidebar-footer mt-auto p-2">
+    <div class="user-info link-text px-2 py-2">
+      <strong>{{ auth.user()?.nome }}</strong>
+      <small>{{ auth.user()?.email }}</small>
+    </div>
+    <button class="nav-link sidebar-link d-flex align-items-center w-100" (click)="auth.logout()">
+      <i class="bi bi-box-arrow-left sidebar-icon"></i>
+      <span class="link-text ms-2">Sair</span>
+    </button>
+  </div>
 
   <!-- Dps se quisermos colocar um footer-->
   <!--  <div class="sidebar-footer mt-auto px-3 py-3">-->

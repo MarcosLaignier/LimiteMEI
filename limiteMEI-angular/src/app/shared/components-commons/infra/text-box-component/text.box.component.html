@@ -1,4 +1,6 @@
-<div [ngClass]="colClass">
+<div [ngClass]="colClass" [style.width]="width || '435px'" [style.max-width]="'100%'">
   <label class="form-label">{{ label + ':'}}</label>
-  <input type="text" class="form-control" [(ngModel)]="dataField" [placeholder]="placeholder">
+  <input type="text" class="form-control" [ngModel]="displayValue"
+         (ngModelChange)="onValueChange($event)" [placeholder]="placeholder"
+         [disabled]="disabled" [attr.maxlength]="mask === 'cnpj' ? 18 : null">
 </div>

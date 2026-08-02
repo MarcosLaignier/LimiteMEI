@@ -1,4 +1,12 @@
-<div [ngClass]="colClass">
+<div [ngClass]="colClass" [style.width]="width || (clearButton ? '210px' : '180px')" [style.max-width]="'100%'">
   <label class="form-label">{{ label + ':'}}</label>
-  <input type="date" class="form-control" [(ngModel)]="dataField">
+  <div class="date-input-wrapper">
+    <input type="date" class="form-control" [(ngModel)]="dataField" [disabled]="disabled">
+    @if (clearButton && dataField && !disabled) {
+      <button type="button" class="clear-date-button" (click)="clearDate()"
+              aria-label="Limpar data" title="Limpar data">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    }
+  </div>
 </div>

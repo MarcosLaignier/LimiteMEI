@@ -1,5 +1,6 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../../core/auth.service';
 
 interface MenuItem {
   label: string;
@@ -22,14 +23,14 @@ export class SideBarComponent implements OnInit {
   isMobile = false;
 
   menuItems: MenuItem[] = [
-    { label: 'Dashboard', icon: 'bi-house', route: '/dashboard' },
+    { label: 'Dashboard', icon: 'bi-house', route: '/app/dashboard' },
 
     {
       label: 'Cadastros Base',
       icon: 'bi-box',
       children: [
-        { label: 'Empresa', icon: 'bi-building', route: '/cadastros/empresa' },
-        { label: 'Categorias', icon: 'bi-tags', route: '/cadastros/categoria' },
+        { label: 'Empresa', icon: 'bi-building', route: '/app/cadastros/empresa' },
+        { label: 'Categorias', icon: 'bi-tags', route: '/app/cadastros/categoria' },
 
       ]
     },
@@ -64,7 +65,7 @@ export class SideBarComponent implements OnInit {
     { label: 'Configurações', icon: 'bi-gear', route: '/configuracoes' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, public auth: AuthService) {}
 
   ngOnInit() {
     this.checkScreen();

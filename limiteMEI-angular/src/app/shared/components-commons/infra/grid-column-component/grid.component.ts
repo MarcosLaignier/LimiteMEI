@@ -116,12 +116,14 @@ export class GridComponent {
     return startCase(col.replace(/[._]/g, ' '));
   }
 
-  applyMask(value: any, mask: string): string {
+  applyMask(value: any, mask: string, alphanumeric = false): string {
     if (value === null || value === undefined) {
       return '';
     }
 
-    const onlyNumbers = value.toString().replace(/\D/g, '');
+    const onlyNumbers = alphanumeric
+      ? value.toString().toUpperCase().replace(/[^A-Z0-9]/g, '')
+      : value.toString().replace(/\D/g, '');
     let result = '';
     let valueIndex = 0;
 
@@ -172,10 +174,10 @@ export class GridComponent {
         return this.formatDate(value);
 
       case 'documento':
-        if (value.toString().length <= 11) {
+        if (value.toString().replace(/\D/g, '').length <= 11 && !/[A-Z]/i.test(value.toString())) {
           return this.applyMask(value, col.mask ?? '000.000.000-00');
         } else {
-          return this.applyMask(value, col.mask ?? '00.000.000/0000-00 ');
+          return this.applyMask(value, col.mask ?? '00.000.000/0000-00', true);
         }
 
       case 'telefone':

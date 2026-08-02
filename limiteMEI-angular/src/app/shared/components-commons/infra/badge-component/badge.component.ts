@@ -19,6 +19,8 @@ export class BadgeComponent {
 
   @Input() text: string = '';
 
+  @Input() icon: string = '';
+
   @Input() color: | 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' = 'primary';
 
   /** Atributo para bordas arredondadas

@@ -1,3 +1,18 @@
-badge-component{
+:host {
+  display: inline-block;
+}
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.badge-sm { padding: .35rem .55rem; font-size: .72rem; }
+.badge-lg { padding: .72rem 1rem; font-size: .95rem; }
+
+.badge i {
+  font-size: 1.05em;
 }

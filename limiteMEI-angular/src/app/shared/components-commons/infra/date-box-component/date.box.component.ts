@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, Input} from "@angular/core";
 import {FormFieldBase} from "../../../utils/form.field.base";
 import {CommonModule} from "@angular/common";
 import {RouterModule} from "@angular/router";
@@ -13,9 +13,13 @@ import {FormsModule} from "@angular/forms";
     FormsModule,
   ],
   templateUrl: './date.box.component.html',
-  styles: [':host { display: contents; }']
+  styleUrls: ['./date.box.component.scss']
 })
-export class DateBoxComponent extends FormFieldBase<Date> {
+export class DateBoxComponent extends FormFieldBase<string> {
 
+  @Input() clearButton = false;
 
+  clearDate(): void {
+    this.dataField = '';
+  }
 }
