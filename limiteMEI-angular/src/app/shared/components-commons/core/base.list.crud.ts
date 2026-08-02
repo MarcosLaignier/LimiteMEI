@@ -27,11 +27,11 @@ export abstract class BaseListCrud<D, C, F = any, ID = number> extends BaseCrud<
       next: res => {
         this.dataSource = res.body ?? [];
         this.loading = false;
-        this.changeDetector.markForCheck();
+        this.changeDetector.detectChanges();
       },
       error: err => {
         this.loading = false;
-        this.changeDetector.markForCheck();
+        this.changeDetector.detectChanges();
         this.alertService.error(this.errorMessage(err, 'Não foi possível carregar os registros.'));
       }
     });

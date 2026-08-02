@@ -40,9 +40,10 @@ export class SideBarComponent implements OnInit {
       label: 'Pessoas',
       icon: 'bi-people',
       children: [
-        {label: 'Cadastro de Clientes', icon: 'bi-person-check', route: '/pessoas/clientes'},
-        {label: 'Cadastro de Fornecedores', icon: 'bi-building-check', route: '/pessoas/fornecedores'},
-        {label: 'Pessoas', icon: 'bi-person-check', route: '/cadastros/pessoa'}
+        {label: 'Pessoas', icon: 'bi-person-vcard', route: '/app/cadastros/pessoa'},
+        {label: 'Clientes', icon: 'bi-person-check', route: '/app/cadastros/cliente'},
+        {label: 'Fornecedores', icon: 'bi-building-check', route: '/app/cadastros/fornecedor'},
+        {label: 'Funcionários', icon: 'bi-person-badge', route: '/app/cadastros/funcionario'}
       ]
     },
     {
