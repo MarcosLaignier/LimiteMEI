@@ -19,17 +19,20 @@ public class EmpresaService extends BaseService<Empresa, Long, EmpresaCreateDTO,
     private final EmpresaRepository repository;
     private final EmpresaMapper mapper;
     private final UsuarioRepository usuarioRepository;
+    private final CategoriaService categoriaService;
 
     public EmpresaService(
             EmpresaRepository repository,
             EmpresaMapper mapper,
             GenericUniqueValidator validator,
-            UsuarioRepository usuarioRepository
+            UsuarioRepository usuarioRepository,
+            CategoriaService categoriaService
     ) {
         super(validator);
         this.repository = repository;
         this.mapper = mapper;
         this.usuarioRepository = usuarioRepository;
+        this.categoriaService = categoriaService;
     }
 
     @Override
@@ -46,6 +49,11 @@ public class EmpresaService extends BaseService<Empresa, Long, EmpresaCreateDTO,
     protected void beforeSave(Empresa empresa) {
         empresa.setUsuario(usuarioRepository.findByEmail(currentEmail())
                 .orElseThrow(() -> new ApplicationException("Usuário autenticado não encontrado")));
+    }
+
+    @Override
+    protected void afterSave(Empresa empresa) {
+        categoriaService.criarCategoriasIniciais(empresa);
     }
 
     @Override

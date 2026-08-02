@@ -6,8 +6,12 @@ import { AuthService } from './auth.service';
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const auth = inject(AuthService);
   const token = auth.token();
+  const empresaAtiva = readEmpresaAtivaId(auth.user()?.email);
   const authenticatedRequest = token
-    ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    ? request.clone({ setHeaders: {
+        Authorization: `Bearer ${token}`,
+        ...(empresaAtiva ? { 'X-Empresa-Id': String(empresaAtiva) } : {})
+      } })
     : request;
 
   return next(authenticatedRequest).pipe(
@@ -19,3 +23,12 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
     })
   );
 };
+
+function readEmpresaAtivaId(email?: string): number | null {
+  if (!email) return null;
+  try {
+    return JSON.parse(localStorage.getItem(`limitemei_empresa_ativa_${email}`) ?? 'null')?.id ?? null;
+  } catch {
+    return null;
+  }
+}
