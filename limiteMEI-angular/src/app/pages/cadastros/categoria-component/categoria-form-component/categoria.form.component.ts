@@ -15,6 +15,8 @@ import { TipoMovimentoEnum } from '../../../../enums/tipo.movimento.enum';
 import { ValidationUtils } from '../../../../shared/utils/validation.utils';
 import { NATUREZA_RECEITA_LABELS, NaturezaReceitaEnum } from '../../../../enums/natureza.receita.enum';
 import { SwitchComponent } from '../../../../shared/components-commons/infra/switch-component/switch.component';
+import {EXIGENCIA_PESSOA_LABELS, ExigenciaPessoaEnum} from '../../../../enums/exigencia.pessoa.enum';
+import {PapelPessoaEnum} from '../../../../enums/papel.pessoa.enum';
 
 @Component({
   selector: 'categoria-form',
@@ -40,6 +42,9 @@ export class CategoriaFormComponent
   protected readonly tipoMovimentoEnum = TipoMovimentoEnum;
   protected readonly naturezaReceitaEnum = NaturezaReceitaEnum;
   protected readonly naturezaReceitaLabels = NATUREZA_RECEITA_LABELS;
+  protected readonly exigenciaPessoaEnum = ExigenciaPessoaEnum;
+  protected readonly exigenciaPessoaLabels = EXIGENCIA_PESSOA_LABELS;
+  protected readonly papelPessoaEnum = PapelPessoaEnum;
 
   constructor(
     service: CategoriaService,
@@ -74,15 +79,28 @@ export class CategoriaFormComponent
       this.alertService.warning('Selecione a natureza da receita.');
       return false;
     }
+    if (this.model.exigenciaPessoa !== ExigenciaPessoaEnum.NAO_UTILIZA && !this.model.papelPessoa) {
+      this.alertService.warning('Selecione o papel exigido da pessoa.');
+      return false;
+    }
     return true;
   }
 
   onTipoChange(tipo: TipoMovimentoEnum): void {
-    if (tipo === TipoMovimentoEnum.DESPESA) this.model.naturezaReceita = undefined;
+    if (tipo === TipoMovimentoEnum.DESPESA) {
+      this.model.naturezaReceita = undefined;
+      this.model.compoeFaturamentoMei = false;
+      this.model.exigeDocumentoFiscal = false;
+    }
+  }
+
+  onExigenciaChange(exigencia: ExigenciaPessoaEnum): void {
+    if (exigencia === ExigenciaPessoaEnum.NAO_UTILIZA) this.model.papelPessoa = undefined;
   }
 
   private setInitialModel(): void {
-    this.model = { nome: '', ativo: true } as CategoriaCreateDTO;
+    this.model = { nome: '', ativo: true, exigenciaPessoa: ExigenciaPessoaEnum.NAO_UTILIZA,
+      compoeFaturamentoMei: false, exigeDocumentoFiscal: false } as CategoriaCreateDTO;
   }
 
 }

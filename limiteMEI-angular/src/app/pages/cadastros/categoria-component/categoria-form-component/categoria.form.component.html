@@ -20,6 +20,24 @@
                        [disabled]="loading" [enumObject]="naturezaReceitaEnum" [optionLabels]="naturezaReceitaLabels"
                        [(dataField)]="model.naturezaReceita"></select-enum>
         }
+        <select-enum label="Vínculo com pessoa" colClass="" width="260px" placeholder="Selecione"
+                     [disabled]="loading" [enumObject]="exigenciaPessoaEnum" [optionLabels]="exigenciaPessoaLabels"
+                     [(dataField)]="model.exigenciaPessoa" (dataFieldChange)="onExigenciaChange($event)"></select-enum>
+        @if (model.exigenciaPessoa !== exigenciaPessoaEnum.NAO_UTILIZA) {
+          <select-enum label="Papel da pessoa" colClass="" width="240px" placeholder="Selecione"
+                       [disabled]="loading" [enumObject]="papelPessoaEnum"
+                       [(dataField)]="model.papelPessoa"></select-enum>
+        }
+        @if (model.tipo === tipoMovimentoEnum.RECEITA) {
+          <div class="category-status">
+            <span>Regras da receita</span>
+            <switch-component label="Compõe o faturamento do MEI" [disabled]="loading"
+                              [(dataField)]="model.compoeFaturamentoMei"></switch-component>
+            <switch-component label="Exige documento fiscal" [disabled]="loading"
+                              [(dataField)]="model.exigeDocumentoFiscal"></switch-component>
+            <small>Essas opções serão utilizadas no limite e nos relatórios fiscais.</small>
+          </div>
+        }
         <div class="category-status">
           <span>Situação</span>
           <switch-component label="Categoria ativa" [disabled]="loading" [(dataField)]="model.ativo"></switch-component>
