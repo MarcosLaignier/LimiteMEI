@@ -48,6 +48,9 @@ public class FechamentoApuracaoMei {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal total;
 
+    @Column(precision = 15, scale = 2)
+    private BigDecimal acumuladoAno;
+
     private LocalDateTime dataFechamento;
     private String usuarioFechamento;
     private LocalDateTime dataReabertura;

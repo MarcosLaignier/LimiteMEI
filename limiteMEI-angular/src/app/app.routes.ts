@@ -102,6 +102,16 @@ export const routes: Routes = [
               import('./pages/mei/apuracao-mei.component').then((m) => m.ApuracaoMeiComponent),
           },
           {
+            path: 'mei/relatorio/:ano/:mes',
+            loadComponent: () =>
+              import('./pages/mei/relatorio-mensal-mei.component').then((m) => m.RelatorioMensalMeiComponent),
+          },
+          {
+            path: 'mei/historico',
+            loadComponent: () =>
+              import('./pages/mei/historico-apuracao-mei.component').then((m) => m.HistoricoApuracaoMeiComponent),
+          },
+          {
             path: 'contas/create',
             loadComponent: () =>
               import('./pages/financeiro/conta-financeira/conta-financeira-form.component').then(

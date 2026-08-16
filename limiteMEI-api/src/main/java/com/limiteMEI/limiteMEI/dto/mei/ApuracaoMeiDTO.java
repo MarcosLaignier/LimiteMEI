@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.time.LocalDateTime;
 import com.limiteMEI.limiteMEI.enums.SituacaoApuracaoMeiEnum;
+import com.limiteMEI.limiteMEI.enums.FaixaAlertaMeiEnum;
 
 @Getter
 @Setter
@@ -25,8 +26,13 @@ public class ApuracaoMeiDTO {
     private BigDecimal saldoDisponivel;
     private BigDecimal percentualUtilizado;
     private BigDecimal projecaoAnual;
+    private BigDecimal mediaMensalDisponivel;
+    private FaixaAlertaMeiEnum faixaAlerta;
     private Integer mesesLimite;
     private Integer quantidadePendencias;
+    private Integer quantidadeLancamentosAbertos;
+    private Integer quantidadeLancamentosVencidos;
+    private List<Integer> competenciasAnterioresAbertas;
     private List<ResumoMensalMeiDTO> meses;
     private List<DetalheApuracaoMeiDTO> detalhes;
     private SituacaoApuracaoMeiEnum situacaoFechamento;

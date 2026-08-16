@@ -3,6 +3,8 @@ package com.limiteMEI.limiteMEI.service;
 import com.limiteMEI.limiteMEI.domain.*;
 import com.limiteMEI.limiteMEI.dto.mei.*;
 import com.limiteMEI.limiteMEI.enums.NaturezaReceitaEnum;
+import com.limiteMEI.limiteMEI.enums.FaixaAlertaMeiEnum;
+import com.limiteMEI.limiteMEI.enums.SituacaoLancamentoEnum;
 import com.limiteMEI.limiteMEI.repository.LancamentoFinanceiroRepository;
 import com.limiteMEI.limiteMEI.repository.FechamentoApuracaoMeiRepository;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
@@ -55,20 +57,33 @@ public class ApuracaoMeiService {
         BigDecimal projecao = mesesDecorridos == 0 ? BigDecimal.ZERO
                 : acumulado.divide(BigDecimal.valueOf(mesesDecorridos), 2, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(mesesLimite));
+        int mesesRestantes = Math.max(1, 12 - mesReferencia);
+        BigDecimal saldoDisponivel = limite.subtract(acumulado);
+        BigDecimal mediaMensalDisponivel = saldoDisponivel.signum() <= 0 ? BigDecimal.ZERO
+                : saldoDisponivel.divide(BigDecimal.valueOf(mesesRestantes), 2, RoundingMode.HALF_UP);
         List<DetalheApuracaoMeiDTO> detalhes = todos.stream()
                 .filter(item -> item.getDataCompetencia().getMonthValue() == mesReferencia)
                 .map(this::detalhar).toList();
         Optional<FechamentoApuracaoMei> fechamento = fechamentos
                 .findByEmpresaIdAndAnoAndMes(empresa.getId(), ano, mesReferencia);
+        List<Integer> anterioresAbertas = competenciasAnterioresAbertas(empresa, ano, mesReferencia);
+        List<LancamentoFinanceiro> lancamentosMes = lancamentos.findByEmpresaIdAndDataCompetenciaAndExcluidoFalse(
+                empresa.getId(), YearMonth.of(ano, mesReferencia).atDay(1));
+        int abertos = (int) lancamentosMes.stream().filter(this::lancamentoAberto).count();
+        int vencidos = (int) lancamentosMes.stream().filter(this::lancamentoAberto)
+                .filter(item -> item.getDataVencimento() != null && item.getDataVencimento().isBefore(LocalDate.now())).count();
         return ApuracaoMeiDTO.builder().ano(ano).mesReferencia(mesReferencia)
                 .comercioMes(referencia.getComercio()).industriaMes(referencia.getIndustria())
                 .servicosMes(referencia.getServicos()).totalMes(referencia.getTotal())
                 .comDocumentoFiscalMes(referencia.getComDocumentoFiscal())
                 .semDocumentoFiscalMes(referencia.getSemDocumentoFiscal())
                 .acumuladoAno(acumulado).limiteAplicavel(limite)
-                .saldoDisponivel(limite.subtract(acumulado)).percentualUtilizado(percentual)
-                .projecaoAnual(projecao).mesesLimite(mesesLimite)
+                .saldoDisponivel(saldoDisponivel).percentualUtilizado(percentual)
+                .projecaoAnual(projecao).mediaMensalDisponivel(mediaMensalDisponivel)
+                .faixaAlerta(faixaAlerta(percentual)).mesesLimite(mesesLimite)
                 .quantidadePendencias((int) detalhes.stream().filter(DetalheApuracaoMeiDTO::getPendenciaFiscal).count())
+                .quantidadeLancamentosAbertos(abertos).quantidadeLancamentosVencidos(vencidos)
+                .competenciasAnterioresAbertas(anterioresAbertas)
                 .meses(meses).detalhes(detalhes)
                 .situacaoFechamento(fechamento.map(FechamentoApuracaoMei::getSituacao).orElse(null))
                 .dataFechamento(fechamento.map(FechamentoApuracaoMei::getDataFechamento).orElse(null))
@@ -83,10 +98,16 @@ public class ApuracaoMeiService {
         if (apuracao.getQuantidadePendencias() > 0) {
             throw new ApplicationException("Resolva as pendências fiscais antes de fechar a apuração");
         }
+        if (!apuracao.getCompetenciasAnterioresAbertas().isEmpty()) {
+            throw new ApplicationException("Feche primeiro as competências anteriores: "
+                    + apuracao.getCompetenciasAnterioresAbertas().stream()
+                    .map(item -> String.format("%02d/%d", item, ano)).reduce((a, b) -> a + ", " + b).orElse(""));
+        }
         Empresa empresa = empresaAtual.get();
         FechamentoApuracaoMei fechamento = fechamentos.findByEmpresaIdAndAnoAndMes(empresa.getId(), ano, mes)
                 .orElseGet(() -> FechamentoApuracaoMei.builder().empresa(empresa).ano(ano).mes(mes).build());
         preencherFotografia(fechamento, receitasDoMes(empresa, ano, mes));
+        fechamento.setAcumuladoAno(apuracao.getAcumuladoAno());
         fechamento.setSituacao(SituacaoApuracaoMeiEnum.FECHADA);
         fechamento.setDataFechamento(LocalDateTime.now());
         fechamento.setUsuarioFechamento(usuarioAtual());
@@ -123,7 +144,10 @@ public class ApuracaoMeiService {
             preencherFotografia(preview, receitasDoMes(empresa, ano, mes));
             return preview;
         });
+        BigDecimal acumulado = fechamento.map(FechamentoApuracaoMei::getAcumuladoAno)
+                .orElseGet(() -> apurar(ano, mes).getAcumuladoAno());
         return RelatorioMensalMeiDTO.builder().cnpj(empresa.getCnpj()).razaoSocial(empresa.getRazaoSocial())
+                .nomeFantasia(empresa.getNomeFantasia()).dataAbertura(empresa.getDataAbertura())
                 .ano(ano).mes(mes).situacao(fechamento.map(FechamentoApuracaoMei::getSituacao).orElse(null))
                 .comercioComDocumento(valores.getComercioComDocumento())
                 .comercioSemDocumento(valores.getComercioSemDocumento())
@@ -131,7 +155,41 @@ public class ApuracaoMeiService {
                 .industriaSemDocumento(valores.getIndustriaSemDocumento())
                 .servicosComDocumento(valores.getServicosComDocumento())
                 .servicosSemDocumento(valores.getServicosSemDocumento()).total(valores.getTotal())
+                .acumuladoAno(acumulado)
                 .dataFechamento(valores.getDataFechamento()).usuarioFechamento(valores.getUsuarioFechamento()).build();
+    }
+
+    public HistoricoApuracaoMeiDTO historico(int ano) {
+        if (ano < 2000) throw new ApplicationException("Ano de apuração inválido");
+        Empresa empresa = empresaAtual.get();
+        List<LancamentoFinanceiro> receitas = lancamentos.findReceitasParaApuracaoMei(
+                empresa.getId(), LocalDate.of(ano, 1, 1), LocalDate.of(ano, 12, 31)).stream()
+                .filter(this::incluido).toList();
+        Map<Integer, FechamentoApuracaoMei> porMes = new HashMap<>();
+        fechamentos.findByEmpresaIdAndAnoOrderByMes(empresa.getId(), ano)
+                .forEach(item -> porMes.put(item.getMes(), item));
+        BigDecimal limite = empresa.getLimiteAnual().divide(BigDecimal.valueOf(12), 2, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(mesesLimite(empresa, ano)));
+        BigDecimal acumulado = BigDecimal.ZERO;
+        List<HistoricoApuracaoMeiItemDTO> itens = new ArrayList<>();
+        for (int mes = 1; mes <= 12; mes++) {
+            ResumoMensalMeiDTO atual = resumirMes(receitas, mes);
+            FechamentoApuracaoMei fechamento = porMes.get(mes);
+            BigDecimal totalMes = fechamento != null && fechamento.getSituacao() == SituacaoApuracaoMeiEnum.FECHADA
+                    ? fechamento.getTotal() : atual.getTotal();
+            acumulado = acumulado.add(totalMes);
+            BigDecimal percentual = limite.signum() == 0 ? BigDecimal.ZERO
+                    : acumulado.multiply(CEM).divide(limite, 2, RoundingMode.HALF_UP);
+            itens.add(HistoricoApuracaoMeiItemDTO.builder().mes(mes).totalMes(totalMes)
+                    .acumuladoAno(acumulado).percentualUtilizado(percentual)
+                    .situacao(fechamento == null ? null : fechamento.getSituacao())
+                    .dataFechamento(fechamento == null ? null : fechamento.getDataFechamento())
+                    .usuarioFechamento(fechamento == null ? null : fechamento.getUsuarioFechamento()).build());
+        }
+        BigDecimal percentual = limite.signum() == 0 ? BigDecimal.ZERO
+                : acumulado.multiply(CEM).divide(limite, 2, RoundingMode.HALF_UP);
+        return HistoricoApuracaoMeiDTO.builder().ano(ano).limiteAplicavel(limite).totalAno(acumulado)
+                .percentualUtilizado(percentual).meses(itens).build();
     }
 
     private ResumoMensalMeiDTO resumirMes(List<LancamentoFinanceiro> receitas, int mes) {
@@ -161,6 +219,32 @@ public class ApuracaoMeiService {
         if (empresa.getDataAbertura().getYear() > ano) return 0;
         return empresa.getDataAbertura().getYear() == ano
                 ? 13 - empresa.getDataAbertura().getMonthValue() : 12;
+    }
+
+    private List<Integer> competenciasAnterioresAbertas(Empresa empresa, int ano, int mesReferencia) {
+        if (empresa.getDataAbertura().getYear() > ano) return List.of();
+        int primeiroMes = empresa.getDataAbertura().getYear() == ano ? empresa.getDataAbertura().getMonthValue() : 1;
+        Map<Integer, SituacaoApuracaoMeiEnum> situacoes = new HashMap<>();
+        fechamentos.findByEmpresaIdAndAnoOrderByMes(empresa.getId(), ano)
+                .forEach(item -> situacoes.put(item.getMes(), item.getSituacao()));
+        List<Integer> abertas = new ArrayList<>();
+        for (int mes = primeiroMes; mes < mesReferencia; mes++) {
+            if (situacoes.get(mes) != SituacaoApuracaoMeiEnum.FECHADA) abertas.add(mes);
+        }
+        return abertas;
+    }
+
+    private boolean lancamentoAberto(LancamentoFinanceiro item) {
+        return item.getSituacao() == SituacaoLancamentoEnum.ABERTO
+                || item.getSituacao() == SituacaoLancamentoEnum.PARCIAL;
+    }
+
+    private FaixaAlertaMeiEnum faixaAlerta(BigDecimal percentual) {
+        if (percentual.compareTo(new BigDecimal("100")) >= 0) return FaixaAlertaMeiEnum.EXCEDIDO_100;
+        if (percentual.compareTo(new BigDecimal("90")) >= 0) return FaixaAlertaMeiEnum.CRITICO_90;
+        if (percentual.compareTo(new BigDecimal("80")) >= 0) return FaixaAlertaMeiEnum.ALERTA_80;
+        if (percentual.compareTo(new BigDecimal("75")) >= 0) return FaixaAlertaMeiEnum.ATENCAO_75;
+        return FaixaAlertaMeiEnum.NORMAL;
     }
 
     private boolean incluido(LancamentoFinanceiro item) {

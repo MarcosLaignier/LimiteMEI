@@ -11,6 +11,7 @@ import java.util.*;
 
 public interface MovimentoFinanceiroRepository extends BaseRepository<MovimentoFinanceiro, Long> {
     List<MovimentoFinanceiro> findByEmpresaIdOrderByDataDescIdDesc(Long empresaId);
+    List<MovimentoFinanceiro> findTop8ByEmpresaIdOrderByDataDescIdDesc(Long empresaId);
     List<MovimentoFinanceiro> findByContaFinanceiraIdAndEmpresaIdOrderByDataDescIdDesc(Long contaId, Long empresaId);
     Optional<MovimentoFinanceiro> findByIdAndEmpresaId(Long id, Long empresaId);
     Optional<MovimentoFinanceiro> findByBaixaFinanceiraId(Long baixaId);
@@ -25,4 +26,9 @@ public interface MovimentoFinanceiroRepository extends BaseRepository<MovimentoF
             "and (:inicio is null or m.data >= :inicio) and (:fim is null or m.data <= :fim) order by m.data desc, m.id desc")
     List<MovimentoFinanceiro> extrato(@Param("contaId") Long contaId, @Param("empresaId") Long empresaId,
                                       @Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
+
+    @Query("select coalesce(sum(m.valor), 0) from MovimentoFinanceiro m where m.empresa.id = :empresaId " +
+            "and m.tipo = :tipo and m.data between :inicio and :fim")
+    BigDecimal totalPeriodo(@Param("empresaId") Long empresaId, @Param("tipo") TipoFluxoCaixaEnum tipo,
+                            @Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
 }

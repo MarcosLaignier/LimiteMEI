@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.controller;
 
 import com.limiteMEI.limiteMEI.dto.mei.ApuracaoMeiDTO;
+import com.limiteMEI.limiteMEI.dto.mei.HistoricoApuracaoMeiDTO;
 import com.limiteMEI.limiteMEI.dto.mei.RelatorioMensalMeiDTO;
 import com.limiteMEI.limiteMEI.dto.lancamento.MotivoOperacaoDTO;
 import jakarta.validation.Valid;
@@ -35,5 +36,10 @@ public class ApuracaoMeiController {
     @GetMapping("/relatorio")
     public RelatorioMensalMeiDTO relatorio(@RequestParam int ano, @RequestParam int mes) {
         return service.relatorio(ano, mes);
+    }
+
+    @GetMapping("/historico")
+    public HistoricoApuracaoMeiDTO historico(@RequestParam int ano) {
+        return service.historico(ano);
     }
 }

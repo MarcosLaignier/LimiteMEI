@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../enviroments/enviroment';
-import { ApuracaoMeiDTO, RelatorioMensalMeiDTO } from '../dtos/mei/apuracao-mei.dto';
+import { ApuracaoMeiDTO, HistoricoApuracaoMeiDTO, RelatorioMensalMeiDTO } from '../dtos/mei/apuracao-mei.dto';
 
 @Injectable({ providedIn: 'root' })
 export class ApuracaoMeiService {
@@ -20,5 +20,8 @@ export class ApuracaoMeiService {
   }
   relatorio(ano: number, mes: number) {
     return this.http.get<RelatorioMensalMeiDTO>(`${this.url}/relatorio`, { params: { ano, mes } });
+  }
+  historico(ano: number) {
+    return this.http.get<HistoricoApuracaoMeiDTO>(`${this.url}/historico`, { params: { ano } });
   }
 }

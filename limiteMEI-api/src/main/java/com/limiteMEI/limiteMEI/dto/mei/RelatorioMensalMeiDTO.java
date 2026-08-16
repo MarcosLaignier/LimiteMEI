@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 public class RelatorioMensalMeiDTO {
     private String cnpj;
     private String razaoSocial;
+    private String nomeFantasia;
+    private java.time.LocalDate dataAbertura;
     private Integer ano;
     private Integer mes;
     private SituacaoApuracaoMeiEnum situacao;
@@ -23,6 +25,7 @@ public class RelatorioMensalMeiDTO {
     private BigDecimal servicosComDocumento;
     private BigDecimal servicosSemDocumento;
     private BigDecimal total;
+    private BigDecimal acumuladoAno;
     private LocalDateTime dataFechamento;
     private String usuarioFechamento;
 }

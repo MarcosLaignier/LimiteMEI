@@ -22,8 +22,13 @@ export interface ApuracaoMeiDTO {
   saldoDisponivel: number;
   percentualUtilizado: number;
   projecaoAnual: number;
+  mediaMensalDisponivel: number;
+  faixaAlerta: 'NORMAL' | 'ATENCAO_75' | 'ALERTA_80' | 'CRITICO_90' | 'EXCEDIDO_100';
   mesesLimite: number;
   quantidadePendencias: number;
+  quantidadeLancamentosAbertos: number;
+  quantidadeLancamentosVencidos: number;
+  competenciasAnterioresAbertas: number[];
   meses: ResumoMensalMeiDTO[];
   detalhes: DetalheApuracaoMeiDTO[];
   situacaoFechamento?: 'FECHADA' | 'REABERTA';
@@ -35,6 +40,8 @@ export interface ApuracaoMeiDTO {
 export interface RelatorioMensalMeiDTO {
   cnpj: string;
   razaoSocial: string;
+  nomeFantasia?: string;
+  dataAbertura: string;
   ano: number;
   mes: number;
   situacao?: 'FECHADA';
@@ -45,6 +52,25 @@ export interface RelatorioMensalMeiDTO {
   servicosComDocumento: number;
   servicosSemDocumento: number;
   total: number;
+  acumuladoAno: number;
+  dataFechamento?: string;
+  usuarioFechamento?: string;
+}
+
+export interface HistoricoApuracaoMeiDTO {
+  ano: number;
+  limiteAplicavel: number;
+  totalAno: number;
+  percentualUtilizado: number;
+  meses: HistoricoApuracaoMeiItemDTO[];
+}
+
+export interface HistoricoApuracaoMeiItemDTO {
+  mes: number;
+  totalMes: number;
+  acumuladoAno: number;
+  percentualUtilizado: number;
+  situacao?: 'FECHADA' | 'REABERTA';
   dataFechamento?: string;
   usuarioFechamento?: string;
 }
