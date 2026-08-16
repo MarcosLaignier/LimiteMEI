@@ -1,0 +1,12 @@
+<section class="launch-filter"><tabs-component>
+  <tab title="Principais" icon="bi-funnel">
+    <div class="filter-row"><select-enum label="Tipo" width="252px" [enumObject]="tipos" [(dataField)]="filtro.tipo" (dataFieldChange)="tipoChanged()" [disabled]="disabled"/><categoria-selector-component width="252px" [tipo]="tipoCategoria" [(dataField)]="filtro.categoriaId" [disabled]="disabled"/></div>
+    <div class="filter-row"><month-year-box-component label="Competência" width="252px" [(dataField)]="filtro.competencia" [disabled]="disabled"/><select-enum label="Situação" width="252px" [enumObject]="situacoes" [optionLabels]="situacaoLabels" [(dataField)]="filtro.situacao" [disabled]="disabled"/></div>
+  </tab>
+  <tab title="Avançados" icon="bi-sliders">
+    <div class="filter-row"><number-box-component label="Valor mínimo" width="252px" [dataField]="$any(filtro.valorMin)" (dataFieldChange)="filtro.valorMin=$event || undefined" [disabled]="disabled"/><number-box-component label="Valor máximo" width="252px" [dataField]="$any(filtro.valorMax)" (dataFieldChange)="filtro.valorMax=$event || undefined" [disabled]="disabled"/></div>
+    <div class="filter-row"><date-box-component label="Vencimento inicial" width="252px" [clearButton]="true" [(dataField)]="filtro.vencimentoInicial" [disabled]="disabled"/><date-box-component label="Vencimento final" width="252px" [clearButton]="true" [(dataField)]="filtro.vencimentoFinal" [disabled]="disabled"/></div>
+    <div class="filter-row full"><pessoa-selector-component label="Pessoa" width="520px" [pessoa]="pessoa" (pessoaChange)="pessoaChanged($event)" [disabled]="disabled"/></div>
+    <div class="filter-row"><text-box-component label="Descrição" width="520px" [(dataField)]="filtro.descricao" [disabled]="disabled"/></div>
+  </tab>
+</tabs-component></section>

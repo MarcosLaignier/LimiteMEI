@@ -1,0 +1,31 @@
+package com.limiteMEI.limiteMEI.controller;
+
+import com.limiteMEI.limiteMEI.dto.lancamento.*;
+import com.limiteMEI.limiteMEI.service.LancamentoFinanceiroService;
+import jakarta.validation.Valid;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/lancamentos-financeiros")
+public class LancamentoFinanceiroController {
+    private final LancamentoFinanceiroService service;
+    public LancamentoFinanceiroController(LancamentoFinanceiroService service) { this.service = service; }
+
+    @GetMapping
+    public List<LancamentoFinanceiroDTO> findAll() { return service.findAll(); }
+    @GetMapping("/{id}")
+    public LancamentoFinanceiroDTO getById(@PathVariable Long id) { return service.getById(id); }
+    @PostMapping
+    public ResponseEntity<LancamentoFinanceiroDTO> create(@Valid @RequestBody LancamentoFinanceiroCreateDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+    }
+    @PutMapping("/{id}")
+    public LancamentoFinanceiroDTO update(@PathVariable Long id, @Valid @RequestBody LancamentoFinanceiroCreateDTO dto) {
+        return service.update(id, dto);
+    }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) { service.delete(id); }
+}

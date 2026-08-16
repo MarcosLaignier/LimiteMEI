@@ -1,0 +1,15 @@
+<toolbar-filter tituloPagina="Monitor de lançamentos" [listMode]="true" [showNew]="false"
+                [loading]="loading" (filtrar)="aplicarFiltros()" (limpar)="limparFiltros()" />
+<section class="monitor">
+  <header><span>CONTAS A PAGAR E RECEBER</span><h1>Monitor de lançamentos</h1><p>Acompanhe vencimentos, saldos e registre baixas sem sair da consulta.</p></header>
+  <lancamento-filter-component [filtro]="filtro" [disabled]="loading" />
+  <div class="summaries"><article><span>A receber</span><strong>{{totalReceber|currency:'BRL'}}</strong></article><article><span>A pagar</span><strong>{{totalPagar|currency:'BRL'}}</strong></article><article><span>Já baixado</span><strong>{{totalBaixado|currency:'BRL'}}</strong></article><article class="overdue"><span>Vencido</span><strong>{{totalVencido|currency:'BRL'}}</strong></article></div>
+  @if (selecionado) {
+    <div class="payment-panel"><div class="payment-heading"><div><h2>Baixar {{selecionado.descricao}}</h2><p>Saldo disponível: <strong>{{selecionado.saldoAberto|currency:'BRL'}}</strong></p></div><button (click)="fecharBaixa()" aria-label="Fechar"><i class="bi bi-x-lg"></i></button></div><div class="payment-fields"><number-box-component label="Valor" width="180px" [(dataField)]="baixa.valor" [disabled]="baixando" /><date-box-component label="Data da liquidação" [clearButton]="true" [(dataField)]="baixa.dataLiquidacao" [disabled]="baixando" /><select-enum label="Forma de pagamento" width="240px" [enumObject]="formas" [optionLabels]="formaLabels" [(dataField)]="baixa.formaPagamento" [disabled]="baixando" /><conta-financeira-selector-component [(dataField)]="baixa.contaFinanceiraId" [disabled]="baixando" /><button class="primary" [disabled]="baixando" (click)="confirmarBaixa()">{{baixando?'Baixando...':'Confirmar baixa'}}</button></div></div>
+  }
+  <div class="table-responsive"><table><thead><tr><th>Descrição</th><th>Tipo</th><th>Categoria</th><th>Pessoa</th><th>Vencimento</th><th>Valor</th><th>Baixado</th><th>Saldo</th><th>Situação</th><th>Ações</th></tr></thead><tbody>
+    @if(loading){<tr><td colspan="10" class="state"><span class="spinner-border spinner-border-sm"></span> Carregando lançamentos...</td></tr>}
+    @else if(!filtrados.length){<tr><td colspan="10" class="state">Nenhum lançamento encontrado para os filtros informados.</td></tr>}
+    @else {@for(item of filtrados;track item.id){<tr><td><strong>{{item.descricao}}</strong></td><td>{{item.tipo==='RECEBER'?'Receber':'Pagar'}}</td><td>{{item.categoriaNome}}</td><td>{{item.pessoaNome||'—'}}</td><td>{{item.dataVencimento|date:'dd/MM/yyyy':'UTC'}}</td><td>{{item.valor|currency:'BRL'}}</td><td>{{item.valorLiquidado|currency:'BRL'}}</td><td><strong>{{item.saldoAberto|currency:'BRL'}}</strong></td><td><badge-component [text]="situacaoLabels[situacao(item)]" [color]="badgeColor(item)" [pill]="true" size="sm" /></td><td><div class="actions">@if(podeBaixar(item)){<button class="pay" title="Baixar" (click)="abrirBaixa(item)"><i class="bi bi-check2-circle"></i></button>}@else{<span>—</span>}</div></td></tr>}}
+  </tbody></table></div>
+</section>

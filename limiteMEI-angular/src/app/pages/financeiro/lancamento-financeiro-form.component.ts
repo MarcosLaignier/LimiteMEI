@@ -1,0 +1,438 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { BaseFormCrud } from '../../shared/components-commons/core/base.form.crud';
+import {
+  LancamentoFinanceiroCreateDTO,
+  LancamentoFinanceiroDTO,
+} from '../../dtos/lancamento/lancamento.financeiro';
+import { LancamentoFinanceiroService } from '../../services/lancamento-financeiro.service';
+import { BaixaFinanceiraService } from '../../services/baixa-financeira.service';
+import {
+  BaixaFinanceiraCreateDTO,
+  BaixaFinanceiraDTO,
+} from '../../dtos/lancamento/baixa.financeira';
+import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
+import { TextBoxComponent } from '../../shared/components-commons/infra/text-box-component/text.box.component';
+import { NumberBoxComponent } from '../../shared/components-commons/infra/number-box-component/number.box.component';
+import { DateBoxComponent } from '../../shared/components-commons/infra/date-box-component/date.box.component';
+import { MonthYearBoxComponent } from '../../shared/components-commons/infra/month-year-box-component/month.year.box.component';
+import { TextAreaComponent } from '../../shared/components-commons/infra/text-area-component/text.area.component';
+import { SelectEnumComponent } from '../../shared/components-commons/infra/select-enum-component/select.enum.component';
+import { CategoriaSelectorComponent } from '../../shared/components-commons/categoria-selector-component/categoria.selector.component';
+import { PessoaSelectorComponent } from '../../shared/components-commons/pessoa-selector-component/pessoa.selector.component';
+import { PessoaDTO } from '../../dtos/pessoa/pessoa.dto';
+import { TipoLancamentoEnum } from '../../enums/tipo.lancamento.enum';
+import { TipoMovimentoEnum } from '../../enums/tipo.movimento.enum';
+import { FormaPagamentoEnum, FORMA_PAGAMENTO_LABELS } from '../../enums/forma.pagamento.enum';
+import { SwitchComponent } from '../../shared/components-commons/infra/switch-component/switch.component';
+import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
+import { ConfirmDialogService } from '../../shared/components-commons/infra/confirm-dialog-component/confirm.dialog.service';
+import { ContaFinanceiraSelectorComponent } from '../../shared/components-commons/conta-financeira-selector-component/conta-financeira.selector.component';
+@Component({
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ToolbarComponent,
+    TextBoxComponent,
+    NumberBoxComponent,
+    DateBoxComponent,
+    MonthYearBoxComponent,
+    TextAreaComponent,
+    SelectEnumComponent,
+    CategoriaSelectorComponent,
+    PessoaSelectorComponent,
+    SwitchComponent,
+    ContaFinanceiraSelectorComponent,
+  ],
+  template: `<toolbar-filter
+      tituloPagina="Lançamento financeiro"
+      [listMode]="false"
+      [loading]="loading"
+      (salvar)="save()"
+      (limpar)="clear()"
+    />
+    <section class="card">
+      <h2>Dados do lançamento</h2>
+      <div class="form-row">
+        <text-box-component
+          label="Descrição"
+          width="435px"
+          [(dataField)]="model.descricao"
+          [disabled]="loading"
+        />
+        <number-box-component
+          label="Valor"
+          width="180px"
+          [(dataField)]="model.valor"
+          [disabled]="loading"
+        />
+      </div>
+      <div class="form-row">
+        <select-enum
+          label="Tipo"
+          width="200px"
+          [enumObject]="tipoEnum"
+          [(dataField)]="model.tipo"
+          (dataFieldChange)="tipoChanged()"
+          [disabled]="loading"
+        /><categoria-selector-component
+          [tipo]="tipoCategoria"
+          [(dataField)]="model.categoriaId"
+          [disabled]="loading"
+        />
+      </div>
+      <div class="form-row">
+        <month-year-box-component
+          label="Competência"
+          [clearButton]="true"
+          [(dataField)]="model.dataCompetencia"
+          [disabled]="loading"
+        /><date-box-component
+          label="Vencimento"
+          [clearButton]="true"
+          [(dataField)]="model.dataVencimento"
+          [disabled]="loading"
+        />
+      </div>
+      <div class="form-row full-row">
+        <pessoa-selector-component
+          label="Pessoa vinculada"
+          [pessoa]="pessoa"
+          (pessoaChange)="setPessoa($event)"
+          [disabled]="loading"
+        />
+      </div>
+      <div class="form-row full-row">
+        <text-area-component
+          label="Observação"
+          width="435px"
+          [(dataField)]="model.observacao"
+          [disabled]="loading"
+        />
+      </div>
+      <div class="form-row">
+        <switch-component
+          label="Lançamento ativo"
+          [(dataField)]="model.ativo"
+          [disabled]="loading"
+        />
+      </div>
+      @if (!id) {
+        <div class="automatic-payment">
+          <switch-component
+            label="Baixar automaticamente ao salvar"
+            [(dataField)]="model.baixarAutomaticamente"
+            [disabled]="loading"
+            (dataFieldChange)="automaticPaymentChanged($event)"
+          />
+          <small>Cria uma baixa no valor total e deixa o lançamento como liquidado.</small>
+          @if (model.baixarAutomaticamente) {
+            <div class="form-row">
+              <date-box-component
+                label="Data da liquidação"
+                [clearButton]="true"
+                [dataField]="model.dataLiquidacao ?? ''"
+                (dataFieldChange)="model.dataLiquidacao = $event || undefined"
+                [disabled]="loading"
+              />
+              <select-enum
+                label="Forma de pagamento"
+                width="240px"
+                [enumObject]="formaEnum"
+                [optionLabels]="formaLabels"
+                [(dataField)]="model.formaPagamento"
+                [disabled]="loading"
+              />
+              <conta-financeira-selector-component
+                [(dataField)]="model.contaFinanceiraId"
+                [disabled]="loading"
+              />
+            </div>
+          }
+        </div>
+      }
+    </section>
+    @if (id) {
+      <section class="card">
+        <h2>Baixas financeiras</h2>
+        <div class="fields">
+          <number-box-component
+            label="Valor da baixa"
+            width="180px"
+            [(dataField)]="baixa.valor"
+            [disabled]="baixando"
+          /><date-box-component
+            label="Data"
+            [clearButton]="true"
+            [(dataField)]="baixa.dataLiquidacao"
+            [disabled]="baixando"
+          /><select-enum
+            label="Forma de pagamento"
+            width="240px"
+            [enumObject]="formaEnum"
+            [optionLabels]="formaLabels"
+            [(dataField)]="baixa.formaPagamento"
+            [disabled]="baixando"
+          /><conta-financeira-selector-component
+            [(dataField)]="baixa.contaFinanceiraId"
+            [disabled]="baixando"
+          /><button class="primary" [disabled]="baixando" (click)="baixar()">
+            {{ baixando ? 'Baixando...' : 'Registrar baixa' }}
+          </button>
+        </div>
+        @if (baixas.length) {
+          <div class="baixas">
+            @for (item of baixas; track item.id) {
+              <div>
+                <span>{{ item.dataLiquidacao }}</span
+                ><strong>{{ item.valor | currency: 'BRL' }}</strong
+                ><span>{{ formaLabels[item.formaPagamento] }}</span
+                ><span>{{ item.contaFinanceiraNome || 'Conta não informada' }}</span
+                ><button (click)="excluirBaixa(item)">Excluir</button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty">Nenhuma baixa registrada.</p>
+        }
+      </section>
+    }`,
+  styles: [
+    `
+      .card {
+        background: #fff;
+        border: 0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+      }
+      .fields {
+        display: flex;
+        align-items: end;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .form-row {
+        display: flex;
+        align-items: end;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+      }
+      .full-row {
+        width: 100%;
+      }
+      .full-row pessoa-selector-component,
+      .full-row text-area-component {
+        width: 100%;
+      }
+      .automatic-payment {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border: 1px solid #dce2f5;
+        border-radius: 10px;
+        background: #f8f9ff;
+      }
+      .automatic-payment small {
+        display: block;
+        color: #687080;
+        margin-top: 0.35rem;
+      }
+      .fields pessoa-selector-component,
+      .fields text-area-component {
+        flex-basis: 100%;
+      }
+      .primary {
+        height: 38px;
+        background: #5570f1;
+        color: white;
+        border: 0;
+        border-radius: 6px;
+        padding: 0 1.2rem;
+      }
+      .baixas {
+        margin-top: 1rem;
+      }
+      .baixas > div {
+        display: grid;
+        grid-template-columns: 130px 140px 180px 1fr 80px;
+        padding: 0.75rem;
+        border-top: 1px solid #eee;
+      }
+      .baixas button {
+        border: 0;
+        background: none;
+        color: #c33;
+      }
+      .empty {
+        color: #687080;
+        margin-top: 1rem;
+      }
+    `,
+  ],
+})
+export class LancamentoFinanceiroFormComponent
+  extends BaseFormCrud<LancamentoFinanceiroDTO, LancamentoFinanceiroCreateDTO>
+  implements OnInit
+{
+  protected service: LancamentoFinanceiroService;
+  protected routeBase = '/app/financeiro/lancamentos';
+  readonly tipoEnum = TipoLancamentoEnum;
+  readonly formaEnum = FormaPagamentoEnum;
+  readonly formaLabels = FORMA_PAGAMENTO_LABELS;
+  pessoa?: PessoaDTO;
+  baixas: BaixaFinanceiraDTO[] = [];
+  baixa: BaixaFinanceiraCreateDTO = this.novaBaixa();
+  baixando = false;
+  constructor(
+    service: LancamentoFinanceiroService,
+    router: Router,
+    route: ActivatedRoute,
+    private baixaService: BaixaFinanceiraService,
+    private alerts: AlertService,
+    private confirmDialog: ConfirmDialogService,
+  ) {
+    super(router, route);
+    this.service = service;
+    this.clear();
+  }
+  ngOnInit() {
+    this.initForm();
+    if (this.route.snapshot.paramMap.get('id')) this.carregarBaixas();
+  }
+  get tipoCategoria() {
+    return this.model.tipo === TipoLancamentoEnum.RECEBER
+      ? TipoMovimentoEnum.RECEITA
+      : this.model.tipo === TipoLancamentoEnum.PAGAR
+        ? TipoMovimentoEnum.DESPESA
+        : undefined;
+  }
+  override clear() {
+    this.model = {
+      descricao: '',
+      valor: 0,
+      dataCompetencia: '',
+      dataVencimento: '',
+      ativo: true,
+      observacao: '',
+      baixarAutomaticamente: false,
+    };
+    this.pessoa = undefined;
+  }
+  override loadById(id: number) {
+    this.loading = true;
+    this.service.getById(id).subscribe({
+      next: (r) => {
+        if (r.body) {
+          this.model = {
+            ...r.body,
+            observacao: r.body.observacao ?? '',
+            baixarAutomaticamente: false,
+          };
+          if (r.body.pessoaId)
+            this.pessoa = { id: r.body.pessoaId, nomeRazaoSocial: r.body.pessoaNome } as PessoaDTO;
+        }
+        this.loading = false;
+      },
+      error: (e) => {
+        this.loading = false;
+        this.alerts.error(
+          e?.error?.messages?.join('<br>') || 'Não foi possível carregar o lançamento.',
+        );
+      },
+    });
+  }
+  tipoChanged() {
+    this.model.categoriaId = undefined;
+  }
+  setPessoa(p?: PessoaDTO) {
+    this.pessoa = p;
+    this.model.pessoaId = p?.id;
+  }
+  automaticPaymentChanged(enabled: boolean) {
+    if (enabled) {
+      this.model.dataLiquidacao = new Date().toISOString().slice(0, 10);
+      return;
+    }
+    this.model.dataLiquidacao = undefined;
+    this.model.formaPagamento = undefined;
+    this.model.contaFinanceiraId = undefined;
+  }
+  override validateSave() {
+    if (
+      !this.model.descricao ||
+      !this.model.tipo ||
+      !this.model.categoriaId ||
+      !this.model.valor ||
+      !this.model.dataCompetencia ||
+      !this.model.dataVencimento
+    ) {
+      this.alerts.warning('Preencha descrição, tipo, categoria, valor e datas.');
+      return false;
+    }
+    if (
+      this.model.baixarAutomaticamente &&
+      (!this.model.dataLiquidacao || !this.model.formaPagamento || !this.model.contaFinanceiraId)
+    ) {
+      this.alerts.warning('Informe a data, a forma de pagamento e a conta da baixa automática.');
+      return false;
+    }
+    return true;
+  }
+  carregarBaixas() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.baixaService.listar(id).subscribe({
+      next: (r) => (this.baixas = r),
+      error: () => this.alerts.error('Não foi possível carregar as baixas.'),
+    });
+  }
+  baixar() {
+    const id = Number(this.id);
+    if (
+      !this.baixa.valor ||
+      !this.baixa.dataLiquidacao ||
+      !this.baixa.formaPagamento ||
+      !this.baixa.contaFinanceiraId
+    ) {
+      this.alerts.warning('Preencha os dados da baixa.');
+      return;
+    }
+    this.baixando = true;
+    this.baixaService.criar(id, this.baixa).subscribe({
+      next: () => {
+        this.baixando = false;
+        this.baixa = this.novaBaixa();
+        this.carregarBaixas();
+        this.alerts.success('Baixa registrada com sucesso.');
+      },
+      error: (e) => {
+        this.baixando = false;
+        this.alerts.error(
+          e?.error?.messages?.join('<br>') || 'Não foi possível registrar a baixa.',
+        );
+      },
+    });
+  }
+  async excluirBaixa(item: BaixaFinanceiraDTO) {
+    if (
+      !(await this.confirmDialog.confirm(
+        'Excluir baixa',
+        'Deseja realmente excluir esta baixa financeira?',
+      ))
+    )
+      return;
+    this.baixaService.excluir(Number(this.id), item.id).subscribe({
+      next: () => {
+        this.carregarBaixas();
+        this.alerts.success('Baixa excluída.');
+      },
+      error: () => this.alerts.error('Não foi possível excluir a baixa.'),
+    });
+  }
+  private novaBaixa(): BaixaFinanceiraCreateDTO {
+    return { valor: 0, dataLiquidacao: new Date().toISOString().slice(0, 10) };
+  }
+}
