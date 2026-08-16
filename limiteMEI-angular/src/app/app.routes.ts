@@ -76,10 +76,24 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'lancamentos/grupo/:tipo/:id',
+            loadComponent: () =>
+              import('./pages/financeiro/grupo-lancamento/grupo-lancamento.component').then(
+                (m) => m.GrupoLancamentoComponent,
+              ),
+          },
+          {
             path: 'contas',
             loadComponent: () =>
               import('./pages/financeiro/conta-financeira/conta-financeira.component').then(
                 (m) => m.ContaFinanceiraComponent,
+              ),
+          },
+          {
+            path: 'movimentacoes',
+            loadComponent: () =>
+              import('./pages/financeiro/movimento-financeiro/movimento-financeiro.component').then(
+                (m) => m.MovimentoFinanceiroComponent,
               ),
           },
           {
