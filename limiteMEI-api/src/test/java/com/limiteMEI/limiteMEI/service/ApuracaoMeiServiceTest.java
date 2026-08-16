@@ -4,6 +4,7 @@ import com.limiteMEI.limiteMEI.domain.*;
 import com.limiteMEI.limiteMEI.dto.mei.ApuracaoMeiDTO;
 import com.limiteMEI.limiteMEI.enums.*;
 import com.limiteMEI.limiteMEI.repository.LancamentoFinanceiroRepository;
+import com.limiteMEI.limiteMEI.repository.FechamentoApuracaoMeiRepository;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,7 +17,8 @@ class ApuracaoMeiServiceTest {
 
     private final LancamentoFinanceiroRepository repository = mock(LancamentoFinanceiroRepository.class);
     private final EmpresaAtualService empresaAtual = mock(EmpresaAtualService.class);
-    private final ApuracaoMeiService service = new ApuracaoMeiService(repository, empresaAtual);
+    private final FechamentoApuracaoMeiRepository fechamentos = mock(FechamentoApuracaoMeiRepository.class);
+    private final ApuracaoMeiService service = new ApuracaoMeiService(repository, empresaAtual, fechamentos);
 
     @Test
     void deveSepararReceitasPorNaturezaEAcumularAteReferencia() {

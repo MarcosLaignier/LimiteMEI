@@ -4,9 +4,13 @@ import com.limiteMEI.limiteMEI.domain.*;
 import com.limiteMEI.limiteMEI.dto.mei.*;
 import com.limiteMEI.limiteMEI.enums.NaturezaReceitaEnum;
 import com.limiteMEI.limiteMEI.repository.LancamentoFinanceiroRepository;
+import com.limiteMEI.limiteMEI.repository.FechamentoApuracaoMeiRepository;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
+import com.limiteMEI.limiteMEI.dto.lancamento.MotivoOperacaoDTO;
+import com.limiteMEI.limiteMEI.enums.SituacaoApuracaoMeiEnum;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.*;
 import java.time.*;
 import java.util.*;
@@ -17,10 +21,13 @@ public class ApuracaoMeiService {
     private static final BigDecimal CEM = new BigDecimal("100");
     private final LancamentoFinanceiroRepository lancamentos;
     private final EmpresaAtualService empresaAtual;
+    private final FechamentoApuracaoMeiRepository fechamentos;
 
-    public ApuracaoMeiService(LancamentoFinanceiroRepository lancamentos, EmpresaAtualService empresaAtual) {
+    public ApuracaoMeiService(LancamentoFinanceiroRepository lancamentos, EmpresaAtualService empresaAtual,
+                              FechamentoApuracaoMeiRepository fechamentos) {
         this.lancamentos = lancamentos;
         this.empresaAtual = empresaAtual;
+        this.fechamentos = fechamentos;
     }
 
     public ApuracaoMeiDTO apurar(int ano, int mesReferencia) {
@@ -51,6 +58,8 @@ public class ApuracaoMeiService {
         List<DetalheApuracaoMeiDTO> detalhes = todos.stream()
                 .filter(item -> item.getDataCompetencia().getMonthValue() == mesReferencia)
                 .map(this::detalhar).toList();
+        Optional<FechamentoApuracaoMei> fechamento = fechamentos
+                .findByEmpresaIdAndAnoAndMes(empresa.getId(), ano, mesReferencia);
         return ApuracaoMeiDTO.builder().ano(ano).mesReferencia(mesReferencia)
                 .comercioMes(referencia.getComercio()).industriaMes(referencia.getIndustria())
                 .servicosMes(referencia.getServicos()).totalMes(referencia.getTotal())
@@ -60,7 +69,69 @@ public class ApuracaoMeiService {
                 .saldoDisponivel(limite.subtract(acumulado)).percentualUtilizado(percentual)
                 .projecaoAnual(projecao).mesesLimite(mesesLimite)
                 .quantidadePendencias((int) detalhes.stream().filter(DetalheApuracaoMeiDTO::getPendenciaFiscal).count())
-                .meses(meses).detalhes(detalhes).build();
+                .meses(meses).detalhes(detalhes)
+                .situacaoFechamento(fechamento.map(FechamentoApuracaoMei::getSituacao).orElse(null))
+                .dataFechamento(fechamento.map(FechamentoApuracaoMei::getDataFechamento).orElse(null))
+                .usuarioFechamento(fechamento.map(FechamentoApuracaoMei::getUsuarioFechamento).orElse(null))
+                .motivoReabertura(fechamento.map(FechamentoApuracaoMei::getMotivoReabertura).orElse(null))
+                .build();
+    }
+
+    @Transactional
+    public ApuracaoMeiDTO fechar(int ano, int mes) {
+        ApuracaoMeiDTO apuracao = apurar(ano, mes);
+        if (apuracao.getQuantidadePendencias() > 0) {
+            throw new ApplicationException("Resolva as pendências fiscais antes de fechar a apuração");
+        }
+        Empresa empresa = empresaAtual.get();
+        FechamentoApuracaoMei fechamento = fechamentos.findByEmpresaIdAndAnoAndMes(empresa.getId(), ano, mes)
+                .orElseGet(() -> FechamentoApuracaoMei.builder().empresa(empresa).ano(ano).mes(mes).build());
+        preencherFotografia(fechamento, receitasDoMes(empresa, ano, mes));
+        fechamento.setSituacao(SituacaoApuracaoMeiEnum.FECHADA);
+        fechamento.setDataFechamento(LocalDateTime.now());
+        fechamento.setUsuarioFechamento(usuarioAtual());
+        fechamento.setDataReabertura(null);
+        fechamento.setUsuarioReabertura(null);
+        fechamento.setMotivoReabertura(null);
+        fechamentos.save(fechamento);
+        return apurar(ano, mes);
+    }
+
+    @Transactional
+    public ApuracaoMeiDTO reabrir(int ano, int mes, MotivoOperacaoDTO dto) {
+        Empresa empresa = empresaAtual.get();
+        FechamentoApuracaoMei fechamento = fechamentos.findByEmpresaIdAndAnoAndMes(empresa.getId(), ano, mes)
+                .orElseThrow(() -> new ApplicationException("A apuração ainda não foi fechada"));
+        if (fechamento.getSituacao() != SituacaoApuracaoMeiEnum.FECHADA) {
+            throw new ApplicationException("A apuração já está aberta");
+        }
+        fechamento.setSituacao(SituacaoApuracaoMeiEnum.REABERTA);
+        fechamento.setDataReabertura(LocalDateTime.now());
+        fechamento.setUsuarioReabertura(usuarioAtual());
+        fechamento.setMotivoReabertura(dto.getMotivo().trim());
+        fechamentos.save(fechamento);
+        return apurar(ano, mes);
+    }
+
+    public RelatorioMensalMeiDTO relatorio(int ano, int mes) {
+        Empresa empresa = empresaAtual.get();
+        Optional<FechamentoApuracaoMei> fechamento = fechamentos
+                .findByEmpresaIdAndAnoAndMes(empresa.getId(), ano, mes)
+                .filter(item -> item.getSituacao() == SituacaoApuracaoMeiEnum.FECHADA);
+        FechamentoApuracaoMei valores = fechamento.orElseGet(() -> {
+            FechamentoApuracaoMei preview = new FechamentoApuracaoMei();
+            preencherFotografia(preview, receitasDoMes(empresa, ano, mes));
+            return preview;
+        });
+        return RelatorioMensalMeiDTO.builder().cnpj(empresa.getCnpj()).razaoSocial(empresa.getRazaoSocial())
+                .ano(ano).mes(mes).situacao(fechamento.map(FechamentoApuracaoMei::getSituacao).orElse(null))
+                .comercioComDocumento(valores.getComercioComDocumento())
+                .comercioSemDocumento(valores.getComercioSemDocumento())
+                .industriaComDocumento(valores.getIndustriaComDocumento())
+                .industriaSemDocumento(valores.getIndustriaSemDocumento())
+                .servicosComDocumento(valores.getServicosComDocumento())
+                .servicosSemDocumento(valores.getServicosSemDocumento()).total(valores.getTotal())
+                .dataFechamento(valores.getDataFechamento()).usuarioFechamento(valores.getUsuarioFechamento()).build();
     }
 
     private ResumoMensalMeiDTO resumirMes(List<LancamentoFinanceiro> receitas, int mes) {
@@ -119,5 +190,31 @@ public class ApuracaoMeiService {
                 .incluido(motivo == null).motivoNaoInclusao(motivo).pendenciaFiscal(pendenciaDocumento)
                 .descricaoPendencia(pendenciaDocumento ? "A categoria exige documento fiscal, mas a emissão não foi informada" : null)
                 .build();
+    }
+
+    private List<LancamentoFinanceiro> receitasDoMes(Empresa empresa, int ano, int mes) {
+        return lancamentos.findReceitasParaApuracaoMei(empresa.getId(), YearMonth.of(ano, mes).atDay(1),
+                YearMonth.of(ano, mes).atEndOfMonth()).stream().filter(this::incluido).toList();
+    }
+
+    private void preencherFotografia(FechamentoApuracaoMei fechamento, List<LancamentoFinanceiro> receitas) {
+        fechamento.setComercioComDocumento(total(receitas, NaturezaReceitaEnum.COMERCIO, true));
+        fechamento.setComercioSemDocumento(total(receitas, NaturezaReceitaEnum.COMERCIO, false));
+        fechamento.setIndustriaComDocumento(total(receitas, NaturezaReceitaEnum.INDUSTRIA, true));
+        fechamento.setIndustriaSemDocumento(total(receitas, NaturezaReceitaEnum.INDUSTRIA, false));
+        fechamento.setServicosComDocumento(total(receitas, NaturezaReceitaEnum.SERVICOS, true));
+        fechamento.setServicosSemDocumento(total(receitas, NaturezaReceitaEnum.SERVICOS, false));
+        fechamento.setTotal(receitas.stream().map(LancamentoFinanceiro::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+    }
+
+    private BigDecimal total(List<LancamentoFinanceiro> receitas, NaturezaReceitaEnum natureza, boolean documento) {
+        return receitas.stream().filter(item -> item.getCategoria().getNaturezaReceita() == natureza)
+                .filter(item -> Boolean.TRUE.equals(item.getDocumentoFiscalEmitido()) == documento)
+                .map(LancamentoFinanceiro::getValor).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private String usuarioAtual() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }

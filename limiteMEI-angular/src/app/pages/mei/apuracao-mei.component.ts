@@ -7,6 +7,7 @@ import { ApuracaoMeiService } from '../../services/apuracao-mei.service';
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
 import { MonthYearBoxComponent } from '../../shared/components-commons/infra/month-year-box-component/month.year.box.component';
 import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
+import { ConfirmDialogService } from '../../shared/components-commons/infra/confirm-dialog-component/confirm.dialog.service';
 
 @Component({
   standalone: true,
@@ -15,7 +16,7 @@ import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-
     <toolbar-filter tituloPagina="Apuração do MEI" [listMode]="true" [showNew]="false"
       [loading]="loading" (filtrar)="carregar()" (limpar)="periodoAtual()" />
     <section class="page">
-      <header><span>FATURAMENTO E LIMITE</span><h1>Apuração do MEI</h1><p>Receitas por competência que compõem o faturamento da empresa.</p></header>
+      <header class="page-heading"><div><span>FATURAMENTO E LIMITE</span><h1>Apuração do MEI</h1><p>Receitas por competência que compõem o faturamento da empresa.</p></div>@if(apuracao){<div class="closing-actions"><button (click)="abrirRelatorio()"><i class="bi bi-file-earmark-text"></i> Relatório mensal</button>@if(apuracao.situacaoFechamento==='FECHADA'){<button class="warning" (click)="reabrir()">Reabrir apuração</button>}@else{<button class="success" (click)="fechar()">Fechar apuração</button>}</div>}</header>
       <div class="filter"><month-year-box-component label="Período de referência" [clearButton]="false" [(dataField)]="competencia" /></div>
       @if (apuracao) {
         <div class="cards">
@@ -24,6 +25,7 @@ import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-
           <article><span>Limite aplicável</span><strong>{{apuracao.limiteAplicavel|currency:'BRL'}}</strong><small>{{apuracao.mesesLimite}} meses considerados</small></article>
           <article [class.danger]="apuracao.saldoDisponivel < 0"><span>Saldo disponível</span><strong>{{apuracao.saldoDisponivel|currency:'BRL'}}</strong><small>Antes de atingir o teto</small></article>
         </div>
+        @if(apuracao.situacaoFechamento==='FECHADA'){<div class="closed"><i class="bi bi-lock"></i><div><strong>Apuração fechada</strong><span>Fechada em {{apuracao.dataFechamento|date:'dd/MM/yyyy HH:mm'}} por {{apuracao.usuarioFechamento}}. O relatório usa a fotografia deste fechamento.</span></div></div>}@else if(apuracao.situacaoFechamento==='REABERTA'){<div class="reopened"><i class="bi bi-unlock"></i><div><strong>Apuração reaberta</strong><span>{{apuracao.motivoReabertura}}</span></div></div>}
         <div class="limit-card">
           <div><span>Uso do limite anual</span><strong>{{apuracao.percentualUtilizado|number:'1.2-2'}}%</strong></div>
           <div class="progress"><i [style.width.%]="percentualBarra" [class.warning]="apuracao.percentualUtilizado >= 75" [class.danger]="apuracao.percentualUtilizado >= 100"></i></div>
@@ -39,7 +41,7 @@ import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-
     </section>
   `,
   styles: [`
-    .page{margin-top:1rem;padding:1.5rem;background:#fff;border-radius:12px}.page>header span{font-size:.75rem;color:#5570f1;font-weight:700}.page h1{margin:.2rem 0}.page>header p,.cards span,.cards small,.limit-card span,.limit-card small,.naturezas span,.details p{color:#687080}.filter{margin-top:1.5rem}.cards{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:1rem;margin:1.5rem 0}.cards article,.naturezas button{display:flex;flex-direction:column;padding:1rem;border:1px solid #e5e8ef;border-radius:10px;background:#fff;text-align:left}.clickable,.naturezas button{cursor:pointer}.clickable:hover,.naturezas button:hover{border-color:#8fa0f5;background:#fafbff}.cards strong{font-size:1.25rem}.cards .danger strong{color:#c33}.limit-card{padding:1rem;border:1px solid #dce2f5;border-radius:10px;background:#f8f9ff}.limit-card>div:first-child{display:flex;justify-content:space-between}.limit-card>div>strong{font-size:1.25rem}.progress{height:12px;margin:.8rem 0;background:#e2e6f2;border-radius:8px;overflow:hidden}.progress i{display:block;height:100%;background:#5570f1}.progress i.warning{background:#e0a800}.progress i.danger{background:#dc3545}.naturezas{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin:1.5rem 0}.naturezas i{color:#5570f1}.naturezas strong{font-size:1.15rem}.fiscal-warning{display:flex;align-items:center;gap:.8rem;margin-top:1rem;padding:1rem;border:1px solid #f0d58a;border-radius:10px;background:#fff9e8;color:#765800}.fiscal-warning div{display:flex;flex:1;flex-direction:column}.fiscal-warning button,.detail-filters button{border:1px solid #d6dce9;border-radius:6px;background:#fff;padding:.45rem .7rem}.table-responsive{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:.8rem;border-bottom:1px solid #eceef3;text-align:left;white-space:nowrap}th{font-size:.8rem;color:#687080}.selected{background:#f4f6ff}.state{padding:3rem;text-align:center;color:#687080}.details{margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e5e8ef}.details-heading{display:flex;justify-content:space-between;gap:1rem}.details h2{font-size:1.1rem;margin:0}.detail-filters{display:flex;gap:.4rem;flex-wrap:wrap}.detail-filters button.active{border-color:#5570f1;background:#5570f1;color:#fff}.status{display:inline-block;padding:.25rem .5rem;border-radius:12px;background:#fff0f0;color:#a12a35;font-size:.78rem}.status.ok{background:#eaf8f0;color:#187747}.pending{display:block;color:#a06a00}.edit{width:34px;height:34px;border:1px solid #d8dce5;border-radius:6px;background:#fff}@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.naturezas{grid-template-columns:1fr}.details-heading{flex-direction:column}}
+    .page{margin-top:1rem;padding:1.5rem;background:#fff;border-radius:12px}.page>header span{font-size:.75rem;color:#5570f1;font-weight:700}.page h1{margin:.2rem 0}.page>header p,.cards span,.cards small,.limit-card span,.limit-card small,.naturezas span,.details p{color:#687080}.page-heading{display:flex;justify-content:space-between;gap:1rem}.closing-actions{display:flex;align-items:start;gap:.5rem}.closing-actions button{padding:.55rem .8rem;border:1px solid #d6dce9;border-radius:6px;background:#fff}.closing-actions .success{border-color:#198754;color:#187747}.closing-actions .warning{border-color:#d5a51e;color:#806000}.closed,.reopened{display:flex;gap:.7rem;padding:1rem;border-radius:9px}.closed div,.reopened div{display:flex;flex-direction:column}.closed{background:#eaf8f0;color:#187747}.reopened{background:#fff9e8;color:#806000}.filter{margin-top:1.5rem}.cards{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:1rem;margin:1.5rem 0}.cards article,.naturezas button{display:flex;flex-direction:column;padding:1rem;border:1px solid #e5e8ef;border-radius:10px;background:#fff;text-align:left}.clickable,.naturezas button{cursor:pointer}.clickable:hover,.naturezas button:hover{border-color:#8fa0f5;background:#fafbff}.cards strong{font-size:1.25rem}.cards .danger strong{color:#c33}.limit-card{padding:1rem;border:1px solid #dce2f5;border-radius:10px;background:#f8f9ff}.limit-card>div:first-child{display:flex;justify-content:space-between}.limit-card>div>strong{font-size:1.25rem}.progress{height:12px;margin:.8rem 0;background:#e2e6f2;border-radius:8px;overflow:hidden}.progress i{display:block;height:100%;background:#5570f1}.progress i.warning{background:#e0a800}.progress i.danger{background:#dc3545}.naturezas{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin:1.5rem 0}.naturezas i{color:#5570f1}.naturezas strong{font-size:1.15rem}.fiscal-warning{display:flex;align-items:center;gap:.8rem;margin-top:1rem;padding:1rem;border:1px solid #f0d58a;border-radius:10px;background:#fff9e8;color:#765800}.fiscal-warning div{display:flex;flex:1;flex-direction:column}.fiscal-warning button,.detail-filters button{border:1px solid #d6dce9;border-radius:6px;background:#fff;padding:.45rem .7rem}.table-responsive{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:.8rem;border-bottom:1px solid #eceef3;text-align:left;white-space:nowrap}th{font-size:.8rem;color:#687080}.selected{background:#f4f6ff}.state{padding:3rem;text-align:center;color:#687080}.details{margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e5e8ef}.details-heading{display:flex;justify-content:space-between;gap:1rem}.details h2{font-size:1.1rem;margin:0}.detail-filters{display:flex;gap:.4rem;flex-wrap:wrap}.detail-filters button.active{border-color:#5570f1;background:#5570f1;color:#fff}.status{display:inline-block;padding:.25rem .5rem;border-radius:12px;background:#fff0f0;color:#a12a35;font-size:.78rem}.status.ok{background:#eaf8f0;color:#187747}.pending{display:block;color:#a06a00}.edit{width:34px;height:34px;border:1px solid #d8dce5;border-radius:6px;background:#fff}@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.naturezas{grid-template-columns:1fr}.details-heading,.page-heading{flex-direction:column}}
   `],
 })
 export class ApuracaoMeiComponent implements OnInit, OnDestroy {
@@ -53,7 +55,8 @@ export class ApuracaoMeiComponent implements OnInit, OnDestroy {
   private loadingWatchdog?: ReturnType<typeof setTimeout>;
 
   constructor(private service: ApuracaoMeiService, private alerts: AlertService,
-              private router: Router, private changeDetector: ChangeDetectorRef) {}
+              private router: Router, private changeDetector: ChangeDetectorRef,
+              private confirm: ConfirmDialogService) {}
   ngOnInit() { this.periodoAtual(); }
   ngOnDestroy() { this.pararLoading(false); }
   get percentualBarra() { return Math.min(100, Math.max(0, this.apuracao?.percentualUtilizado ?? 0)); }
@@ -75,6 +78,32 @@ export class ApuracaoMeiComponent implements OnInit, OnDestroy {
   filtrarNatureza(natureza: 'COMERCIO' | 'INDUSTRIA' | 'SERVICOS') { this.mostrarIncluidos(); this.filtroNatureza = natureza; }
   filtrarDocumento(emitido: boolean) { this.mostrarIncluidos(); this.filtroDocumento = emitido; }
   abrirLancamento(id: number) { this.router.navigate(['/app/financeiro/lancamentos/editar', id]); }
+  abrirRelatorio() { const [ano, mes] = this.competencia.split('-').map(Number); this.router.navigate(['/app/financeiro/mei/relatorio', ano, mes]); }
+  async fechar() {
+    if (!this.apuracao) return;
+    const confirmado = await this.confirm.confirm({
+      title: `Fechar apuração de ${this.nomeMes(this.apuracao.mesReferencia)}/${this.apuracao.ano}`,
+      message: 'Confira os totalizadores que serão congelados no fechamento:',
+      confirmText: 'Confirmar fechamento',
+      cancelText: 'Voltar',
+      summaryItems: [
+        { label: 'Comércio', value: this.moeda(this.apuracao.comercioMes) },
+        { label: 'Indústria', value: this.moeda(this.apuracao.industriaMes) },
+        { label: 'Serviços', value: this.moeda(this.apuracao.servicosMes) },
+        { label: 'Com documento fiscal', value: this.moeda(this.apuracao.comDocumentoFiscalMes) },
+        { label: 'Sem documento fiscal', value: this.moeda(this.apuracao.semDocumentoFiscalMes) },
+        { label: 'Total do mês', value: this.moeda(this.apuracao.totalMes), highlight: true },
+      ],
+    });
+    if (!confirmado) return;
+    const [ano, mes] = this.competencia.split('-').map(Number); this.loading = true;
+    this.service.fechar(ano, mes).pipe(finalize(() => this.pararLoading())).subscribe({next:async r=>{this.apuracao=r;this.alerts.success('Apuração fechada com sucesso.');const imprimir=await this.confirm.confirm({title:'Apuração fechada',message:'Deseja abrir o Relatório Mensal de Receitas Brutas para imprimir ou salvar em PDF?',confirmText:'Abrir relatório',cancelText:'Agora não'});if(imprimir)this.abrirRelatorio();},error:e=>this.alerts.error(e?.error?.messages?.join('<br>')||'Não foi possível fechar a apuração.')});
+  }
+  async reabrir() {
+    const motivo = await this.confirm.requestText({title:'Reabrir apuração',message:'A apuração voltará a usar os valores atuais dos lançamentos.',inputLabel:'Motivo da reabertura',confirmText:'Reabrir'}); if(!motivo)return;
+    const [ano, mes] = this.competencia.split('-').map(Number); this.loading = true;
+    this.service.reabrir(ano, mes, motivo).pipe(finalize(() => this.pararLoading())).subscribe({next:r=>{this.apuracao=r;this.alerts.success('Apuração reaberta.');},error:e=>this.alerts.error(e?.error?.messages?.join('<br>')||'Não foi possível reabrir a apuração.')});
+  }
   periodoAtual() {
     const hoje = new Date();
     this.competencia = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-01`;
@@ -112,5 +141,8 @@ export class ApuracaoMeiComponent implements OnInit, OnDestroy {
     if (this.loadingWatchdog) clearTimeout(this.loadingWatchdog);
     this.loadingWatchdog = undefined;
     if (atualizarTela) this.changeDetector.detectChanges();
+  }
+  private moeda(valor: number) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor ?? 0);
   }
 }

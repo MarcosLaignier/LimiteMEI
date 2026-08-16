@@ -26,6 +26,27 @@ export interface ApuracaoMeiDTO {
   quantidadePendencias: number;
   meses: ResumoMensalMeiDTO[];
   detalhes: DetalheApuracaoMeiDTO[];
+  situacaoFechamento?: 'FECHADA' | 'REABERTA';
+  dataFechamento?: string;
+  usuarioFechamento?: string;
+  motivoReabertura?: string;
+}
+
+export interface RelatorioMensalMeiDTO {
+  cnpj: string;
+  razaoSocial: string;
+  ano: number;
+  mes: number;
+  situacao?: 'FECHADA';
+  comercioComDocumento: number;
+  comercioSemDocumento: number;
+  industriaComDocumento: number;
+  industriaSemDocumento: number;
+  servicosComDocumento: number;
+  servicosSemDocumento: number;
+  total: number;
+  dataFechamento?: string;
+  usuarioFechamento?: string;
 }
 
 export interface DetalheApuracaoMeiDTO {

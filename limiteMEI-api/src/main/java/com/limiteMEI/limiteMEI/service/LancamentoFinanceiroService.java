@@ -30,13 +30,15 @@ public class LancamentoFinanceiroService {
     private final HistoricoFinanceiroService historico;
     private final ParcelamentoValidator parcelamentoValidator;
     private final RecorrenciaValidator recorrenciaValidator;
+    private final FechamentoApuracaoMeiRepository fechamentosMei;
 
     public LancamentoFinanceiroService(LancamentoFinanceiroRepository repository, BaixaFinanceiraRepository baixas,
                                        EmpresaAtualService empresaAtual, CategoriaService categorias,
                                        PessoaService pessoas, PessoaPapelService papeis, ContaFinanceiraService contas,
                                        MovimentoFinanceiroService movimentos, HistoricoFinanceiroService historico,
                                        ParcelamentoValidator parcelamentoValidator,
-                                       RecorrenciaValidator recorrenciaValidator) {
+                                       RecorrenciaValidator recorrenciaValidator,
+                                       FechamentoApuracaoMeiRepository fechamentosMei) {
         this.repository = repository;
         this.baixas = baixas;
         this.empresaAtual = empresaAtual;
@@ -48,6 +50,7 @@ public class LancamentoFinanceiroService {
         this.historico = historico;
         this.parcelamentoValidator = parcelamentoValidator;
         this.recorrenciaValidator = recorrenciaValidator;
+        this.fechamentosMei = fechamentosMei;
     }
 
     public List<LancamentoFinanceiroDTO> findAll() {
@@ -102,6 +105,7 @@ public class LancamentoFinanceiroService {
 
     public LancamentoFinanceiroDTO update(Long id, LancamentoFinanceiroCreateDTO dto) {
         LancamentoFinanceiro entity = findOwned(id);
+        validarPeriodoAberto(entity.getEmpresa(), entity.getDataCompetencia());
         if (entity.getSituacao() == SituacaoLancamentoEnum.CANCELADO) {
             throw new ApplicationException("Um lançamento cancelado não pode ser alterado");
         }
@@ -121,6 +125,7 @@ public class LancamentoFinanceiroService {
 
     public void delete(Long id) {
         LancamentoFinanceiro entity = findOwned(id);
+        validarPeriodoAberto(entity.getEmpresa(), entity.getDataCompetencia());
         if (entity.getParcelamentoId() != null || entity.getRecorrenciaId() != null) {
             throw new ApplicationException("Utilize a exclusão do grupo para remover todos os lançamentos vinculados");
         }
@@ -137,6 +142,7 @@ public class LancamentoFinanceiroService {
 
     public LancamentoFinanceiroDTO cancelar(Long id, MotivoOperacaoDTO dto) {
         LancamentoFinanceiro entity = findOwned(id);
+        validarPeriodoAberto(entity.getEmpresa(), entity.getDataCompetencia());
         if (entity.getSituacao() == SituacaoLancamentoEnum.CANCELADO) {
             throw new ApplicationException("O lançamento já está cancelado");
         }
@@ -164,6 +170,7 @@ public class LancamentoFinanceiroService {
 
     public void cancelarParcelamento(String parcelamentoId, MotivoOperacaoDTO dto) {
         List<LancamentoFinanceiro> parcelas = findParcelamentoOwned(parcelamentoId);
+        parcelas.forEach(item -> validarPeriodoAberto(item.getEmpresa(), item.getDataCompetencia()));
         boolean cancelou = false;
         for (LancamentoFinanceiro parcela : parcelas) {
             if (parcela.getSituacao() != SituacaoLancamentoEnum.CANCELADO
@@ -183,6 +190,7 @@ public class LancamentoFinanceiroService {
 
     public void excluirParcelamento(String parcelamentoId) {
         List<LancamentoFinanceiro> parcelas = findParcelamentoOwned(parcelamentoId);
+        parcelas.forEach(item -> validarPeriodoAberto(item.getEmpresa(), item.getDataCompetencia()));
         if (parcelas.stream().anyMatch(item -> baixas.existsByLancamentoIdAndAtivoTrue(item.getId()))) {
             throw new ApplicationException("Estorne as baixas ativas antes de excluir o parcelamento");
         }
@@ -210,6 +218,7 @@ public class LancamentoFinanceiroService {
 
     public void cancelarRecorrencia(String recorrenciaId, MotivoOperacaoDTO dto) {
         List<LancamentoFinanceiro> ocorrencias = findRecorrenciaOwned(recorrenciaId);
+        ocorrencias.forEach(item -> validarPeriodoAberto(item.getEmpresa(), item.getDataCompetencia()));
         boolean cancelou = false;
         for (LancamentoFinanceiro ocorrencia : ocorrencias) {
             if (ocorrencia.getSituacao() != SituacaoLancamentoEnum.CANCELADO
@@ -229,6 +238,7 @@ public class LancamentoFinanceiroService {
 
     public void excluirRecorrencia(String recorrenciaId) {
         List<LancamentoFinanceiro> ocorrencias = findRecorrenciaOwned(recorrenciaId);
+        ocorrencias.forEach(item -> validarPeriodoAberto(item.getEmpresa(), item.getDataCompetencia()));
         if (ocorrencias.stream().anyMatch(item -> baixas.existsByLancamentoIdAndAtivoTrue(item.getId()))) {
             throw new ApplicationException("Estorne as baixas ativas antes de excluir a recorrência");
         }
@@ -281,6 +291,8 @@ public class LancamentoFinanceiroService {
     }
 
     private void apply(LancamentoFinanceiro entity, LancamentoFinanceiroCreateDTO dto) {
+        Empresa empresa = entity.getEmpresa() == null ? empresaAtual.get() : entity.getEmpresa();
+        validarPeriodoAberto(empresa, dto.getDataCompetencia());
         Categoria categoria = categorias.findOwnedEntity(dto.getCategoriaId());
         if (!Boolean.TRUE.equals(categoria.getAtivo())) throw new ApplicationException("A categoria selecionada está inativa");
         TipoMovimentoEnum tipoCategoria = dto.getTipo() == TipoLancamentoEnum.RECEBER ? TipoMovimentoEnum.RECEITA : TipoMovimentoEnum.DESPESA;
@@ -472,5 +484,15 @@ public class LancamentoFinanceiroService {
 
     private String usuarioAtual() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    private void validarPeriodoAberto(Empresa empresa, java.time.LocalDate competencia) {
+        if (competencia == null) return;
+        boolean fechado = fechamentosMei.findByEmpresaIdAndAnoAndMes(empresa.getId(),
+                        competencia.getYear(), competencia.getMonthValue())
+                .map(item -> item.getSituacao() == SituacaoApuracaoMeiEnum.FECHADA).orElse(false);
+        if (fechado) {
+            throw new ApplicationException("A apuração desta competência está fechada. Reabra o mês antes de alterar lançamentos");
+        }
     }
 }
