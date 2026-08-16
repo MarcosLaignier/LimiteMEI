@@ -12,4 +12,10 @@ public interface LancamentoFinanceiroRepository extends JpaRepository<Lancamento
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<LancamentoFinanceiro> findLockedByIdAndEmpresaId(Long id, Long empresaId);
+
+    List<LancamentoFinanceiro> findByParcelamentoIdAndEmpresaIdAndExcluidoFalseOrderByNumeroParcela(
+            String parcelamentoId, Long empresaId);
+
+    List<LancamentoFinanceiro> findByRecorrenciaIdAndEmpresaIdAndExcluidoFalseOrderByNumeroRecorrencia(
+            String recorrenciaId, Long empresaId);
 }

@@ -5,6 +5,7 @@ import {
   TipoLancamentoEnum,
 } from '../../enums/tipo.lancamento.enum';
 import { FormaPagamentoEnum } from '../../enums/forma.pagamento.enum';
+import { PeriodicidadeRecorrenciaEnum } from '../../enums/periodicidade.recorrencia.enum';
 
 export interface LancamentoFinanceiroCreateDTO {
   descricao: string;
@@ -24,6 +25,45 @@ export interface LancamentoFinanceiroCreateDTO {
   dataCancelamento?: string;
   motivoCancelamento?: string;
   usuarioCancelamento?: string;
+  parcelas?: ParcelaLancamentoCreateDTO[];
+  parcelamentoId?: string;
+  numeroParcela?: number;
+  totalParcelas?: number;
+  parcelaEntrada?: boolean;
+  periodicidadeRecorrencia?: PeriodicidadeRecorrenciaEnum;
+  recorrencias?: RecorrenciaLancamentoCreateDTO[];
+  recorrenciaId?: string;
+  numeroRecorrencia?: number;
+  totalRecorrencias?: number;
+}
+
+export interface ParcelaLancamentoCreateDTO {
+  valor: number;
+  dataCompetencia: string;
+  dataVencimento: string;
+  entrada: boolean;
+}
+
+export interface RecorrenciaLancamentoCreateDTO {
+  valor: number;
+  dataCompetencia: string;
+  dataVencimento: string;
+}
+
+export interface GrupoLancamentoUpdateDTO {
+  descricao: string;
+  categoriaId: number;
+  pessoaId?: number;
+  observacao: string;
+  ativo: boolean;
+  itens: ItemGrupoLancamentoUpdateDTO[];
+}
+
+export interface ItemGrupoLancamentoUpdateDTO {
+  id: number;
+  valor: number;
+  dataCompetencia: string;
+  dataVencimento: string;
 }
 export class LancamentoFinanceiroDTO {
   @GridColumn({ label: 'Código', type: 'number', ordem: 1, width: '90px' }) id!: number;
@@ -53,6 +93,14 @@ export class LancamentoFinanceiroDTO {
   dataCancelamento?: string;
   motivoCancelamento?: string;
   usuarioCancelamento?: string;
+  parcelamentoId?: string;
+  numeroParcela?: number;
+  totalParcelas?: number;
+  parcelaEntrada?: boolean;
+  recorrenciaId?: string;
+  numeroRecorrencia?: number;
+  totalRecorrencias?: number;
+  periodicidadeRecorrencia?: PeriodicidadeRecorrenciaEnum;
 }
 
 export type EventoFinanceiro =

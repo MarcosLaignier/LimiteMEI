@@ -2,6 +2,7 @@ package com.limiteMEI.limiteMEI.domain;
 
 import com.limiteMEI.limiteMEI.enums.SituacaoLancamentoEnum;
 import com.limiteMEI.limiteMEI.enums.TipoLancamentoEnum;
+import com.limiteMEI.limiteMEI.enums.PeriodicidadeRecorrenciaEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -64,6 +65,32 @@ public class LancamentoFinanceiro {
 
     @Column(length = 500)
     private String observacao;
+
+    @Column(name = "parcelamento_id", length = 36)
+    private String parcelamentoId;
+
+    @Column(name = "numero_parcela")
+    private Integer numeroParcela;
+
+    @Column(name = "total_parcelas")
+    private Integer totalParcelas;
+
+    @Column(name = "parcela_entrada", nullable = false)
+    @Builder.Default
+    private Boolean parcelaEntrada = false;
+
+    @Column(name = "recorrencia_id", length = 36)
+    private String recorrenciaId;
+
+    @Column(name = "numero_recorrencia")
+    private Integer numeroRecorrencia;
+
+    @Column(name = "total_recorrencias")
+    private Integer totalRecorrencias;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "periodicidade_recorrencia", length = 20)
+    private PeriodicidadeRecorrenciaEnum periodicidadeRecorrencia;
 
     @Column(name = "data_cancelamento")
     private LocalDateTime dataCancelamento;

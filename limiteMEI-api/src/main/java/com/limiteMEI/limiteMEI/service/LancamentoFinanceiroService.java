@@ -10,6 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
@@ -24,11 +28,15 @@ public class LancamentoFinanceiroService {
     private final ContaFinanceiraService contas;
     private final MovimentoFinanceiroService movimentos;
     private final HistoricoFinanceiroService historico;
+    private final ParcelamentoValidator parcelamentoValidator;
+    private final RecorrenciaValidator recorrenciaValidator;
 
     public LancamentoFinanceiroService(LancamentoFinanceiroRepository repository, BaixaFinanceiraRepository baixas,
                                        EmpresaAtualService empresaAtual, CategoriaService categorias,
                                        PessoaService pessoas, PessoaPapelService papeis, ContaFinanceiraService contas,
-                                       MovimentoFinanceiroService movimentos, HistoricoFinanceiroService historico) {
+                                       MovimentoFinanceiroService movimentos, HistoricoFinanceiroService historico,
+                                       ParcelamentoValidator parcelamentoValidator,
+                                       RecorrenciaValidator recorrenciaValidator) {
         this.repository = repository;
         this.baixas = baixas;
         this.empresaAtual = empresaAtual;
@@ -38,6 +46,8 @@ public class LancamentoFinanceiroService {
         this.contas = contas;
         this.movimentos = movimentos;
         this.historico = historico;
+        this.parcelamentoValidator = parcelamentoValidator;
+        this.recorrenciaValidator = recorrenciaValidator;
     }
 
     public List<LancamentoFinanceiroDTO> findAll() {
@@ -49,6 +59,15 @@ public class LancamentoFinanceiroService {
     }
 
     public LancamentoFinanceiroDTO create(LancamentoFinanceiroCreateDTO dto) {
+        if (dto.getRecorrencias() != null && !dto.getRecorrencias().isEmpty()) {
+            if (dto.getParcelas() != null && !dto.getParcelas().isEmpty()) {
+                throw new ApplicationException("Um lançamento não pode ser parcelado e recorrente ao mesmo tempo");
+            }
+            return criarRecorrencia(dto);
+        }
+        if (dto.getParcelas() != null && !dto.getParcelas().isEmpty()) {
+            return criarParcelamento(dto);
+        }
         LancamentoFinanceiro entity = LancamentoFinanceiro.builder().empresa(empresaAtual.get())
                 .situacao(SituacaoLancamentoEnum.ABERTO).build();
         apply(entity, dto);
@@ -86,6 +105,9 @@ public class LancamentoFinanceiroService {
         if (entity.getSituacao() == SituacaoLancamentoEnum.CANCELADO) {
             throw new ApplicationException("Um lançamento cancelado não pode ser alterado");
         }
+        if (entity.getParcelamentoId() != null || entity.getRecorrenciaId() != null) {
+            throw new ApplicationException("Lançamentos vinculados a grupos devem ser alterados pela operação do grupo");
+        }
         apply(entity, dto);
         BigDecimal total = total(id);
         if (entity.getValor().compareTo(total) < 0) {
@@ -99,6 +121,9 @@ public class LancamentoFinanceiroService {
 
     public void delete(Long id) {
         LancamentoFinanceiro entity = findOwned(id);
+        if (entity.getParcelamentoId() != null || entity.getRecorrenciaId() != null) {
+            throw new ApplicationException("Utilize a exclusão do grupo para remover todos os lançamentos vinculados");
+        }
         if (baixas.existsByLancamentoIdAndAtivoTrue(id)) {
             throw new ApplicationException("Exclua as baixas antes de excluir o lançamento");
         }
@@ -131,6 +156,98 @@ public class LancamentoFinanceiroService {
     public List<HistoricoFinanceiroDTO> historico(Long id) {
         findOwned(id);
         return historico.listar(id);
+    }
+
+    public List<LancamentoFinanceiroDTO> parcelas(String parcelamentoId) {
+        return findParcelamentoOwned(parcelamentoId).stream().map(this::toDTO).toList();
+    }
+
+    public void cancelarParcelamento(String parcelamentoId, MotivoOperacaoDTO dto) {
+        List<LancamentoFinanceiro> parcelas = findParcelamentoOwned(parcelamentoId);
+        boolean cancelou = false;
+        for (LancamentoFinanceiro parcela : parcelas) {
+            if (parcela.getSituacao() != SituacaoLancamentoEnum.CANCELADO
+                    && !baixas.existsByLancamentoIdAndAtivoTrue(parcela.getId())) {
+                parcela.setSituacao(SituacaoLancamentoEnum.CANCELADO);
+                parcela.setDataCancelamento(LocalDateTime.now());
+                parcela.setMotivoCancelamento(dto.getMotivo().trim());
+                parcela.setUsuarioCancelamento(usuarioAtual());
+                repository.save(parcela);
+                historico.registrar(parcela, null, EventoFinanceiroEnum.CANCELAMENTO_LANCAMENTO,
+                        "Parcelamento cancelado: " + dto.getMotivo().trim());
+                cancelou = true;
+            }
+        }
+        if (!cancelou) throw new ApplicationException("Não existem parcelas pendentes para cancelar");
+    }
+
+    public void excluirParcelamento(String parcelamentoId) {
+        List<LancamentoFinanceiro> parcelas = findParcelamentoOwned(parcelamentoId);
+        if (parcelas.stream().anyMatch(item -> baixas.existsByLancamentoIdAndAtivoTrue(item.getId()))) {
+            throw new ApplicationException("Estorne as baixas ativas antes de excluir o parcelamento");
+        }
+        for (LancamentoFinanceiro parcela : parcelas) {
+            parcela.setExcluido(true);
+            parcela.setDataExclusao(LocalDateTime.now());
+            parcela.setMotivoExclusao("Exclusão do parcelamento solicitada pelo usuário");
+            parcela.setUsuarioExclusao(usuarioAtual());
+            repository.save(parcela);
+            historico.registrar(parcela, null, EventoFinanceiroEnum.EXCLUSAO_LANCAMENTO,
+                    parcela.getMotivoExclusao());
+        }
+    }
+
+    public List<LancamentoFinanceiroDTO> atualizarParcelamento(String parcelamentoId,
+                                                                GrupoLancamentoUpdateDTO dto) {
+        List<LancamentoFinanceiro> grupo = findParcelamentoOwned(parcelamentoId);
+        atualizarGrupo(grupo, dto, "parcela");
+        return grupo.stream().map(this::toDTO).toList();
+    }
+
+    public List<LancamentoFinanceiroDTO> recorrencias(String recorrenciaId) {
+        return findRecorrenciaOwned(recorrenciaId).stream().map(this::toDTO).toList();
+    }
+
+    public void cancelarRecorrencia(String recorrenciaId, MotivoOperacaoDTO dto) {
+        List<LancamentoFinanceiro> ocorrencias = findRecorrenciaOwned(recorrenciaId);
+        boolean cancelou = false;
+        for (LancamentoFinanceiro ocorrencia : ocorrencias) {
+            if (ocorrencia.getSituacao() != SituacaoLancamentoEnum.CANCELADO
+                    && !baixas.existsByLancamentoIdAndAtivoTrue(ocorrencia.getId())) {
+                ocorrencia.setSituacao(SituacaoLancamentoEnum.CANCELADO);
+                ocorrencia.setDataCancelamento(LocalDateTime.now());
+                ocorrencia.setMotivoCancelamento(dto.getMotivo().trim());
+                ocorrencia.setUsuarioCancelamento(usuarioAtual());
+                repository.save(ocorrencia);
+                historico.registrar(ocorrencia, null, EventoFinanceiroEnum.CANCELAMENTO_LANCAMENTO,
+                        "Recorrência cancelada: " + dto.getMotivo().trim());
+                cancelou = true;
+            }
+        }
+        if (!cancelou) throw new ApplicationException("Não existem ocorrências pendentes para cancelar");
+    }
+
+    public void excluirRecorrencia(String recorrenciaId) {
+        List<LancamentoFinanceiro> ocorrencias = findRecorrenciaOwned(recorrenciaId);
+        if (ocorrencias.stream().anyMatch(item -> baixas.existsByLancamentoIdAndAtivoTrue(item.getId()))) {
+            throw new ApplicationException("Estorne as baixas ativas antes de excluir a recorrência");
+        }
+        for (LancamentoFinanceiro ocorrencia : ocorrencias) {
+            ocorrencia.setExcluido(true);
+            ocorrencia.setDataExclusao(LocalDateTime.now());
+            ocorrencia.setMotivoExclusao("Exclusão da recorrência solicitada pelo usuário");
+            ocorrencia.setUsuarioExclusao(usuarioAtual());
+            repository.save(ocorrencia);
+            historico.registrar(ocorrencia, null, EventoFinanceiroEnum.EXCLUSAO_LANCAMENTO,
+                    ocorrencia.getMotivoExclusao());
+        }
+    }
+
+    public List<LancamentoFinanceiroDTO> atualizarRecorrencia(String recorrenciaId,
+                                                               GrupoLancamentoUpdateDTO dto) {
+        List<LancamentoFinanceiro> grupo = findRecorrenciaOwned(recorrenciaId);
+        atualizarGrupo(grupo, dto, "ocorrência");
+        return grupo.stream().map(this::toDTO).toList();
     }
 
     public LancamentoFinanceiro findOwned(Long id) {
@@ -200,7 +317,153 @@ public class LancamentoFinanceiroService {
                 .dataCompetencia(entity.getDataCompetencia()).dataVencimento(entity.getDataVencimento())
                 .situacao(entity.getSituacao()).ativo(entity.getAtivo()).observacao(entity.getObservacao())
                 .dataCancelamento(entity.getDataCancelamento()).motivoCancelamento(entity.getMotivoCancelamento())
-                .usuarioCancelamento(entity.getUsuarioCancelamento()).build();
+                .usuarioCancelamento(entity.getUsuarioCancelamento())
+                .parcelamentoId(entity.getParcelamentoId()).numeroParcela(entity.getNumeroParcela())
+                .totalParcelas(entity.getTotalParcelas()).parcelaEntrada(entity.getParcelaEntrada())
+                .recorrenciaId(entity.getRecorrenciaId()).numeroRecorrencia(entity.getNumeroRecorrencia())
+                .totalRecorrencias(entity.getTotalRecorrencias())
+                .periodicidadeRecorrencia(entity.getPeriodicidadeRecorrencia()).build();
+    }
+
+    private LancamentoFinanceiroDTO criarParcelamento(LancamentoFinanceiroCreateDTO dto) {
+        if (Boolean.TRUE.equals(dto.getBaixarAutomaticamente())) {
+            throw new ApplicationException("A baixa automática não está disponível para parcelamentos");
+        }
+        List<ParcelaLancamentoCreateDTO> itens = dto.getParcelas();
+        String grupoId = UUID.randomUUID().toString();
+        int totalParcelas = parcelamentoValidator.validar(dto.getValor(), itens);
+        int numero = 0;
+        LancamentoFinanceiro primeiro = null;
+        for (ParcelaLancamentoCreateDTO item : itens) {
+            boolean entrada = Boolean.TRUE.equals(item.getEntrada());
+            int numeroParcela = entrada ? 0 : ++numero;
+            LancamentoFinanceiro entity = LancamentoFinanceiro.builder()
+                    .empresa(empresaAtual.get())
+                    .situacao(SituacaoLancamentoEnum.ABERTO)
+                    .parcelamentoId(grupoId)
+                    .numeroParcela(numeroParcela)
+                    .totalParcelas(totalParcelas)
+                    .parcelaEntrada(entrada)
+                    .build();
+            apply(entity, dto);
+            entity.setValor(item.getValor());
+            entity.setDataCompetencia(item.getDataCompetencia().withDayOfMonth(1));
+            entity.setDataVencimento(item.getDataVencimento());
+            entity.setDescricao(dto.getDescricao() + (entrada ? " — Entrada" : " — " + numeroParcela + "/" + totalParcelas));
+            entity = repository.save(entity);
+            historico.registrar(entity, null, EventoFinanceiroEnum.CRIACAO_LANCAMENTO,
+                    "Parcela criada no grupo " + grupoId);
+            if (primeiro == null) primeiro = entity;
+        }
+        return toDTO(primeiro);
+    }
+
+    private List<LancamentoFinanceiro> findParcelamentoOwned(String parcelamentoId) {
+        List<LancamentoFinanceiro> parcelas = repository
+                .findByParcelamentoIdAndEmpresaIdAndExcluidoFalseOrderByNumeroParcela(
+                        parcelamentoId, empresaAtual.get().getId());
+        if (parcelas.isEmpty()) {
+            throw new ApplicationException("Parcelamento não encontrado");
+        }
+        return parcelas;
+    }
+
+    private LancamentoFinanceiroDTO criarRecorrencia(LancamentoFinanceiroCreateDTO dto) {
+        if (Boolean.TRUE.equals(dto.getBaixarAutomaticamente())) {
+            throw new ApplicationException("A baixa automática não está disponível para recorrências");
+        }
+        recorrenciaValidator.validar(dto.getPeriodicidadeRecorrencia(), dto.getRecorrencias());
+        String grupoId = UUID.randomUUID().toString();
+        int total = dto.getRecorrencias().size();
+        LancamentoFinanceiro primeiro = null;
+        for (int indice = 0; indice < total; indice++) {
+            RecorrenciaLancamentoCreateDTO item = dto.getRecorrencias().get(indice);
+            LancamentoFinanceiro entity = LancamentoFinanceiro.builder()
+                    .empresa(empresaAtual.get())
+                    .situacao(SituacaoLancamentoEnum.ABERTO)
+                    .recorrenciaId(grupoId)
+                    .numeroRecorrencia(indice + 1)
+                    .totalRecorrencias(total)
+                    .periodicidadeRecorrencia(dto.getPeriodicidadeRecorrencia())
+                    .build();
+            apply(entity, dto);
+            entity.setValor(item.getValor());
+            entity.setDataCompetencia(item.getDataCompetencia().withDayOfMonth(1));
+            entity.setDataVencimento(item.getDataVencimento());
+            entity.setDescricao(dto.getDescricao() + " — Recorrência " + (indice + 1) + "/" + total);
+            entity = repository.save(entity);
+            historico.registrar(entity, null, EventoFinanceiroEnum.CRIACAO_LANCAMENTO,
+                    "Ocorrência criada no grupo " + grupoId);
+            if (primeiro == null) primeiro = entity;
+        }
+        return toDTO(primeiro);
+    }
+
+    private List<LancamentoFinanceiro> findRecorrenciaOwned(String recorrenciaId) {
+        List<LancamentoFinanceiro> ocorrencias = repository
+                .findByRecorrenciaIdAndEmpresaIdAndExcluidoFalseOrderByNumeroRecorrencia(
+                        recorrenciaId, empresaAtual.get().getId());
+        if (ocorrencias.isEmpty()) {
+            throw new ApplicationException("Recorrência não encontrada");
+        }
+        return ocorrencias;
+    }
+
+    private void atualizarGrupo(List<LancamentoFinanceiro> grupo, GrupoLancamentoUpdateDTO dto, String nomeItem) {
+        for (ItemGrupoLancamentoUpdateDTO item : dto.getItens()) {
+            if (item.getDataVencimento() == null) {
+                throw new ApplicationException("Informe a data de vencimento de todos os itens do grupo");
+            }
+            if (item.getDataCompetencia() == null) {
+                throw new ApplicationException("Informe a competência de todos os itens do grupo");
+            }
+            if (item.getValor() == null || item.getValor().signum() <= 0) {
+                throw new ApplicationException("Informe um valor maior que zero para todos os itens do grupo");
+            }
+        }
+        Map<Long, ItemGrupoLancamentoUpdateDTO> informados = dto.getItens().stream()
+                .collect(Collectors.toMap(ItemGrupoLancamentoUpdateDTO::getId, Function.identity(),
+                        (primeiro, segundo) -> primeiro));
+        if (informados.size() != grupo.size()
+                || grupo.stream().anyMatch(item -> !informados.containsKey(item.getId()))) {
+            throw new ApplicationException("Informe todos os lançamentos pertencentes ao grupo");
+        }
+        for (LancamentoFinanceiro entity : grupo) {
+            if (entity.getSituacao() == SituacaoLancamentoEnum.CANCELADO) {
+                throw new ApplicationException("Grupos cancelados não podem ser alterados");
+            }
+            ItemGrupoLancamentoUpdateDTO item = informados.get(entity.getId());
+            BigDecimal liquidado = total(entity.getId());
+            if (liquidado.signum() > 0) {
+                if (item.getValor().compareTo(entity.getValor()) != 0
+                        || !item.getDataCompetencia().withDayOfMonth(1).equals(entity.getDataCompetencia())
+                        || !item.getDataVencimento().equals(entity.getDataVencimento())) {
+                    throw new ApplicationException("A " + nomeItem + " " + entity.getId()
+                            + " possui baixa e não pode ter valor ou datas alterados");
+                }
+                continue;
+            }
+            LancamentoFinanceiroCreateDTO comum = LancamentoFinanceiroCreateDTO.builder()
+                    .descricao(dto.getDescricao())
+                    .tipo(entity.getTipo())
+                    .categoriaId(dto.getCategoriaId())
+                    .pessoaId(dto.getPessoaId())
+                    .valor(item.getValor())
+                    .dataCompetencia(item.getDataCompetencia())
+                    .dataVencimento(item.getDataVencimento())
+                    .ativo(dto.getAtivo())
+                    .observacao(dto.getObservacao())
+                    .build();
+            apply(entity, comum);
+            String sufixo = entity.getParcelamentoId() != null
+                    ? (Boolean.TRUE.equals(entity.getParcelaEntrada()) ? " — Entrada"
+                    : " — " + entity.getNumeroParcela() + "/" + entity.getTotalParcelas())
+                    : " — Recorrência " + entity.getNumeroRecorrencia() + "/" + entity.getTotalRecorrencias();
+            entity.setDescricao(dto.getDescricao() + sufixo);
+            repository.save(entity);
+            historico.registrar(entity, null, EventoFinanceiroEnum.ALTERACAO_LANCAMENTO,
+                    "Grupo financeiro alterado");
+        }
     }
 
     private String usuarioAtual() {

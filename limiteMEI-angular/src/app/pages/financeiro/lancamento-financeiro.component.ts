@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { LancamentoFinanceiroDTO } from '../../dtos/lancamento/lancamento.financeiro';
 import { BaixaFinanceiraCreateDTO } from '../../dtos/lancamento/baixa.financeira';
 import { LancamentoFinanceiroService } from '../../services/lancamento-financeiro.service';
@@ -13,6 +14,9 @@ import { AlertService } from '../../shared/components-commons/infra/alert-compon
 import { TipoLancamentoEnum } from '../../enums/tipo.lancamento.enum';
 import { FormaPagamentoEnum, FORMA_PAGAMENTO_LABELS } from '../../enums/forma.pagamento.enum';
 import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
+import { ConfirmDialogService } from '../../shared/components-commons/infra/confirm-dialog-component/confirm.dialog.service';
+import { TabsComponent } from '../../shared/components-commons/infra/tabs-component/tabs.component';
+import { TabComponent } from '../../shared/components-commons/infra/tabs-component/tab.component';
 import {
   LancamentoFilterComponent,
   LancamentoFiltro,
@@ -31,6 +35,8 @@ import {
     LancamentoFilterComponent,
     ContaFinanceiraSelectorComponent,
     ToolbarComponent,
+    TabsComponent,
+    TabComponent,
   ],
   templateUrl: './lancamento-financeiro.component.html',
   styleUrl: './lancamento-financeiro.component.scss',
@@ -58,6 +64,8 @@ export class LancamentoFinanceiroComponent implements OnInit {
     private service: LancamentoFinanceiroService,
     private baixas: BaixaFinanceiraService,
     private alerts: AlertService,
+    private confirmDialog: ConfirmDialogService,
+    private router: Router,
   ) {}
   ngOnInit() {
     this.carregar();
@@ -79,6 +87,25 @@ export class LancamentoFinanceiroComponent implements OnInit {
     return this.filtrados
       .filter((i) => this.situacao(i) === 'VENCIDO')
       .reduce((s, i) => s + i.saldoAberto, 0);
+  }
+  get gruposFinanceiros() {
+    const grupos = new Map<string, { item: LancamentoFinanceiroDTO; quantidade: number; total: number; baixado: number; saldo: number }>();
+    for (const item of this.filtrados.filter(i => i.parcelamentoId || i.recorrenciaId)) {
+      const chave = item.parcelamentoId ?? item.recorrenciaId!;
+      const grupo = grupos.get(chave) ?? { item, quantidade: 0, total: 0, baixado: 0, saldo: 0 };
+      grupo.quantidade++;
+      grupo.total += Number(item.valor);
+      grupo.baixado += Number(item.valorLiquidado);
+      grupo.saldo += Number(item.saldoAberto);
+      grupos.set(chave, grupo);
+    }
+    return [...grupos.values()];
+  }
+  get parcelamentos() {
+    return this.gruposFinanceiros.filter((grupo) => !!grupo.item.parcelamentoId);
+  }
+  get recorrencias() {
+    return this.gruposFinanceiros.filter((grupo) => !!grupo.item.recorrenciaId);
   }
   carregar() {
     this.loading = true;
@@ -186,6 +213,60 @@ export class LancamentoFinanceiroComponent implements OnInit {
   }
   podeBaixar(item: LancamentoFinanceiroDTO) {
     return item.saldoAberto > 0 && item.situacao !== 'CANCELADO';
+  }
+  primeiraDoParcelamento(item: LancamentoFinanceiroDTO) {
+    return !!item.parcelamentoId && (item.parcelaEntrada || item.numeroParcela === 1);
+  }
+  primeiraDaRecorrencia(item: LancamentoFinanceiroDTO) {
+    return !!item.recorrenciaId && item.numeroRecorrencia === 1;
+  }
+  async cancelarParcelamento(item: LancamentoFinanceiroDTO) {
+    if (!item.parcelamentoId) return;
+    const motivo = await this.confirmDialog.requestText({
+      title: 'Cancelar parcelamento',
+      message: 'Todas as parcelas sem baixa serão canceladas. Baixas ativas devem ser estornadas antes.',
+      inputLabel: 'Motivo do cancelamento',
+      confirmText: 'Cancelar parcelamento',
+    });
+    if (!motivo) return;
+    this.service.cancelarParcelamento(item.parcelamentoId, motivo).subscribe({
+      next: () => {
+        this.alerts.success('Parcelamento cancelado.');
+        this.carregar();
+      },
+      error: (e) => this.alerts.error(e?.error?.messages?.join('<br>') || 'Não foi possível cancelar o parcelamento.'),
+    });
+  }
+  async cancelarRecorrencia(item: LancamentoFinanceiroDTO) {
+    if (!item.recorrenciaId) return;
+    const motivo = await this.confirmDialog.requestText({
+      title: 'Cancelar recorrência',
+      message: 'Todas as ocorrências sem baixa serão canceladas. Baixas ativas devem ser estornadas antes.',
+      inputLabel: 'Motivo do cancelamento',
+      confirmText: 'Cancelar recorrência',
+    });
+    if (!motivo) return;
+    this.service.cancelarRecorrencia(item.recorrenciaId, motivo).subscribe({
+      next: () => {
+        this.alerts.success('Recorrência cancelada.');
+        this.carregar();
+      },
+      error: (e) => this.alerts.error(e?.error?.messages?.join('<br>') || 'Não foi possível cancelar a recorrência.'),
+    });
+  }
+  gerenciarGrupo(item: LancamentoFinanceiroDTO) {
+    const tipo = item.parcelamentoId ? 'parcelamento' : 'recorrencia';
+    const id = item.parcelamentoId ?? item.recorrenciaId;
+    if (!id) return;
+    const itens = this.lancamentos.filter((lancamento) =>
+      tipo === 'parcelamento'
+        ? lancamento.parcelamentoId === id
+        : lancamento.recorrenciaId === id,
+    );
+    this.router.navigate(
+      ['/app/financeiro/lancamentos/grupo', tipo, id],
+      { state: { itens } },
+    );
   }
   private novaBaixa(): BaixaFinanceiraCreateDTO {
     return { valorPrincipal: 0, juros: 0, multa: 0, desconto: 0, dataLiquidacao: this.hoje() };

@@ -2,10 +2,13 @@ package com.limiteMEI.limiteMEI.dto.lancamento;
 
 import com.limiteMEI.limiteMEI.enums.FormaPagamentoEnum;
 import com.limiteMEI.limiteMEI.enums.TipoLancamentoEnum;
+import com.limiteMEI.limiteMEI.enums.PeriodicidadeRecorrenciaEnum;
 import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,4 +40,12 @@ public class LancamentoFinanceiroCreateDTO {
     private FormaPagamentoEnum formaPagamento;
 
     private Long contaFinanceiraId;
+
+    @Valid
+    private List<ParcelaLancamentoCreateDTO> parcelas;
+
+    private PeriodicidadeRecorrenciaEnum periodicidadeRecorrencia;
+
+    @Valid
+    private List<RecorrenciaLancamentoCreateDTO> recorrencias;
 }

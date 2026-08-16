@@ -30,4 +30,12 @@ public class LancamentoFinanceiroDTO {
     private LocalDateTime dataCancelamento;
     private String motivoCancelamento;
     private String usuarioCancelamento;
+    private String parcelamentoId;
+    private Integer numeroParcela;
+    private Integer totalParcelas;
+    private Boolean parcelaEntrada;
+    private String recorrenciaId;
+    private Integer numeroRecorrencia;
+    private Integer totalRecorrencias;
+    private PeriodicidadeRecorrenciaEnum periodicidadeRecorrencia;
 }

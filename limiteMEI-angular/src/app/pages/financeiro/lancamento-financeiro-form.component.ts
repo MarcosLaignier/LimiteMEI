@@ -31,6 +31,8 @@ import { SwitchComponent } from '../../shared/components-commons/infra/switch-co
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
 import { ConfirmDialogService } from '../../shared/components-commons/infra/confirm-dialog-component/confirm.dialog.service';
 import { ContaFinanceiraSelectorComponent } from '../../shared/components-commons/conta-financeira-selector-component/conta-financeira.selector.component';
+import { ParcelamentoEditorComponent } from '../../shared/components-commons/parcelamento-editor-component/parcelamento.editor.component';
+import { RecorrenciaEditorComponent, ConfiguracaoRecorrencia } from '../../shared/components-commons/recorrencia-editor-component/recorrencia.editor.component';
 @Component({
   standalone: true,
   imports: [
@@ -47,6 +49,8 @@ import { ContaFinanceiraSelectorComponent } from '../../shared/components-common
     PessoaSelectorComponent,
     SwitchComponent,
     ContaFinanceiraSelectorComponent,
+    ParcelamentoEditorComponent,
+    RecorrenciaEditorComponent,
   ],
   template: `<toolbar-filter
       tituloPagina="Lançamento financeiro"
@@ -125,6 +129,42 @@ import { ContaFinanceiraSelectorComponent } from '../../shared/components-common
         />
       </div>
       @if (!id) {
+        <div class="installment-option">
+          <switch-component
+            label="Parcelar lançamento"
+            [(dataField)]="parcelado"
+            [disabled]="loading"
+            (dataFieldChange)="parcelamentoChanged($event)"
+          />
+          <small>Permite entrada, parcelas mensais e valores ou vencimentos personalizados.</small>
+          @if (parcelado) {
+            <parcelamento-editor-component
+              [total]="model.valor"
+              [competencia]="model.dataCompetencia"
+              [primeiroVencimento]="model.dataVencimento"
+              (parcelasChange)="model.parcelas = $event"
+            />
+          }
+        </div>
+        <div class="installment-option">
+          <switch-component
+            label="Lançamento recorrente"
+            [(dataField)]="recorrente"
+            [disabled]="loading"
+            (dataFieldChange)="recorrenciaChanged($event)"
+          />
+          <small>Gera lançamentos independentes em uma frequência e período definidos.</small>
+          @if (recorrente) {
+            <recorrencia-editor-component
+              [valor]="model.valor"
+              [competencia]="model.dataCompetencia"
+              [primeiroVencimento]="model.dataVencimento"
+              (configuracaoChange)="setRecorrencia($event)"
+            />
+          }
+        </div>
+      }
+      @if (!id && !parcelado && !recorrente) {
         <div class="automatic-payment">
           <switch-component
             label="Baixar automaticamente ao salvar"
@@ -263,6 +303,7 @@ import { ContaFinanceiraSelectorComponent } from '../../shared/components-common
         border-radius: 10px;
         background: #f8f9ff;
       }
+      .installment-option{margin-top:1.5rem;padding:1rem;border:1px solid #dce2f5;border-radius:10px;background:#fff}.installment-option>small{display:block;color:#687080;margin-top:.35rem}
       .automatic-payment small {
         display: block;
         color: #687080;
@@ -322,6 +363,8 @@ export class LancamentoFinanceiroFormComponent
   };
   baixa: BaixaFinanceiraCreateDTO = this.novaBaixa();
   baixando = false;
+  parcelado = false;
+  recorrente = false;
   constructor(
     service: LancamentoFinanceiroService,
     router: Router,
@@ -349,6 +392,8 @@ export class LancamentoFinanceiroFormComponent
         : undefined;
   }
   override clear() {
+    this.parcelado = false;
+    this.recorrente = false;
     this.model = {
       descricao: '',
       valor: 0,
@@ -399,6 +444,29 @@ export class LancamentoFinanceiroFormComponent
     this.model.formaPagamento = undefined;
     this.model.contaFinanceiraId = undefined;
   }
+  parcelamentoChanged(enabled: boolean) {
+    this.model.parcelas = [];
+    if (enabled) {
+      this.recorrente = false;
+      this.model.recorrencias = [];
+      this.model.baixarAutomaticamente = false;
+      this.automaticPaymentChanged(false);
+    }
+  }
+  recorrenciaChanged(enabled: boolean) {
+    this.model.recorrencias = [];
+    this.model.periodicidadeRecorrencia = undefined;
+    if (enabled) {
+      this.parcelado = false;
+      this.model.parcelas = [];
+      this.model.baixarAutomaticamente = false;
+      this.automaticPaymentChanged(false);
+    }
+  }
+  setRecorrencia(configuracao: ConfiguracaoRecorrencia) {
+    this.model.periodicidadeRecorrencia = configuracao.periodicidade;
+    this.model.recorrencias = configuracao.ocorrencias;
+  }
   override validateSave() {
     if (this.model.situacao === 'CANCELADO') {
       this.alerts.warning('Um lançamento cancelado não pode ser alterado.');
@@ -413,6 +481,21 @@ export class LancamentoFinanceiroFormComponent
       !this.model.dataVencimento
     ) {
       this.alerts.warning('Preencha descrição, tipo, categoria, valor e datas.');
+      return false;
+    }
+    if (this.parcelado) {
+      if (!this.model.parcelas || this.model.parcelas.length < 2) {
+        this.alerts.warning('Gere ao menos duas parcelas, ou uma entrada e uma parcela.');
+        return false;
+      }
+      const totalParcelas = Math.round(this.model.parcelas.reduce((s, p) => s + Number(p.valor || 0), 0) * 100);
+      if (totalParcelas !== Math.round(this.model.valor * 100)) {
+        this.alerts.warning('A soma da entrada e das parcelas deve ser igual ao valor total.');
+        return false;
+      }
+    }
+    if (this.recorrente && (!this.model.periodicidadeRecorrencia || !this.model.recorrencias || this.model.recorrencias.length < 2)) {
+      this.alerts.warning('Gere ao menos duas ocorrências para o lançamento recorrente.');
       return false;
     }
     if (
@@ -497,12 +580,40 @@ export class LancamentoFinanceiroFormComponent
   }
   async cancelarLancamento() {
     const motivo = await this.confirmDialog.requestText({
-      title: 'Cancelar lançamento',
-      message: 'O lançamento deixará de aceitar alterações e novas baixas.',
+      title: this.model.parcelamentoId
+        ? 'Cancelar parcelamento'
+        : this.model.recorrenciaId ? 'Cancelar recorrência' : 'Cancelar lançamento',
+      message: this.model.parcelamentoId
+        ? 'Todas as parcelas serão canceladas e deixarão de aceitar novas baixas.'
+        : this.model.recorrenciaId
+          ? 'Todas as ocorrências serão canceladas e deixarão de aceitar novas baixas.'
+          : 'O lançamento deixará de aceitar alterações e novas baixas.',
       inputLabel: 'Motivo do cancelamento',
       confirmText: 'Cancelar lançamento',
     });
     if (!motivo) return;
+    if (this.model.parcelamentoId) {
+      this.service.cancelarParcelamento(this.model.parcelamentoId, motivo).subscribe({
+        next: () => {
+          this.loadById(Number(this.id));
+          this.carregarHistorico();
+          this.alerts.success('Parcelamento cancelado.');
+        },
+        error: (e) => this.alerts.error(e?.error?.messages?.join('<br>') || 'Não foi possível cancelar o parcelamento.'),
+      });
+      return;
+    }
+    if (this.model.recorrenciaId) {
+      this.service.cancelarRecorrencia(this.model.recorrenciaId, motivo).subscribe({
+        next: () => {
+          this.loadById(Number(this.id));
+          this.carregarHistorico();
+          this.alerts.success('Recorrência cancelada.');
+        },
+        error: (e) => this.alerts.error(e?.error?.messages?.join('<br>') || 'Não foi possível cancelar a recorrência.'),
+      });
+      return;
+    }
     this.service.cancelar(Number(this.id), motivo).subscribe({
       next: (r) => {
         this.model = { ...r, observacao: r.observacao ?? '', baixarAutomaticamente: false };
