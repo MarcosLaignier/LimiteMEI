@@ -1,0 +1,51 @@
+<toolbar-filter tituloPagina="Caixa e bancos" [listMode]="true" [showNew]="false" [loading]="loading" (filtrar)="carregarExtrato()" (limpar)="limpar()"/>
+<section class="cash-page"><header><span>MOVIMENTAÇÕES REALIZADAS</span><h1>Caixa e bancos</h1><p>Consulte o extrato, registre operações manuais e transfira valores entre contas.</p></header><tabs-component>
+ <tab title="Extrato" icon="bi-card-list"><div class="fields"><conta-financeira-selector-component label="Conta do extrato" [(dataField)]="contaExtratoId"/><date-box-component label="Data inicial" [clearButton]="true" [(dataField)]="inicio"/><date-box-component label="Data final" [clearButton]="true" [(dataField)]="fim"/></div>@if(contaExtratoId){<article class="balance"><span>Saldo atual</span><strong>{{saldo|currency:'BRL'}}</strong></article>}<div class="table-responsive"><table><thead><tr><th>Data</th><th>Descrição</th><th>Origem</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Ações</th></tr></thead><tbody>@if(loading){<tr><td colspan="7" class="state">Carregando extrato...</td></tr>}@else if(!movimentos.length){<tr><td colspan="7" class="state">Selecione uma conta e filtre para consultar o extrato.</td></tr>}@else{@for(m of movimentos;track m.id){<tr><td>{{m.data|date:'dd/MM/yyyy':'UTC'}}</td><td><strong>{{m.descricao}}</strong></td><td>{{origemLabels[m.origem]}}</td><td>{{m.categoriaNome||'—'}}</td><td><badge-component [text]="tipoLabels[m.tipo]" [color]="badgeColor(m.tipo)" [pill]="true" size="sm"/></td><td [class.entry]="m.tipo==='ENTRADA'" [class.exit]="m.tipo==='SAIDA'">{{m.valor|currency:'BRL'}}</td><td>@if(m.editavel){<button class="icon-button" title="Excluir" (click)="excluir(m)"><i class="bi bi-trash"></i></button>}@else{<i class="bi bi-lock" title="Movimentação automática"></i>}</td></tr>}}</tbody></table></div></tab>
+ <tab title="Movimento manual" icon="bi-pencil-square">
+  <div class="form-card manual-form">
+   <div class="form-row">
+    <conta-financeira-selector-component width="435px" [(dataField)]="manual.contaFinanceiraId"/>
+   </div>
+   <div class="form-row">
+    <select-enum label="Origem" width="220px" [enumObject]="origens" [optionLabels]="origemLabels" [(dataField)]="manual.origem" (dataFieldChange)="origemChanged()"/>
+    <select-enum label="Tipo do ajuste" width="199px" [enumObject]="tipos" [optionLabels]="tipoLabels" [(dataField)]="manual.tipo" [disabled]="manual.origem!=='AJUSTE'"/>
+   </div>
+   <div class="form-row">
+    <number-box-component label="Valor" width="180px" [(dataField)]="manual.valor"/>
+    <date-box-component label="Data" width="239px" [clearButton]="true" [(dataField)]="manual.data"/>
+   </div>
+   <div class="form-row">
+    <select-enum label="Forma de pagamento" width="240px" [enumObject]="formas" [optionLabels]="formaLabels" [(dataField)]="manual.formaPagamento"/>
+    <categoria-selector-component width="179px" [tipo]="tipoCategoriaManual" [(dataField)]="manual.categoriaId"/>
+   </div>
+   <div class="form-row">
+    <text-box-component label="Descrição" width="435px" [(dataField)]="manual.descricao"/>
+   </div>
+   <div class="form-row">
+    <text-area-component label="Observação" width="435px" [(dataField)]="manual.observacao"/>
+   </div>
+   <button class="primary" [disabled]="salvando" (click)="salvarManual()">{{salvando?'Salvando...':'Registrar movimentação'}}</button>
+  </div>
+ </tab>
+ <tab title="Transferência" icon="bi-arrow-left-right">
+  <div class="form-card transfer-form">
+   <div class="form-row">
+    <conta-financeira-selector-component label="Conta de origem" width="435px" [(dataField)]="transferencia.contaOrigemId"/>
+   </div>
+   <div class="form-row">
+    <conta-financeira-selector-component label="Conta de destino" width="435px" [(dataField)]="transferencia.contaDestinoId"/>
+   </div>
+   <div class="form-row">
+    <number-box-component label="Valor" width="180px" [(dataField)]="transferencia.valor"/>
+    <date-box-component label="Data" width="239px" [clearButton]="true" [(dataField)]="transferencia.data"/>
+   </div>
+   <div class="form-row">
+    <text-box-component label="Descrição" width="435px" [(dataField)]="transferencia.descricao"/>
+   </div>
+   <div class="form-row">
+    <text-area-component label="Observação" width="435px" [(dataField)]="transferencia.observacao"/>
+   </div>
+   <button class="primary" [disabled]="salvando" (click)="salvarTransferencia()">{{salvando?'Transferindo...':'Realizar transferência'}}</button>
+  </div>
+ </tab>
+</tabs-component></section>
