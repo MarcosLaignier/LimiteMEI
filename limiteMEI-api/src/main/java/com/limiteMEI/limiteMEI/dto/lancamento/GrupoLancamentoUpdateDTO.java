@@ -25,6 +25,8 @@ public class GrupoLancamentoUpdateDTO {
 
     private Boolean ativo;
 
+    private Boolean documentoFiscalEmitido;
+
     @NotEmpty
     @Valid
     private List<ItemGrupoLancamentoUpdateDTO> itens;

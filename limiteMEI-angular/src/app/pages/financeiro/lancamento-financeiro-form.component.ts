@@ -127,6 +127,13 @@ import { RecorrenciaEditorComponent, ConfiguracaoRecorrencia } from '../../share
           [(dataField)]="model.ativo"
           [disabled]="loading"
         />
+        @if (model.tipo === tipoEnum.RECEBER) {
+          <switch-component
+            label="Documento fiscal emitido"
+            [(dataField)]="model.documentoFiscalEmitido"
+            [disabled]="loading"
+          />
+        }
       </div>
       @if (!id) {
         <div class="installment-option">
@@ -402,6 +409,7 @@ export class LancamentoFinanceiroFormComponent
       ativo: true,
       observacao: '',
       baixarAutomaticamente: false,
+      documentoFiscalEmitido: false,
     };
     this.pessoa = undefined;
   }
@@ -430,6 +438,9 @@ export class LancamentoFinanceiroFormComponent
   }
   tipoChanged() {
     this.model.categoriaId = undefined;
+    if (this.model.tipo !== TipoLancamentoEnum.RECEBER) {
+      this.model.documentoFiscalEmitido = false;
+    }
   }
   setPessoa(p?: PessoaDTO) {
     this.pessoa = p;

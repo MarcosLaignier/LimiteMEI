@@ -305,6 +305,8 @@ public class LancamentoFinanceiroService {
         entity.setDataVencimento(dto.getDataVencimento());
         entity.setAtivo(dto.getAtivo() == null ? true : dto.getAtivo());
         entity.setObservacao(dto.getObservacao());
+        entity.setDocumentoFiscalEmitido(entity.getTipo() == TipoLancamentoEnum.RECEBER
+                && Boolean.TRUE.equals(dto.getDocumentoFiscalEmitido()));
     }
 
     private LancamentoFinanceiroDTO toDTO(LancamentoFinanceiro entity) {
@@ -316,6 +318,7 @@ public class LancamentoFinanceiroService {
                 .valor(entity.getValor()).valorLiquidado(liquidado).saldoAberto(entity.getValor().subtract(liquidado))
                 .dataCompetencia(entity.getDataCompetencia()).dataVencimento(entity.getDataVencimento())
                 .situacao(entity.getSituacao()).ativo(entity.getAtivo()).observacao(entity.getObservacao())
+                .documentoFiscalEmitido(Boolean.TRUE.equals(entity.getDocumentoFiscalEmitido()))
                 .dataCancelamento(entity.getDataCancelamento()).motivoCancelamento(entity.getMotivoCancelamento())
                 .usuarioCancelamento(entity.getUsuarioCancelamento())
                 .parcelamentoId(entity.getParcelamentoId()).numeroParcela(entity.getNumeroParcela())
@@ -453,6 +456,7 @@ public class LancamentoFinanceiroService {
                     .dataVencimento(item.getDataVencimento())
                     .ativo(dto.getAtivo())
                     .observacao(dto.getObservacao())
+                    .documentoFiscalEmitido(dto.getDocumentoFiscalEmitido())
                     .build();
             apply(entity, comum);
             String sufixo = entity.getParcelamentoId() != null

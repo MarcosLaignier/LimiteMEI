@@ -27,6 +27,7 @@ public class LancamentoFinanceiroDTO {
     private SituacaoLancamentoEnum situacao;
     private Boolean ativo;
     private String observacao;
+    private Boolean documentoFiscalEmitido;
     private LocalDateTime dataCancelamento;
     private String motivoCancelamento;
     private String usuarioCancelamento;

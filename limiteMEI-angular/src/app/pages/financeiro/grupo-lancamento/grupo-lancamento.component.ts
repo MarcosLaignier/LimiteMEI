@@ -29,6 +29,7 @@ import { PessoaDTO } from '../../../dtos/pessoa/pessoa.dto';
       <div class="form-row"><categoria-selector-component width="280px" [tipo]="tipoCategoria" [(dataField)]="model.categoriaId" [disabled]="salvando"/><pessoa-selector-component [pessoa]="pessoa" (pessoaChange)="setPessoa($event)" [disabled]="salvando"/></div>
       <div class="form-row"><text-area-component label="Observação" width="435px" [(dataField)]="model.observacao" [disabled]="salvando"/></div>
       <div class="form-row"><switch-component label="Grupo ativo" [(dataField)]="model.ativo" [disabled]="salvando"/></div>
+      @if (itens[0]?.tipo === 'RECEBER') { <div class="form-row"><switch-component label="Documento fiscal emitido" [(dataField)]="model.documentoFiscalEmitido" [disabled]="salvando"/></div> }
     </section>
     <section class="card"><div class="summary"><article><span>Total do grupo</span><strong>{{totalGrupo|currency:'BRL'}}</strong></article><article><span>Total baixado</span><strong>{{totalBaixado|currency:'BRL'}}</strong></article><article><span>Saldo aberto</span><strong>{{saldoAberto|currency:'BRL'}}</strong></article></div>
       <div class="items"><header><span>Item</span><span>Valor</span><span>Competência</span><span>Vencimento</span><span>Situação</span></header>
@@ -47,7 +48,7 @@ export class GrupoLancamentoComponent implements OnInit {
   grupoId = '';
   itens: LancamentoFinanceiroDTO[] = [];
   pessoa?: PessoaDTO;
-  model: GrupoLancamentoUpdateDTO = { descricao: '', categoriaId: 0, observacao: '', ativo: true, itens: [] };
+  model: GrupoLancamentoUpdateDTO = { descricao: '', categoriaId: 0, observacao: '', ativo: true, documentoFiscalEmitido: false, itens: [] };
 
   constructor(private route: ActivatedRoute, private router: Router,
               private service: LancamentoFinanceiroService, private alerts: AlertService,
@@ -127,6 +128,7 @@ export class GrupoLancamentoComponent implements OnInit {
       pessoaId: primeiro.pessoaId,
       observacao: primeiro.observacao ?? '',
       ativo: primeiro.ativo,
+      documentoFiscalEmitido: primeiro.documentoFiscalEmitido,
       itens: [],
     };
     this.pessoa = primeiro.pessoaId

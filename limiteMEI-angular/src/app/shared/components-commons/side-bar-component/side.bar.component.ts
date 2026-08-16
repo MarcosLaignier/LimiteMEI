@@ -64,6 +64,14 @@ export class SideBarComponent implements OnInit {
       ]
     },
 
+    {
+      label: 'MEI',
+      icon: 'bi-graph-up-arrow',
+      children: [
+        { label: 'Apuração e limite', icon: 'bi-speedometer2', route: '/app/financeiro/mei/apuracao' }
+      ]
+    },
+
 
     { label: 'Configurações', icon: 'bi-gear', route: '/configuracoes' }
   ];

@@ -33,6 +33,8 @@ public class LancamentoFinanceiroCreateDTO {
     private Boolean ativo;
     private String observacao;
 
+    private Boolean documentoFiscalEmitido;
+
     private Boolean baixarAutomaticamente;
 
     private LocalDate dataLiquidacao;

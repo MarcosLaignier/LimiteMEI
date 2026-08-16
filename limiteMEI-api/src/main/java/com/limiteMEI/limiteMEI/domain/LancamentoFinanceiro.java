@@ -11,7 +11,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "lancamento_financeiro")
+@Table(name = "lancamento_financeiro", indexes = {
+        @Index(name = "idx_lancamento_empresa_competencia", columnList = "empresa_id, data_competencia"),
+        @Index(name = "idx_lancamento_empresa_tipo", columnList = "empresa_id, tipo")
+})
 @Getter
 @Setter
 @Builder
@@ -65,6 +68,10 @@ public class LancamentoFinanceiro {
 
     @Column(length = 500)
     private String observacao;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean documentoFiscalEmitido = false;
 
     @Column(name = "parcelamento_id", length = 36)
     private String parcelamentoId;

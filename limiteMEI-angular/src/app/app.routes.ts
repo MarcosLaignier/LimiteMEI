@@ -97,6 +97,11 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'mei/apuracao',
+            loadComponent: () =>
+              import('./pages/mei/apuracao-mei.component').then((m) => m.ApuracaoMeiComponent),
+          },
+          {
             path: 'contas/create',
             loadComponent: () =>
               import('./pages/financeiro/conta-financeira/conta-financeira-form.component').then(

@@ -17,6 +17,7 @@ export interface LancamentoFinanceiroCreateDTO {
   dataVencimento: string;
   ativo: boolean;
   observacao: string;
+  documentoFiscalEmitido: boolean;
   baixarAutomaticamente: boolean;
   dataLiquidacao?: string;
   formaPagamento?: FormaPagamentoEnum;
@@ -56,6 +57,7 @@ export interface GrupoLancamentoUpdateDTO {
   pessoaId?: number;
   observacao: string;
   ativo: boolean;
+  documentoFiscalEmitido: boolean;
   itens: ItemGrupoLancamentoUpdateDTO[];
 }
 
@@ -90,6 +92,7 @@ export class LancamentoFinanceiroDTO {
   dataCompetencia!: string;
   ativo!: boolean;
   observacao?: string;
+  documentoFiscalEmitido!: boolean;
   dataCancelamento?: string;
   motivoCancelamento?: string;
   usuarioCancelamento?: string;
