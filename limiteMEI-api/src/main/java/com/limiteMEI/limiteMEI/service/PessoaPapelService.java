@@ -8,4 +8,5 @@ public class PessoaPapelService{
  public PessoaPapelService(PessoaPapelRepository r,PessoaService p,PessoaMapper m,EmpresaAtualService e){repository=r;pessoas=p;mapper=m;empresaAtual=e;}
  public PessoaDTO adicionar(Long pessoaId,PapelPessoaEnum papel){Pessoa p=pessoas.findOwnedEntity(pessoaId);if(!repository.existsByPessoaIdAndPapel(pessoaId,papel))repository.save(PessoaPapel.builder().pessoa(p).papel(papel).ativo(true).build());return mapper.toDTO(p);}
  public List<PessoaDTO> listar(PapelPessoaEnum papel){return repository.findByPessoaEmpresaIdAndPapelAndAtivoTrue(empresaAtual.get().getId(),papel).stream().map(PessoaPapel::getPessoa).map(mapper::toDTO).toList();}
+ public boolean possuiPapel(Long pessoaId,PapelPessoaEnum papel){return repository.existsByPessoaIdAndPapelAndAtivoTrue(pessoaId,papel);}
 }

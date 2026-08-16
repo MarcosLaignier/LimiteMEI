@@ -3,6 +3,7 @@ import com.limiteMEI.limiteMEI.domain.PessoaPapel; import com.limiteMEI.limiteME
 import java.util.*;
 public interface PessoaPapelRepository extends BaseRepository<PessoaPapel,Long> {
  boolean existsByPessoaIdAndPapel(Long pessoaId,PapelPessoaEnum papel);
+ boolean existsByPessoaIdAndPapelAndAtivoTrue(Long pessoaId,PapelPessoaEnum papel);
  List<PessoaPapel> findByPessoaEmpresaIdAndPapelAndAtivoTrue(Long empresaId,PapelPessoaEnum papel);
  Set<PessoaPapel> findByPessoaId(Long pessoaId);
 }

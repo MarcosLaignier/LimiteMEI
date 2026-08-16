@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.limiteMEI.limiteMEI.domain.Empresa;
 import com.limiteMEI.limiteMEI.enums.TipoMovimentoEnum;
 import com.limiteMEI.limiteMEI.enums.NaturezaReceitaEnum;
+import com.limiteMEI.limiteMEI.enums.ExigenciaPessoaEnum;
+import com.limiteMEI.limiteMEI.enums.PapelPessoaEnum;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
 import java.util.List;
 
@@ -51,11 +53,21 @@ public class CategoriaService extends BaseService<Categoria, Long, CategoriaCrea
 
     @Override
     protected void validate(Categoria categoria) {
+        if (categoria.getExigenciaPessoa() == null) {
+            categoria.setExigenciaPessoa(ExigenciaPessoaEnum.NAO_UTILIZA);
+        }
+        if (categoria.getExigenciaPessoa() == ExigenciaPessoaEnum.NAO_UTILIZA) {
+            categoria.setPapelPessoa(null);
+        } else if (categoria.getPapelPessoa() == null) {
+            throw new ApplicationException("Informe o papel da pessoa usado pela categoria");
+        }
         if (categoria.getTipo() == TipoMovimentoEnum.RECEITA && categoria.getNaturezaReceita() == null) {
             throw new ApplicationException("A natureza da receita é obrigatória para categorias de receita");
         }
         if (categoria.getTipo() == TipoMovimentoEnum.DESPESA) {
             categoria.setNaturezaReceita(null);
+            categoria.setCompoeFaturamentoMei(false);
+            categoria.setExigeDocumentoFiscal(false);
         }
         super.validate(categoria);
     }
@@ -88,16 +100,25 @@ public class CategoriaService extends BaseService<Categoria, Long, CategoriaCrea
     }
 
     public void criarCategoriasIniciais(Empresa empresa) {
-        criarSeAusente(empresa, "Vendas", TipoMovimentoEnum.RECEITA, NaturezaReceitaEnum.COMERCIO);
-        criarSeAusente(empresa, "Serviços", TipoMovimentoEnum.RECEITA, NaturezaReceitaEnum.SERVICOS);
-        criarSeAusente(empresa, "Aluguel", TipoMovimentoEnum.DESPESA, null);
-        criarSeAusente(empresa, "Fornecedores", TipoMovimentoEnum.DESPESA, null);
+        criarSeAusente(empresa, "Vendas", TipoMovimentoEnum.RECEITA, NaturezaReceitaEnum.COMERCIO, ExigenciaPessoaEnum.OPCIONAL, PapelPessoaEnum.CLIENTE);
+        criarSeAusente(empresa, "Serviços", TipoMovimentoEnum.RECEITA, NaturezaReceitaEnum.SERVICOS, ExigenciaPessoaEnum.OPCIONAL, PapelPessoaEnum.CLIENTE);
+        criarSeAusente(empresa, "Aluguel", TipoMovimentoEnum.DESPESA, null, ExigenciaPessoaEnum.OPCIONAL, PapelPessoaEnum.FORNECEDOR);
+        criarSeAusente(empresa, "Fornecedores", TipoMovimentoEnum.DESPESA, null, ExigenciaPessoaEnum.OBRIGATORIA, PapelPessoaEnum.FORNECEDOR);
     }
 
-    private void criarSeAusente(Empresa empresa, String nome, TipoMovimentoEnum tipo, NaturezaReceitaEnum natureza) {
+    private void criarSeAusente(Empresa empresa, String nome, TipoMovimentoEnum tipo, NaturezaReceitaEnum natureza,
+                                ExigenciaPessoaEnum exigenciaPessoa, PapelPessoaEnum papelPessoa) {
         if (!repository.existsByEmpresaIdAndNomeIgnoreCaseAndTipo(empresa.getId(), nome, tipo)) {
-            repository.save(Categoria.builder().nome(nome).tipo(tipo).naturezaReceita(natureza).ativo(true).empresa(empresa).build());
+            repository.save(Categoria.builder().nome(nome).tipo(tipo).naturezaReceita(natureza)
+                    .exigenciaPessoa(exigenciaPessoa).papelPessoa(papelPessoa)
+                    .compoeFaturamentoMei(tipo == TipoMovimentoEnum.RECEITA)
+                    .exigeDocumentoFiscal(tipo == TipoMovimentoEnum.RECEITA)
+                    .ativo(true).empresa(empresa).build());
         }
+    }
+
+    public Categoria findOwnedEntity(Long id) {
+        return findOwned(id);
     }
 
     private Categoria findOwned(Long id) {
