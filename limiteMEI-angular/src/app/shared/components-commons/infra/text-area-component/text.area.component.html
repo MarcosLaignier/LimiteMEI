@@ -1,4 +1,4 @@
-<div [ngClass]="colClass">
+<div [ngClass]="colClass" [style.width]="width || '435px'" [style.max-width]="'100%'">
   <label class="form-label">{{ label + ':'}}</label>
-  <textarea type="text" class="form-control" [(ngModel)]="dataField" [placeholder]="placeholder" [rows]="rows"></textarea>
+  <textarea type="text" class="form-control" [(ngModel)]="dataField" [placeholder]="placeholder" [rows]="rows" [disabled]="disabled"></textarea>
 </div>

@@ -6,7 +6,7 @@ import { ContaFinanceiraService } from '../../../services/conta-financeira.servi
   selector: 'conta-financeira-selector-component',
   standalone: true,
   imports: [FormsModule],
-  template: `<div class="field">
+  template: `<div class="field" [style.width]="width">
     <label>{{ label }}:</label
     ><select [disabled]="disabled" [ngModel]="dataField" (ngModelChange)="change($event)">
       <option [ngValue]="undefined">Selecione</option>
@@ -42,6 +42,7 @@ import { ContaFinanceiraService } from '../../../services/conta-financeira.servi
 })
 export class ContaFinanceiraSelectorComponent implements OnInit {
   @Input() label = 'Conta financeira';
+  @Input() width = '280px';
   @Input() disabled = false;
   @Input() dataField?: number;
   @Output() dataFieldChange = new EventEmitter<number | undefined>();

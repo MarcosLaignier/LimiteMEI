@@ -50,7 +50,8 @@ export class SideBarComponent implements OnInit {
       label: 'Caixa e bancos',
       icon: 'bi-bank',
       children: [
-        {label: 'Contas financeiras', icon: 'bi-wallet2', route: '/app/financeiro/contas'}
+        {label: 'Contas financeiras', icon: 'bi-wallet2', route: '/app/financeiro/contas'},
+        {label: 'Movimentações e extrato', icon: 'bi-arrow-left-right', route: '/app/financeiro/movimentacoes'}
       ]
     },
 

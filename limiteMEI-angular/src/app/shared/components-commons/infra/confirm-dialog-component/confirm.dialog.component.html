@@ -6,12 +6,19 @@
       {{ message }}
     </p>
 
+    @if (inputLabel) {
+      <label class="dialog-input">
+        <span>{{ inputLabel }}</span>
+        <textarea [(ngModel)]="inputValue" [placeholder]="inputPlaceholder" maxlength="500"></textarea>
+      </label>
+    }
+
     <div class="actions">
       <button type="button" class="btn btn-outline-secondary" (click)="cancel.emit()">
         {{ cancelText }}
       </button>
 
-      <button type="button" class="btn btn-primary" (click)="confirm.emit()">
+      <button type="button" class="btn btn-primary" [disabled]="inputRequired && !inputValue.trim()" (click)="confirm.emit(inputValue.trim())">
         {{ confirmText }}
       </button>
     </div>

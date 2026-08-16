@@ -30,7 +30,10 @@ export class ConfirmDialogService {
         title: options.title ?? 'Confirmação',
         message: options.message,
         confirmText: options.confirmText ?? 'Sim',
-        cancelText: options.cancelText ?? 'Não'
+        cancelText: options.cancelText ?? 'Não',
+        inputLabel: options.inputLabel,
+        inputPlaceholder: options.inputPlaceholder ?? '',
+        inputRequired: options.inputRequired ?? false
       });
 
       this.dialogRef.instance.confirm.subscribe(() => {
@@ -43,6 +46,33 @@ export class ConfirmDialogService {
         resolve(false);
       });
 
+      this.appRef.attachView(this.dialogRef.hostView);
+      document.body.appendChild(this.dialogRef.location.nativeElement);
+    });
+  }
+
+  requestText(options: ConfirmOptions): Promise<string | null> {
+    return new Promise<string | null>(resolve => {
+      this.dialogRef = createComponent(ConfirmDialogComponent, {
+        environmentInjector: this.injector
+      });
+      Object.assign(this.dialogRef.instance, {
+        title: options.title ?? 'Confirmação',
+        message: options.message,
+        confirmText: options.confirmText ?? 'Confirmar',
+        cancelText: options.cancelText ?? 'Cancelar',
+        inputLabel: options.inputLabel ?? 'Motivo',
+        inputPlaceholder: options.inputPlaceholder ?? '',
+        inputRequired: options.inputRequired ?? true
+      });
+      this.dialogRef.instance.confirm.subscribe(value => {
+        this.close();
+        resolve(value);
+      });
+      this.dialogRef.instance.cancel.subscribe(() => {
+        this.close();
+        resolve(null);
+      });
       this.appRef.attachView(this.dialogRef.hostView);
       document.body.appendChild(this.dialogRef.location.nativeElement);
     });
