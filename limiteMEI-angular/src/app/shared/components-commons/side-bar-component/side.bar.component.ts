@@ -47,10 +47,10 @@ export class SideBarComponent implements OnInit {
       ]
     },
     {
-      label: 'Movimentações',
-      icon: 'bi-arrow-left-right',
+      label: 'Caixa e bancos',
+      icon: 'bi-bank',
       children: [
-        {label: 'Monitor de Financeiras', icon: 'bi-graph-up', route: '/movimentos/monitor-produtos'}
+        {label: 'Contas financeiras', icon: 'bi-wallet2', route: '/app/financeiro/contas'}
       ]
     },
 
@@ -58,8 +58,8 @@ export class SideBarComponent implements OnInit {
       label: 'Financeiro',
       icon: 'bi-cash-stack',
       children: [
-        { label: 'Contas a Pagar', icon: 'bi-arrow-down-circle', route: '/financeiro/pagar' },
-        { label: 'Contas a Receber', icon: 'bi-arrow-up-circle', route: '/financeiro/receber' }
+        { label: 'Lançamentos', icon: 'bi-journal-plus', route: '/app/financeiro/lancamentos' },
+        { label: 'Monitor de lançamentos', icon: 'bi-display', route: '/app/financeiro/monitor-lancamentos' }
       ]
     },
 

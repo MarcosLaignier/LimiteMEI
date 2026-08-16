@@ -11,10 +11,12 @@
         <span>Filtrar</span>
       </button>
 
-      <button type="button" class="btn-action primary" [disabled]="loading" (click)="novoClick()">
-        <i class="bi bi-plus-circle"></i>
-        <span>Novo</span>
-      </button>
+      @if (showNew) {
+        <button type="button" class="btn-action primary" [disabled]="loading" (click)="novoClick()">
+          <i class="bi bi-plus-circle"></i>
+          <span>Novo</span>
+        </button>
+      }
     }
 
     @if (!listMode) {

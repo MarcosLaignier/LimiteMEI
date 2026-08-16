@@ -21,6 +21,7 @@ export class ToolbarComponent {
 
   @Input() tituloPagina = '';
   @Input() loading = false;
+  @Input() showNew = true;
   private _listMode = true;
 
   @Output() filtrar = new EventEmitter<void>();
