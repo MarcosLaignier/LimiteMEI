@@ -18,8 +18,21 @@ public class MovimentoFinanceiroMapper implements BaseMapper<MovimentoFinanceiro
                 .valor(mov.getValor())
                 .data(mov.getData())
                 .tipo(mov.getTipo())
-                .empresaId(mov.getEmpresa() != null ? mov.getEmpresa().getId() : null)
+                .origem(mov.getOrigem())
+                .formaPagamento(mov.getFormaPagamento())
+                .contaFinanceiraId(mov.getContaFinanceira().getId())
+                .contaFinanceiraNome(mov.getContaFinanceira().getNome())
                 .categoriaId(mov.getCategoria() != null ? mov.getCategoria().getId() : null)
+                .categoriaNome(mov.getCategoria() != null ? mov.getCategoria().getNome() : null)
+                .baixaFinanceiraId(mov.getBaixaFinanceira() != null ? mov.getBaixaFinanceira().getId() : null)
+                .transferenciaId(mov.getTransferenciaId())
+                .observacao(mov.getObservacao())
+                .editavel(mov.getOrigem() != com.limiteMEI.limiteMEI.enums.OrigemMovimentoEnum.BAIXA
+                        && mov.getOrigem() != com.limiteMEI.limiteMEI.enums.OrigemMovimentoEnum.TRANSFERENCIA
+                        && mov.getOrigem() != com.limiteMEI.limiteMEI.enums.OrigemMovimentoEnum.ESTORNO
+                        && !Boolean.TRUE.equals(mov.getEstornado()))
+                .estornado(mov.getEstornado())
+                .movimentoOrigemId(mov.getMovimentoOrigem() == null ? null : mov.getMovimentoOrigem().getId())
                 .build();
     }
 
@@ -31,7 +44,9 @@ public class MovimentoFinanceiroMapper implements BaseMapper<MovimentoFinanceiro
         mov.setValor(dto.getValor());
         mov.setData(dto.getData());
         mov.setTipo(dto.getTipo());
-        // empresa e categoria devem ser resolvidos no service via ID
+        mov.setOrigem(dto.getOrigem());
+        mov.setFormaPagamento(dto.getFormaPagamento());
+        mov.setObservacao(dto.getObservacao());
         return mov;
     }
 
@@ -41,5 +56,8 @@ public class MovimentoFinanceiroMapper implements BaseMapper<MovimentoFinanceiro
         mov.setValor(dto.getValor());
         mov.setData(dto.getData());
         mov.setTipo(dto.getTipo());
+        mov.setOrigem(dto.getOrigem());
+        mov.setFormaPagamento(dto.getFormaPagamento());
+        mov.setObservacao(dto.getObservacao());
     }
 }

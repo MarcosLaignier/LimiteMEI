@@ -1,0 +1,10 @@
+package com.limiteMEI.limiteMEI.enums;
+
+public enum EventoFinanceiroEnum {
+    CRIACAO_LANCAMENTO,
+    ALTERACAO_LANCAMENTO,
+    CANCELAMENTO_LANCAMENTO,
+    EXCLUSAO_LANCAMENTO,
+    BAIXA_REALIZADA,
+    BAIXA_ESTORNADA
+}

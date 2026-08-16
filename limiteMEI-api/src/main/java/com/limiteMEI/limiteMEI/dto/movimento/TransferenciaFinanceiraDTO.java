@@ -1,6 +1,5 @@
 package com.limiteMEI.limiteMEI.dto.movimento;
 
-import com.limiteMEI.limiteMEI.enums.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -11,20 +10,16 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MovimentoFinanceiroCreateDTO {
-    @NotBlank
-    private String descricao;
+public class TransferenciaFinanceiraDTO {
+    @NotNull
+    private Long contaOrigemId;
+    @NotNull
+    private Long contaDestinoId;
     @NotNull
     @DecimalMin("0.01")
     private BigDecimal valor;
     @NotNull
     private LocalDate data;
-    @NotNull
-    private OrigemMovimentoEnum origem;
-    private TipoFluxoCaixaEnum tipo;
-    @NotNull
-    private Long contaFinanceiraId;
-    private Long categoriaId;
-    private FormaPagamentoEnum formaPagamento;
+    private String descricao;
     private String observacao;
 }

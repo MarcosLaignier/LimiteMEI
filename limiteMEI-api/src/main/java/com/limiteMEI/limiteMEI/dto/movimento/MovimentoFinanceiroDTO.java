@@ -1,8 +1,7 @@
 package com.limiteMEI.limiteMEI.dto.movimento;
 
-import com.limiteMEI.limiteMEI.enums.TipoMovimentoEnum;
+import com.limiteMEI.limiteMEI.enums.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -12,19 +11,21 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class MovimentoFinanceiroDTO {
-
     private Long id;
-
     private String descricao;
-
     private BigDecimal valor;
-
     private LocalDate data;
-
-    private TipoMovimentoEnum tipo;
-
-    private Long empresaId;
-
+    private TipoFluxoCaixaEnum tipo;
+    private OrigemMovimentoEnum origem;
+    private FormaPagamentoEnum formaPagamento;
+    private Long contaFinanceiraId;
+    private String contaFinanceiraNome;
     private Long categoriaId;
-
+    private String categoriaNome;
+    private Long baixaFinanceiraId;
+    private String transferenciaId;
+    private String observacao;
+    private Boolean editavel;
+    private Boolean estornado;
+    private Long movimentoOrigemId;
 }
