@@ -6,4 +6,11 @@ export interface ConfirmOptions {
   inputLabel?: string;
   inputPlaceholder?: string;
   inputRequired?: boolean;
+  summaryItems?: ConfirmSummaryItem[];
+}
+
+export interface ConfirmSummaryItem {
+  label: string;
+  value: string;
+  highlight?: boolean;
 }

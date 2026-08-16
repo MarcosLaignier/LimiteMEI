@@ -33,7 +33,8 @@ export class ConfirmDialogService {
         cancelText: options.cancelText ?? 'Não',
         inputLabel: options.inputLabel,
         inputPlaceholder: options.inputPlaceholder ?? '',
-        inputRequired: options.inputRequired ?? false
+        inputRequired: options.inputRequired ?? false,
+        summaryItems: options.summaryItems ?? []
       });
 
       this.dialogRef.instance.confirm.subscribe(() => {
@@ -63,7 +64,8 @@ export class ConfirmDialogService {
         cancelText: options.cancelText ?? 'Cancelar',
         inputLabel: options.inputLabel ?? 'Motivo',
         inputPlaceholder: options.inputPlaceholder ?? '',
-        inputRequired: options.inputRequired ?? true
+        inputRequired: options.inputRequired ?? true,
+        summaryItems: options.summaryItems ?? []
       });
       this.dialogRef.instance.confirm.subscribe(value => {
         this.close();

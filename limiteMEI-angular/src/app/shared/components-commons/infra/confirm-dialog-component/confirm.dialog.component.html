@@ -6,6 +6,14 @@
       {{ message }}
     </p>
 
+    @if (summaryItems.length) {
+      <div class="dialog-summary">
+        @for (item of summaryItems; track item.label) {
+          <div [class.highlight]="item.highlight"><span>{{ item.label }}</span><strong>{{ item.value }}</strong></div>
+        }
+      </div>
+    }
+
     @if (inputLabel) {
       <label class="dialog-input">
         <span>{{ inputLabel }}</span>

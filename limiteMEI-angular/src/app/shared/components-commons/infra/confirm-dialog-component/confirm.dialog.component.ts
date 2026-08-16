@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ConfirmSummaryItem } from './confirm.options';
 
 @Component({
   selector: 'confirmation-dialog',
@@ -17,6 +18,7 @@ export class ConfirmDialogComponent {
   @Input() inputLabel?: string;
   @Input() inputPlaceholder = '';
   @Input() inputRequired = false;
+  @Input() summaryItems: ConfirmSummaryItem[] = [];
   inputValue = '';
 
   @Output() confirm = new EventEmitter<string>();
