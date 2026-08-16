@@ -4,6 +4,7 @@ import com.limiteMEI.limiteMEI.enums.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,4 +27,7 @@ public class LancamentoFinanceiroDTO {
     private SituacaoLancamentoEnum situacao;
     private Boolean ativo;
     private String observacao;
+    private LocalDateTime dataCancelamento;
+    private String motivoCancelamento;
+    private String usuarioCancelamento;
 }

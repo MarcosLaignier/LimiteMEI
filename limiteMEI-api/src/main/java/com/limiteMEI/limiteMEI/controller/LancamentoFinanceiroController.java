@@ -28,4 +28,14 @@ public class LancamentoFinanceiroController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) { service.delete(id); }
+
+    @PostMapping("/{id}/cancelamento")
+    public LancamentoFinanceiroDTO cancelar(@PathVariable Long id, @Valid @RequestBody MotivoOperacaoDTO dto) {
+        return service.cancelar(id, dto);
+    }
+
+    @GetMapping("/{id}/historico")
+    public List<HistoricoFinanceiroDTO> historico(@PathVariable Long id) {
+        return service.historico(id);
+    }
 }

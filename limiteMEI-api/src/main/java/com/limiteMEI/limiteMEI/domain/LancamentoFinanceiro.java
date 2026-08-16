@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lancamento_financeiro")
@@ -57,6 +58,28 @@ public class LancamentoFinanceiro {
     @Builder.Default
     private Boolean ativo = true;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean excluido = false;
+
     @Column(length = 500)
     private String observacao;
+
+    @Column(name = "data_cancelamento")
+    private LocalDateTime dataCancelamento;
+
+    @Column(name = "motivo_cancelamento", length = 500)
+    private String motivoCancelamento;
+
+    @Column(name = "usuario_cancelamento", length = 150)
+    private String usuarioCancelamento;
+
+    @Column(name = "data_exclusao")
+    private LocalDateTime dataExclusao;
+
+    @Column(name = "motivo_exclusao", length = 500)
+    private String motivoExclusao;
+
+    @Column(name = "usuario_exclusao", length = 150)
+    private String usuarioExclusao;
 }

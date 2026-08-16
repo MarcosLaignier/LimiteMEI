@@ -6,6 +6,7 @@ import { BaseFormCrud } from '../../shared/components-commons/core/base.form.cru
 import {
   LancamentoFinanceiroCreateDTO,
   LancamentoFinanceiroDTO,
+  HistoricoFinanceiroDTO,
 } from '../../dtos/lancamento/lancamento.financeiro';
 import { LancamentoFinanceiroService } from '../../services/lancamento-financeiro.service';
 import { BaixaFinanceiraService } from '../../services/baixa-financeira.service';
@@ -56,6 +57,9 @@ import { ContaFinanceiraSelectorComponent } from '../../shared/components-common
     />
     <section class="card">
       <h2>Dados do lançamento</h2>
+      @if (model.situacao === 'CANCELADO') {
+        <div class="cancelled"><strong>Lançamento cancelado</strong><span>{{ model.motivoCancelamento }}</span><small>{{ model.dataCancelamento | date: 'dd/MM/yyyy HH:mm' }} por {{ model.usuarioCancelamento }}</small></div>
+      }
       <div class="form-row">
         <text-box-component
           label="Descrição"
@@ -157,12 +161,27 @@ import { ContaFinanceiraSelectorComponent } from '../../shared/components-common
     </section>
     @if (id) {
       <section class="card">
-        <h2>Baixas financeiras</h2>
+        <div class="section-heading"><h2>Baixas financeiras</h2>@if(model.situacao !== 'CANCELADO'){<button class="danger-outline" (click)="cancelarLancamento()">Cancelar lançamento</button>}</div>
         <div class="fields">
           <number-box-component
-            label="Valor da baixa"
+            label="Valor principal"
             width="180px"
-            [(dataField)]="baixa.valor"
+            [(dataField)]="baixa.valorPrincipal"
+            [disabled]="baixando"
+          /><number-box-component
+            label="Juros"
+            width="150px"
+            [(dataField)]="baixa.juros"
+            [disabled]="baixando"
+          /><number-box-component
+            label="Multa"
+            width="150px"
+            [(dataField)]="baixa.multa"
+            [disabled]="baixando"
+          /><number-box-component
+            label="Desconto"
+            width="150px"
+            [(dataField)]="baixa.desconto"
             [disabled]="baixando"
           /><date-box-component
             label="Data"
@@ -183,21 +202,29 @@ import { ContaFinanceiraSelectorComponent } from '../../shared/components-common
             {{ baixando ? 'Baixando...' : 'Registrar baixa' }}
           </button>
         </div>
+        <div class="payment-total"><span>Valor efetivamente pago</span><strong>{{valorEfetivoBaixa|currency:'BRL'}}</strong><small>Principal + juros + multa − desconto</small></div>
         @if (baixas.length) {
           <div class="baixas">
             @for (item of baixas; track item.id) {
               <div>
                 <span>{{ item.dataLiquidacao }}</span
-                ><strong>{{ item.valor | currency: 'BRL' }}</strong
+                ><strong>{{ item.valorPago | currency: 'BRL' }}</strong
+                ><span title="Principal + juros + multa − desconto">Principal: {{item.valorPrincipal|currency:'BRL'}}</span
                 ><span>{{ formaLabels[item.formaPagamento] }}</span
                 ><span>{{ item.contaFinanceiraNome || 'Conta não informada' }}</span
-                ><button (click)="excluirBaixa(item)">Excluir</button>
+                >@if(item.ativo){<button (click)="estornarBaixa(item)">Estornar</button>}@else{<span class="reversed" title="{{item.motivoEstorno}}">Estornada</span>}
               </div>
             }
           </div>
         } @else {
           <p class="empty">Nenhuma baixa registrada.</p>
         }
+      </section>
+      <section class="card">
+        <h2>Histórico</h2>
+        @if (historico.length) {
+          <div class="history">@for(item of historico;track item.id){<article><i class="bi bi-clock-history"></i><div><strong>{{eventoLabels[item.evento]}}</strong><span>{{item.descricao}}</span><small>{{item.dataHora|date:'dd/MM/yyyy HH:mm'}} · {{item.usuario}}</small></div></article>}</div>
+        } @else { <p class="empty">Nenhum evento registrado.</p> }
       </section>
     }`,
   styles: [
@@ -258,7 +285,7 @@ import { ContaFinanceiraSelectorComponent } from '../../shared/components-common
       }
       .baixas > div {
         display: grid;
-        grid-template-columns: 130px 140px 180px 1fr 80px;
+        grid-template-columns: 120px 130px 190px 180px 1fr 80px;
         padding: 0.75rem;
         border-top: 1px solid #eee;
       }
@@ -267,6 +294,8 @@ import { ContaFinanceiraSelectorComponent } from '../../shared/components-common
         background: none;
         color: #c33;
       }
+      .section-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem}.danger-outline{border:1px solid #dc3545;background:#fff;color:#dc3545;border-radius:6px;padding:.5rem .8rem}.cancelled{display:flex;flex-direction:column;gap:.25rem;margin:1rem 0;padding:1rem;border:1px solid #efb8bd;background:#fff6f7;border-radius:8px;color:#842029}.cancelled small{color:#687080}.reversed{color:#687080;font-size:.85rem}.history article{display:flex;gap:.75rem;padding:.8rem 0;border-top:1px solid #eee}.history article div{display:flex;flex-direction:column}.history span,.history small{color:#687080}.history small{font-size:.78rem;margin-top:.2rem}
+      .payment-total{display:inline-flex;flex-direction:column;margin-top:1rem;padding:.8rem 1rem;border:1px solid #dce2f5;border-radius:8px;background:#f8f9ff}.payment-total span,.payment-total small{color:#687080}.payment-total strong{font-size:1.2rem;color:#334bc4}
       .empty {
         color: #687080;
         margin-top: 1rem;
@@ -285,6 +314,12 @@ export class LancamentoFinanceiroFormComponent
   readonly formaLabels = FORMA_PAGAMENTO_LABELS;
   pessoa?: PessoaDTO;
   baixas: BaixaFinanceiraDTO[] = [];
+  historico: HistoricoFinanceiroDTO[] = [];
+  readonly eventoLabels: Record<string, string> = {
+    CRIACAO_LANCAMENTO: 'Lançamento criado', ALTERACAO_LANCAMENTO: 'Lançamento alterado',
+    CANCELAMENTO_LANCAMENTO: 'Lançamento cancelado', EXCLUSAO_LANCAMENTO: 'Lançamento excluído',
+    BAIXA_REALIZADA: 'Baixa realizada', BAIXA_ESTORNADA: 'Baixa estornada'
+  };
   baixa: BaixaFinanceiraCreateDTO = this.novaBaixa();
   baixando = false;
   constructor(
@@ -301,7 +336,10 @@ export class LancamentoFinanceiroFormComponent
   }
   ngOnInit() {
     this.initForm();
-    if (this.route.snapshot.paramMap.get('id')) this.carregarBaixas();
+    if (this.route.snapshot.paramMap.get('id')) {
+      this.carregarBaixas();
+      this.carregarHistorico();
+    }
   }
   get tipoCategoria() {
     return this.model.tipo === TipoLancamentoEnum.RECEBER
@@ -362,6 +400,10 @@ export class LancamentoFinanceiroFormComponent
     this.model.contaFinanceiraId = undefined;
   }
   override validateSave() {
+    if (this.model.situacao === 'CANCELADO') {
+      this.alerts.warning('Um lançamento cancelado não pode ser alterado.');
+      return false;
+    }
     if (
       !this.model.descricao ||
       !this.model.tipo ||
@@ -389,15 +431,29 @@ export class LancamentoFinanceiroFormComponent
       error: () => this.alerts.error('Não foi possível carregar as baixas.'),
     });
   }
+  carregarHistorico() {
+    this.service.historico(Number(this.id)).subscribe({
+      next: (r) => (this.historico = r),
+      error: () => this.alerts.error('Não foi possível carregar o histórico.'),
+    });
+  }
   baixar() {
     const id = Number(this.id);
     if (
-      !this.baixa.valor ||
+      !this.baixa.valorPrincipal ||
       !this.baixa.dataLiquidacao ||
       !this.baixa.formaPagamento ||
       !this.baixa.contaFinanceiraId
     ) {
       this.alerts.warning('Preencha os dados da baixa.');
+      return;
+    }
+    if (this.baixa.juros < 0 || this.baixa.multa < 0 || this.baixa.desconto < 0) {
+      this.alerts.warning('Juros, multa e desconto não podem ser negativos.');
+      return;
+    }
+    if (this.valorEfetivoBaixa <= 0) {
+      this.alerts.warning('O valor efetivamente pago deve ser maior que zero.');
       return;
     }
     this.baixando = true;
@@ -406,6 +462,8 @@ export class LancamentoFinanceiroFormComponent
         this.baixando = false;
         this.baixa = this.novaBaixa();
         this.carregarBaixas();
+        this.carregarHistorico();
+        this.loadById(id);
         this.alerts.success('Baixa registrada com sucesso.');
       },
       error: (e) => {
@@ -416,23 +474,51 @@ export class LancamentoFinanceiroFormComponent
       },
     });
   }
-  async excluirBaixa(item: BaixaFinanceiraDTO) {
-    if (
-      !(await this.confirmDialog.confirm(
-        'Excluir baixa',
-        'Deseja realmente excluir esta baixa financeira?',
-      ))
-    )
-      return;
-    this.baixaService.excluir(Number(this.id), item.id).subscribe({
+  get valorEfetivoBaixa() {
+    return this.baixa.valorPrincipal + this.baixa.juros + this.baixa.multa - this.baixa.desconto;
+  }
+  async estornarBaixa(item: BaixaFinanceiraDTO) {
+    const motivo = await this.confirmDialog.requestText({
+      title: 'Estornar baixa',
+      message: 'O estorno preservará a baixa e criará uma movimentação inversa no caixa.',
+      inputLabel: 'Motivo do estorno',
+      confirmText: 'Estornar',
+    });
+    if (!motivo) return;
+    this.baixaService.estornar(Number(this.id), item.id, motivo).subscribe({
       next: () => {
         this.carregarBaixas();
-        this.alerts.success('Baixa excluída.');
+        this.carregarHistorico();
+        this.loadById(Number(this.id));
+        this.alerts.success('Baixa estornada com sucesso.');
       },
-      error: () => this.alerts.error('Não foi possível excluir a baixa.'),
+      error: (e) => this.alerts.error(e?.error?.messages?.join('<br>') || 'Não foi possível estornar a baixa.'),
+    });
+  }
+  async cancelarLancamento() {
+    const motivo = await this.confirmDialog.requestText({
+      title: 'Cancelar lançamento',
+      message: 'O lançamento deixará de aceitar alterações e novas baixas.',
+      inputLabel: 'Motivo do cancelamento',
+      confirmText: 'Cancelar lançamento',
+    });
+    if (!motivo) return;
+    this.service.cancelar(Number(this.id), motivo).subscribe({
+      next: (r) => {
+        this.model = { ...r, observacao: r.observacao ?? '', baixarAutomaticamente: false };
+        this.carregarHistorico();
+        this.alerts.success('Lançamento cancelado.');
+      },
+      error: (e) => this.alerts.error(e?.error?.messages?.join('<br>') || 'Não foi possível cancelar o lançamento.'),
     });
   }
   private novaBaixa(): BaixaFinanceiraCreateDTO {
-    return { valor: 0, dataLiquidacao: new Date().toISOString().slice(0, 10) };
+    return {
+      valorPrincipal: 0,
+      juros: 0,
+      multa: 0,
+      desconto: 0,
+      dataLiquidacao: new Date().toISOString().slice(0, 10),
+    };
   }
 }

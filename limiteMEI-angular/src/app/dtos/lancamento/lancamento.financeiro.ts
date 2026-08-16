@@ -20,6 +20,10 @@ export interface LancamentoFinanceiroCreateDTO {
   dataLiquidacao?: string;
   formaPagamento?: FormaPagamentoEnum;
   contaFinanceiraId?: number;
+  situacao?: SituacaoLancamentoEnum;
+  dataCancelamento?: string;
+  motivoCancelamento?: string;
+  usuarioCancelamento?: string;
 }
 export class LancamentoFinanceiroDTO {
   @GridColumn({ label: 'Código', type: 'number', ordem: 1, width: '90px' }) id!: number;
@@ -46,4 +50,25 @@ export class LancamentoFinanceiroDTO {
   dataCompetencia!: string;
   ativo!: boolean;
   observacao?: string;
+  dataCancelamento?: string;
+  motivoCancelamento?: string;
+  usuarioCancelamento?: string;
+}
+
+export type EventoFinanceiro =
+  | 'CRIACAO_LANCAMENTO'
+  | 'ALTERACAO_LANCAMENTO'
+  | 'CANCELAMENTO_LANCAMENTO'
+  | 'EXCLUSAO_LANCAMENTO'
+  | 'BAIXA_REALIZADA'
+  | 'BAIXA_ESTORNADA';
+
+export interface HistoricoFinanceiroDTO {
+  id: number;
+  lancamentoId: number;
+  baixaId?: number;
+  evento: EventoFinanceiro;
+  dataHora: string;
+  usuario: string;
+  descricao: string;
 }

@@ -119,7 +119,7 @@ export class LancamentoFinanceiroComponent implements OnInit {
   }
   abrirBaixa(item: LancamentoFinanceiroDTO) {
     this.selecionado = item;
-    this.baixa = { ...this.novaBaixa(), valor: item.saldoAberto };
+    this.baixa = { ...this.novaBaixa(), valorPrincipal: item.saldoAberto };
   }
   fecharBaixa() {
     this.selecionado = undefined;
@@ -128,12 +128,20 @@ export class LancamentoFinanceiroComponent implements OnInit {
   confirmarBaixa() {
     if (!this.selecionado) return;
     if (
-      !this.baixa.valor ||
+      !this.baixa.valorPrincipal ||
       !this.baixa.dataLiquidacao ||
       !this.baixa.formaPagamento ||
       !this.baixa.contaFinanceiraId
     ) {
       this.alerts.warning('Informe valor, data, forma de pagamento e conta financeira.');
+      return;
+    }
+    if (this.baixa.juros < 0 || this.baixa.multa < 0 || this.baixa.desconto < 0) {
+      this.alerts.warning('Juros, multa e desconto não podem ser negativos.');
+      return;
+    }
+    if (this.valorEfetivoBaixa <= 0) {
+      this.alerts.warning('O valor efetivamente pago deve ser maior que zero.');
       return;
     }
     this.baixando = true;
@@ -151,6 +159,9 @@ export class LancamentoFinanceiroComponent implements OnInit {
         );
       },
     });
+  }
+  get valorEfetivoBaixa() {
+    return this.baixa.valorPrincipal + this.baixa.juros + this.baixa.multa - this.baixa.desconto;
   }
   situacao(item: LancamentoFinanceiroDTO): SituacaoFiltroLancamento {
     if (item.situacao === 'CANCELADO') return 'CANCELADO';
@@ -177,7 +188,7 @@ export class LancamentoFinanceiroComponent implements OnInit {
     return item.saldoAberto > 0 && item.situacao !== 'CANCELADO';
   }
   private novaBaixa(): BaixaFinanceiraCreateDTO {
-    return { valor: 0, dataLiquidacao: this.hoje() };
+    return { valorPrincipal: 0, juros: 0, multa: 0, desconto: 0, dataLiquidacao: this.hoje() };
   }
   private hoje() {
     const data = new Date();
