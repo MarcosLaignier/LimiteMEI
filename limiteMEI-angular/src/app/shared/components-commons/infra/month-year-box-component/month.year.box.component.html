@@ -1,0 +1,1 @@
+<div class="month-field" [style.width]="width"><label>{{label}}:</label><div><input type="month" class="form-control" [ngModel]="dataField" (ngModelChange)="change($event)" [disabled]="disabled">@if(clearButton&&dataField&&!disabled){<button type="button" (click)="clear()" title="Limpar competência"><i class="bi bi-x-lg"></i></button>}</div></div>
