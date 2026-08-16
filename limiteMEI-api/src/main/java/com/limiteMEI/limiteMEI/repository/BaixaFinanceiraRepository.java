@@ -10,8 +10,8 @@ public interface BaixaFinanceiraRepository extends JpaRepository<BaixaFinanceira
     List<BaixaFinanceira> findByLancamentoIdOrderByDataLiquidacaoDesc(Long lancamentoId);
     Optional<BaixaFinanceira> findByIdAndLancamentoEmpresaId(Long id, Long empresaId);
 
-    @Query("select coalesce(sum(b.valor), 0) from BaixaFinanceira b where b.lancamento.id = :lancamentoId")
+    @Query("select coalesce(sum(b.valorPrincipal), 0) from BaixaFinanceira b where b.lancamento.id = :lancamentoId and b.ativo = true")
     BigDecimal totalPorLancamento(@Param("lancamentoId") Long lancamentoId);
 
-    boolean existsByLancamentoId(Long lancamentoId);
+    boolean existsByLancamentoIdAndAtivoTrue(Long lancamentoId);
 }

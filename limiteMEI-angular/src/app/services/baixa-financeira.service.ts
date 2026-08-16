@@ -14,7 +14,7 @@ export class BaixaFinanceiraService {
   criar(id: number, dto: BaixaFinanceiraCreateDTO) {
     return this.http.post<BaixaFinanceiraDTO>(this.url(id), dto);
   }
-  excluir(id: number, baixaId: number) {
-    return this.http.delete<void>(`${this.url(id)}/${baixaId}`);
+  estornar(id: number, baixaId: number, motivo: string) {
+    return this.http.post<void>(`${this.url(id)}/${baixaId}/estorno`, { motivo });
   }
 }

@@ -17,7 +17,16 @@ public class BaixaFinanceiraCreateDTO {
 
     @NotNull
     @DecimalMin(value = "0.01")
-    private BigDecimal valor;
+    private BigDecimal valorPrincipal;
+
+    @DecimalMin(value = "0.00")
+    private BigDecimal juros;
+
+    @DecimalMin(value = "0.00")
+    private BigDecimal multa;
+
+    @DecimalMin(value = "0.00")
+    private BigDecimal desconto;
     @NotNull
     private LocalDate dataLiquidacao;
     @NotNull

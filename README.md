@@ -4,7 +4,7 @@ O **LimiteMEI** é um projeto SaaS para ajudar Microempreendedores Individuais a
 
 O objetivo é reunir em um único lugar o controle de notas fiscais, receitas, despesas, contas a pagar e receber, fluxo de caixa, funcionário e relatórios mensais.
 
-> O projeto está em desenvolvimento. Atualmente existe a estrutura inicial da API, componentes reutilizáveis no frontend e o CRUD de categorias. Os demais módulos descritos neste documento fazem parte da evolução planejada.
+> O projeto está em desenvolvimento. Atualmente existem autenticação, empresa ativa, cadastros base e o início do módulo financeiro com lançamentos e baixas.
 
 ## Objetivos do produto
 
@@ -76,7 +76,7 @@ LimiteMEI/
 
 Já estão presentes no backend:
 
-- Entidades de usuário, empresa, categoria e movimento financeiro.
+- Entidades de usuário, empresa, categoria, pessoas, lançamentos e baixas financeiras.
 - DTOs e mappers.
 - Camadas de controller, service e repository.
 - Estruturas genéricas para CRUD, validação e filtros.
@@ -87,7 +87,15 @@ No frontend estão presentes:
 - Layout principal com menu lateral.
 - Componentes reutilizáveis de formulário, grid, filtros e diálogos.
 - Estrutura genérica de CRUD.
-- Lista e formulário inicial de categorias.
+- CRUDs de empresas, categorias e pessoas.
+- Lista e formulário de lançamentos financeiros com baixas totais ou parciais.
+- Monitor financeiro com filtros, totais, vencimentos e baixa vinculada à conta financeira.
+- Competência financeira informada por mês/ano e filtro reutilizável compartilhado entre lançamentos e monitor.
+- Categorias com classificação de faturamento MEI, natureza da receita, exigência documental e vínculo opcional ou obrigatório com pessoas.
+- Cadastro de contas financeiras por empresa, incluindo caixa, conta bancária, poupança e carteira digital.
+- Extrato e saldo atual por conta, movimentações manuais, transferências e geração automática de entradas e saídas pelas baixas.
+- Cancelamento auditado de lançamentos, estorno de baixas, histórico financeiro e proteção contra baixas simultâneas acima do saldo.
+- Composição da baixa por principal, juros, multa e desconto, com movimentação bancária pelo valor efetivamente pago.
 
 Antes de uso em produção ainda são necessários autenticação completa, isolamento de dados por empresa, banco persistente, migrations, testes de negócio e os módulos financeiros descritos no [roadmap](./ROADMAP.md).
 

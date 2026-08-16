@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "baixa_financeira")
@@ -29,7 +30,19 @@ public class BaixaFinanceira {
     private ContaFinanceira contaFinanceira;
 
     @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal valor;
+    private BigDecimal valorPrincipal;
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal juros;
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal multa;
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal desconto;
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal valorPago;
 
     @Column(nullable = false)
     private LocalDate dataLiquidacao;
@@ -40,4 +53,17 @@ public class BaixaFinanceira {
 
     @Column(length = 500)
     private String observacao;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean ativo = true;
+
+    @Column(name = "data_estorno")
+    private LocalDateTime dataEstorno;
+
+    @Column(name = "motivo_estorno", length = 500)
+    private String motivoEstorno;
+
+    @Column(name = "usuario_estorno", length = 150)
+    private String usuarioEstorno;
 }

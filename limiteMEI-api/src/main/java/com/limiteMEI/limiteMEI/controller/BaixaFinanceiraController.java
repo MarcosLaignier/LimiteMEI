@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.controller;
 
 import com.limiteMEI.limiteMEI.dto.baixa.*;
+import com.limiteMEI.limiteMEI.dto.lancamento.MotivoOperacaoDTO;
 import com.limiteMEI.limiteMEI.service.BaixaFinanceiraService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
@@ -20,7 +21,10 @@ public class BaixaFinanceiraController {
                                                       @Valid @RequestBody BaixaFinanceiraCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(lancamentoId, dto));
     }
-    @DeleteMapping("/{baixaId}")
+    @PostMapping("/{baixaId}/estorno")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long lancamentoId, @PathVariable Long baixaId) { service.delete(lancamentoId, baixaId); }
+    public void estornar(@PathVariable Long lancamentoId, @PathVariable Long baixaId,
+                         @Valid @RequestBody MotivoOperacaoDTO dto) {
+        service.estornar(lancamentoId, baixaId, dto);
+    }
 }
