@@ -31,6 +31,7 @@ export interface ApuracaoMeiDTO {
   competenciasAnterioresAbertas: number[];
   meses: ResumoMensalMeiDTO[];
   detalhes: DetalheApuracaoMeiDTO[];
+  conferenciaFiscal: ConferenciaFiscalMeiDTO;
   situacaoFechamento?: 'FECHADA' | 'REABERTA';
   dataFechamento?: string;
   usuarioFechamento?: string;
@@ -55,6 +56,30 @@ export interface RelatorioMensalMeiDTO {
   acumuladoAno: number;
   dataFechamento?: string;
   usuarioFechamento?: string;
+  conferenciaFiscal: ConferenciaFiscalMeiDTO;
+}
+
+export interface DocumentoFiscalApuracaoDTO {
+  id: number;
+  tipo: 'NFSE' | 'NFE' | 'NFCE' | 'OUTRO';
+  numero: string;
+  dataEmissao: string;
+  cliente?: string;
+  situacao: 'EMITIDO' | 'CANCELADO' | 'SUBSTITUIDO';
+  valorTotal: number;
+  valorVinculado: number;
+  diferenca: number;
+}
+
+export interface ConferenciaFiscalMeiDTO {
+  quantidadeEmitidos: number;
+  valorEmitidos: number;
+  quantidadeCancelados: number;
+  valorCancelados: number;
+  percentualDocumentado: number;
+  quantidadePendencias: number;
+  quantidadeDivergencias: number;
+  documentos: DocumentoFiscalApuracaoDTO[];
 }
 
 export interface HistoricoApuracaoMeiDTO {

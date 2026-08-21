@@ -6,6 +6,7 @@ import com.limiteMEI.limiteMEI.dto.mei.HistoricoApuracaoMeiDTO;
 import com.limiteMEI.limiteMEI.enums.*;
 import com.limiteMEI.limiteMEI.repository.LancamentoFinanceiroRepository;
 import com.limiteMEI.limiteMEI.repository.FechamentoApuracaoMeiRepository;
+import com.limiteMEI.limiteMEI.repository.DocumentoFiscalRepository;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
@@ -20,7 +21,9 @@ class ApuracaoMeiServiceTest {
     private final LancamentoFinanceiroRepository repository = mock(LancamentoFinanceiroRepository.class);
     private final EmpresaAtualService empresaAtual = mock(EmpresaAtualService.class);
     private final FechamentoApuracaoMeiRepository fechamentos = mock(FechamentoApuracaoMeiRepository.class);
-    private final ApuracaoMeiService service = new ApuracaoMeiService(repository, empresaAtual, fechamentos);
+    private final DocumentoFiscalRepository documentosFiscais = mock(DocumentoFiscalRepository.class);
+    private final ApuracaoMeiService service = new ApuracaoMeiService(
+            repository, empresaAtual, fechamentos, documentosFiscais);
 
     @Test
     void deveSepararReceitasPorNaturezaEAcumularAteReferencia() {

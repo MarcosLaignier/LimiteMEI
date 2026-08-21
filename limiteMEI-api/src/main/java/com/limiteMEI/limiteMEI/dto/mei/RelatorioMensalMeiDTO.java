@@ -28,4 +28,5 @@ public class RelatorioMensalMeiDTO {
     private BigDecimal acumuladoAno;
     private LocalDateTime dataFechamento;
     private String usuarioFechamento;
+    private ConferenciaFiscalMeiDTO conferenciaFiscal;
 }

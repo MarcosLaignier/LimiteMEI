@@ -6,6 +6,8 @@ import java.util.*;
 
 public interface DocumentoFiscalRepository extends JpaRepository<DocumentoFiscal, Long> {
     List<DocumentoFiscal> findByEmpresaIdAndExcluidoFalseOrderByDataEmissaoDescIdDesc(Long empresaId);
+    List<DocumentoFiscal> findByEmpresaIdAndDataEmissaoBetweenAndExcluidoFalseOrderByDataEmissaoAscIdAsc(
+            Long empresaId, java.time.LocalDate inicio, java.time.LocalDate fim);
     Optional<DocumentoFiscal> findByIdAndEmpresaIdAndExcluidoFalse(Long id, Long empresaId);
     boolean existsByEmpresaIdAndNumeroIgnoreCaseAndSerieIgnoreCaseAndExcluidoFalseAndIdNot(
             Long empresaId, String numero, String serie, Long id);

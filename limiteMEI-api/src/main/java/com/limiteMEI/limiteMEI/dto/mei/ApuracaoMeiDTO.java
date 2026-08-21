@@ -35,6 +35,7 @@ public class ApuracaoMeiDTO {
     private List<Integer> competenciasAnterioresAbertas;
     private List<ResumoMensalMeiDTO> meses;
     private List<DetalheApuracaoMeiDTO> detalhes;
+    private ConferenciaFiscalMeiDTO conferenciaFiscal;
     private SituacaoApuracaoMeiEnum situacaoFechamento;
     private LocalDateTime dataFechamento;
     private String usuarioFechamento;

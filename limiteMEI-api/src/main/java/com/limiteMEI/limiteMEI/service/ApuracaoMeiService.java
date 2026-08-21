@@ -7,6 +7,7 @@ import com.limiteMEI.limiteMEI.enums.FaixaAlertaMeiEnum;
 import com.limiteMEI.limiteMEI.enums.SituacaoLancamentoEnum;
 import com.limiteMEI.limiteMEI.repository.LancamentoFinanceiroRepository;
 import com.limiteMEI.limiteMEI.repository.FechamentoApuracaoMeiRepository;
+import com.limiteMEI.limiteMEI.repository.DocumentoFiscalRepository;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
 import com.limiteMEI.limiteMEI.dto.lancamento.MotivoOperacaoDTO;
 import com.limiteMEI.limiteMEI.enums.SituacaoApuracaoMeiEnum;
@@ -24,12 +25,15 @@ public class ApuracaoMeiService {
     private final LancamentoFinanceiroRepository lancamentos;
     private final EmpresaAtualService empresaAtual;
     private final FechamentoApuracaoMeiRepository fechamentos;
+    private final DocumentoFiscalRepository documentosFiscais;
 
     public ApuracaoMeiService(LancamentoFinanceiroRepository lancamentos, EmpresaAtualService empresaAtual,
-                              FechamentoApuracaoMeiRepository fechamentos) {
+                              FechamentoApuracaoMeiRepository fechamentos,
+                              DocumentoFiscalRepository documentosFiscais) {
         this.lancamentos = lancamentos;
         this.empresaAtual = empresaAtual;
         this.fechamentos = fechamentos;
+        this.documentosFiscais = documentosFiscais;
     }
 
     public ApuracaoMeiDTO apurar(int ano, int mesReferencia) {
@@ -72,6 +76,8 @@ public class ApuracaoMeiService {
         int abertos = (int) lancamentosMes.stream().filter(this::lancamentoAberto).count();
         int vencidos = (int) lancamentosMes.stream().filter(this::lancamentoAberto)
                 .filter(item -> item.getDataVencimento() != null && item.getDataVencimento().isBefore(LocalDate.now())).count();
+        ConferenciaFiscalMeiDTO conferenciaFiscal = conferenciaFiscal(empresa, ano, mesReferencia,
+                referencia.getTotal(), detalhes);
         return ApuracaoMeiDTO.builder().ano(ano).mesReferencia(mesReferencia)
                 .comercioMes(referencia.getComercio()).industriaMes(referencia.getIndustria())
                 .servicosMes(referencia.getServicos()).totalMes(referencia.getTotal())
@@ -85,6 +91,7 @@ public class ApuracaoMeiService {
                 .quantidadeLancamentosAbertos(abertos).quantidadeLancamentosVencidos(vencidos)
                 .competenciasAnterioresAbertas(anterioresAbertas)
                 .meses(meses).detalhes(detalhes)
+                .conferenciaFiscal(conferenciaFiscal)
                 .situacaoFechamento(fechamento.map(FechamentoApuracaoMei::getSituacao).orElse(null))
                 .dataFechamento(fechamento.map(FechamentoApuracaoMei::getDataFechamento).orElse(null))
                 .usuarioFechamento(fechamento.map(FechamentoApuracaoMei::getUsuarioFechamento).orElse(null))
@@ -144,8 +151,9 @@ public class ApuracaoMeiService {
             preencherFotografia(preview, receitasDoMes(empresa, ano, mes));
             return preview;
         });
+        ApuracaoMeiDTO apuracaoAtual = apurar(ano, mes);
         BigDecimal acumulado = fechamento.map(FechamentoApuracaoMei::getAcumuladoAno)
-                .orElseGet(() -> apurar(ano, mes).getAcumuladoAno());
+                .orElse(apuracaoAtual.getAcumuladoAno());
         return RelatorioMensalMeiDTO.builder().cnpj(empresa.getCnpj()).razaoSocial(empresa.getRazaoSocial())
                 .nomeFantasia(empresa.getNomeFantasia()).dataAbertura(empresa.getDataAbertura())
                 .ano(ano).mes(mes).situacao(fechamento.map(FechamentoApuracaoMei::getSituacao).orElse(null))
@@ -156,7 +164,8 @@ public class ApuracaoMeiService {
                 .servicosComDocumento(valores.getServicosComDocumento())
                 .servicosSemDocumento(valores.getServicosSemDocumento()).total(valores.getTotal())
                 .acumuladoAno(acumulado)
-                .dataFechamento(valores.getDataFechamento()).usuarioFechamento(valores.getUsuarioFechamento()).build();
+                .dataFechamento(valores.getDataFechamento()).usuarioFechamento(valores.getUsuarioFechamento())
+                .conferenciaFiscal(apuracaoAtual.getConferenciaFiscal()).build();
     }
 
     public HistoricoApuracaoMeiDTO historico(int ano) {
@@ -290,6 +299,46 @@ public class ApuracaoMeiService {
         fechamento.setServicosSemDocumento(total(receitas, NaturezaReceitaEnum.SERVICOS, false));
         fechamento.setTotal(receitas.stream().map(LancamentoFinanceiro::getValor)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
+    }
+
+    private ConferenciaFiscalMeiDTO conferenciaFiscal(Empresa empresa, int ano, int mes, BigDecimal faturamento,
+                                                       List<DetalheApuracaoMeiDTO> detalhes) {
+        YearMonth periodo = YearMonth.of(ano, mes);
+        List<DocumentoFiscalApuracaoDTO> itens = documentosFiscais
+                .findByEmpresaIdAndDataEmissaoBetweenAndExcluidoFalseOrderByDataEmissaoAscIdAsc(
+                        empresa.getId(), periodo.atDay(1), periodo.atEndOfMonth())
+                .stream().map(documento -> {
+                    BigDecimal vinculado = documento.getVinculos().stream()
+                            .map(DocumentoFiscalLancamento::getValorVinculado)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    return DocumentoFiscalApuracaoDTO.builder().id(documento.getId()).tipo(documento.getTipo())
+                            .numero(documento.getNumero()).dataEmissao(documento.getDataEmissao())
+                            .cliente(documento.getCliente() == null ? null : documento.getCliente().getNomeRazaoSocial())
+                            .situacao(documento.getSituacao()).valorTotal(documento.getValorTotal())
+                            .valorVinculado(vinculado).diferenca(documento.getValorTotal().subtract(vinculado)).build();
+                }).toList();
+        List<DocumentoFiscalApuracaoDTO> emitidos = itens.stream()
+                .filter(item -> item.getSituacao() == com.limiteMEI.limiteMEI.enums.SituacaoDocumentoFiscalEnum.EMITIDO)
+                .toList();
+        List<DocumentoFiscalApuracaoDTO> cancelados = itens.stream()
+                .filter(item -> item.getSituacao() == com.limiteMEI.limiteMEI.enums.SituacaoDocumentoFiscalEnum.CANCELADO)
+                .toList();
+        BigDecimal valorDocumentado = detalhes.stream().filter(DetalheApuracaoMeiDTO::getIncluido)
+                .filter(DetalheApuracaoMeiDTO::getDocumentoFiscalEmitido).map(DetalheApuracaoMeiDTO::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal percentual = faturamento == null || faturamento.signum() == 0 ? BigDecimal.ZERO
+                : valorDocumentado.multiply(CEM).divide(faturamento, 2, RoundingMode.HALF_UP);
+        return ConferenciaFiscalMeiDTO.builder().quantidadeEmitidos(emitidos.size())
+                .valorEmitidos(somarDocumentos(emitidos)).quantidadeCancelados(cancelados.size())
+                .valorCancelados(somarDocumentos(cancelados)).percentualDocumentado(percentual)
+                .quantidadePendencias((int) detalhes.stream().filter(DetalheApuracaoMeiDTO::getPendenciaFiscal).count())
+                .quantidadeDivergencias((int) emitidos.stream().filter(item -> item.getDiferenca().signum() != 0).count())
+                .documentos(itens).build();
+    }
+
+    private BigDecimal somarDocumentos(List<DocumentoFiscalApuracaoDTO> documentos) {
+        return documentos.stream().map(DocumentoFiscalApuracaoDTO::getValorTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private BigDecimal total(List<LancamentoFinanceiro> receitas, NaturezaReceitaEnum natureza, boolean documento) {
