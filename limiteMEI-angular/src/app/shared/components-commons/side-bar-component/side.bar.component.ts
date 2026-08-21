@@ -72,6 +72,13 @@ export class SideBarComponent implements OnInit {
         { label: 'Histórico de apurações', icon: 'bi-calendar-check', route: '/app/financeiro/mei/historico' }
       ]
     },
+    {
+      label: 'Fiscal',
+      icon: 'bi-receipt',
+      children: [
+        { label: 'Documentos fiscais', icon: 'bi-file-earmark-text', route: '/app/fiscal/documentos' }
+      ]
+    },
 
 
     { label: 'Configurações', icon: 'bi-gear', route: '/configuracoes' }

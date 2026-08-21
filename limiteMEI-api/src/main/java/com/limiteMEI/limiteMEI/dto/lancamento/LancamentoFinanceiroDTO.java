@@ -28,6 +28,9 @@ public class LancamentoFinanceiroDTO {
     private Boolean ativo;
     private String observacao;
     private Boolean documentoFiscalEmitido;
+    private Long documentoFiscalId;
+    private String documentoFiscalNumero;
+    private BigDecimal valorDocumentoFiscal;
     private LocalDateTime dataCancelamento;
     private String motivoCancelamento;
     private String usuarioCancelamento;

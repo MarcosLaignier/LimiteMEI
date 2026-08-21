@@ -34,6 +34,8 @@ public class LancamentoFinanceiroCreateDTO {
     private String observacao;
 
     private Boolean documentoFiscalEmitido;
+    private Long documentoFiscalId;
+    private BigDecimal valorDocumentoFiscal;
 
     private Boolean baixarAutomaticamente;
 

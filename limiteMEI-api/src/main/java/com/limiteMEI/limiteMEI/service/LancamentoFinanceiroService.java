@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.Map;
 import java.util.function.Function;
@@ -31,6 +32,7 @@ public class LancamentoFinanceiroService {
     private final ParcelamentoValidator parcelamentoValidator;
     private final RecorrenciaValidator recorrenciaValidator;
     private final FechamentoApuracaoMeiRepository fechamentosMei;
+    private final DocumentoFiscalService documentosFiscais;
 
     public LancamentoFinanceiroService(LancamentoFinanceiroRepository repository, BaixaFinanceiraRepository baixas,
                                        EmpresaAtualService empresaAtual, CategoriaService categorias,
@@ -38,7 +40,8 @@ public class LancamentoFinanceiroService {
                                        MovimentoFinanceiroService movimentos, HistoricoFinanceiroService historico,
                                        ParcelamentoValidator parcelamentoValidator,
                                        RecorrenciaValidator recorrenciaValidator,
-                                       FechamentoApuracaoMeiRepository fechamentosMei) {
+                                       FechamentoApuracaoMeiRepository fechamentosMei,
+                                       DocumentoFiscalService documentosFiscais) {
         this.repository = repository;
         this.baixas = baixas;
         this.empresaAtual = empresaAtual;
@@ -51,6 +54,7 @@ public class LancamentoFinanceiroService {
         this.parcelamentoValidator = parcelamentoValidator;
         this.recorrenciaValidator = recorrenciaValidator;
         this.fechamentosMei = fechamentosMei;
+        this.documentosFiscais = documentosFiscais;
     }
 
     public List<LancamentoFinanceiroDTO> findAll() {
@@ -62,6 +66,14 @@ public class LancamentoFinanceiroService {
     }
 
     public LancamentoFinanceiroDTO create(LancamentoFinanceiroCreateDTO dto) {
+        if (Boolean.TRUE.equals(dto.getDocumentoFiscalEmitido()) && dto.getDocumentoFiscalId() == null) {
+            throw new ApplicationException("Selecione o documento fiscal vinculado ao lançamento");
+        }
+        if (Boolean.TRUE.equals(dto.getDocumentoFiscalEmitido())
+                && ((dto.getRecorrencias() != null && !dto.getRecorrencias().isEmpty())
+                || (dto.getParcelas() != null && !dto.getParcelas().isEmpty()))) {
+            throw new ApplicationException("O vínculo fiscal deve ser feito individualmente após gerar parcelas ou recorrências");
+        }
         if (dto.getRecorrencias() != null && !dto.getRecorrencias().isEmpty()) {
             if (dto.getParcelas() != null && !dto.getParcelas().isEmpty()) {
                 throw new ApplicationException("Um lançamento não pode ser parcelado e recorrente ao mesmo tempo");
@@ -75,6 +87,9 @@ public class LancamentoFinanceiroService {
                 .situacao(SituacaoLancamentoEnum.ABERTO).build();
         apply(entity, dto);
         entity = repository.save(entity);
+        documentosFiscais.sincronizarVinculoDoLancamento(entity,
+                Boolean.TRUE.equals(dto.getDocumentoFiscalEmitido()) ? dto.getDocumentoFiscalId() : null,
+                dto.getValorDocumentoFiscal());
         historico.registrar(entity, null, EventoFinanceiroEnum.CRIACAO_LANCAMENTO, "Lançamento criado");
         if (Boolean.TRUE.equals(dto.getBaixarAutomaticamente())) {
             if (dto.getDataLiquidacao() == null || dto.getFormaPagamento() == null || dto.getContaFinanceiraId() == null) {
@@ -104,6 +119,9 @@ public class LancamentoFinanceiroService {
     }
 
     public LancamentoFinanceiroDTO update(Long id, LancamentoFinanceiroCreateDTO dto) {
+        if (Boolean.TRUE.equals(dto.getDocumentoFiscalEmitido()) && dto.getDocumentoFiscalId() == null) {
+            throw new ApplicationException("Selecione o documento fiscal vinculado ao lançamento");
+        }
         LancamentoFinanceiro entity = findOwned(id);
         validarPeriodoAberto(entity.getEmpresa(), entity.getDataCompetencia());
         if (entity.getSituacao() == SituacaoLancamentoEnum.CANCELADO) {
@@ -119,6 +137,9 @@ public class LancamentoFinanceiroService {
         }
         atualizarSituacao(entity, total);
         entity = repository.save(entity);
+        documentosFiscais.sincronizarVinculoDoLancamento(entity,
+                Boolean.TRUE.equals(dto.getDocumentoFiscalEmitido()) ? dto.getDocumentoFiscalId() : null,
+                dto.getValorDocumentoFiscal());
         historico.registrar(entity, null, EventoFinanceiroEnum.ALTERACAO_LANCAMENTO, "Lançamento alterado");
         return toDTO(entity);
     }
@@ -323,6 +344,7 @@ public class LancamentoFinanceiroService {
 
     private LancamentoFinanceiroDTO toDTO(LancamentoFinanceiro entity) {
         BigDecimal liquidado = total(entity.getId());
+        Optional<DocumentoFiscalLancamento> vinculoFiscal = documentosFiscais.vinculoEmitido(entity.getId());
         return LancamentoFinanceiroDTO.builder().id(entity.getId()).descricao(entity.getDescricao()).tipo(entity.getTipo())
                 .categoriaId(entity.getCategoria().getId()).categoriaNome(entity.getCategoria().getNome())
                 .pessoaId(entity.getPessoa() == null ? null : entity.getPessoa().getId())
@@ -331,6 +353,9 @@ public class LancamentoFinanceiroService {
                 .dataCompetencia(entity.getDataCompetencia()).dataVencimento(entity.getDataVencimento())
                 .situacao(entity.getSituacao()).ativo(entity.getAtivo()).observacao(entity.getObservacao())
                 .documentoFiscalEmitido(Boolean.TRUE.equals(entity.getDocumentoFiscalEmitido()))
+                .documentoFiscalId(vinculoFiscal.map(item -> item.getDocumentoFiscal().getId()).orElse(null))
+                .documentoFiscalNumero(vinculoFiscal.map(item -> item.getDocumentoFiscal().getNumero()).orElse(null))
+                .valorDocumentoFiscal(vinculoFiscal.map(DocumentoFiscalLancamento::getValorVinculado).orElse(null))
                 .dataCancelamento(entity.getDataCancelamento()).motivoCancelamento(entity.getMotivoCancelamento())
                 .usuarioCancelamento(entity.getUsuarioCancelamento())
                 .parcelamentoId(entity.getParcelamentoId()).numeroParcela(entity.getNumeroParcela())

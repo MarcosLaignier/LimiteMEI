@@ -18,6 +18,9 @@ export interface LancamentoFinanceiroCreateDTO {
   ativo: boolean;
   observacao: string;
   documentoFiscalEmitido: boolean;
+  documentoFiscalId?: number;
+  documentoFiscalNumero?: string;
+  valorDocumentoFiscal: number;
   baixarAutomaticamente: boolean;
   dataLiquidacao?: string;
   formaPagamento?: FormaPagamentoEnum;
@@ -93,6 +96,9 @@ export class LancamentoFinanceiroDTO {
   ativo!: boolean;
   observacao?: string;
   documentoFiscalEmitido!: boolean;
+  documentoFiscalId?: number;
+  documentoFiscalNumero?: string;
+  valorDocumentoFiscal!: number;
   dataCancelamento?: string;
   motivoCancelamento?: string;
   usuarioCancelamento?: string;

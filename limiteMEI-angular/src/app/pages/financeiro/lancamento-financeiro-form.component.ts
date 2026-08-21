@@ -33,6 +33,7 @@ import { ConfirmDialogService } from '../../shared/components-commons/infra/conf
 import { ContaFinanceiraSelectorComponent } from '../../shared/components-commons/conta-financeira-selector-component/conta-financeira.selector.component';
 import { ParcelamentoEditorComponent } from '../../shared/components-commons/parcelamento-editor-component/parcelamento.editor.component';
 import { RecorrenciaEditorComponent, ConfiguracaoRecorrencia } from '../../shared/components-commons/recorrencia-editor-component/recorrencia.editor.component';
+import { DocumentoFiscalSelectorComponent } from '../../shared/components-commons/documento-fiscal-selector-component/documento-fiscal.selector.component';
 @Component({
   standalone: true,
   imports: [
@@ -51,6 +52,7 @@ import { RecorrenciaEditorComponent, ConfiguracaoRecorrencia } from '../../share
     ContaFinanceiraSelectorComponent,
     ParcelamentoEditorComponent,
     RecorrenciaEditorComponent,
+    DocumentoFiscalSelectorComponent,
   ],
   template: `<toolbar-filter
       tituloPagina="Lançamento financeiro"
@@ -131,10 +133,18 @@ import { RecorrenciaEditorComponent, ConfiguracaoRecorrencia } from '../../share
           <switch-component
             label="Documento fiscal emitido"
             [(dataField)]="model.documentoFiscalEmitido"
+            (dataFieldChange)="documentoFiscalChanged($event)"
             [disabled]="loading"
           />
         }
       </div>
+      @if (model.tipo === tipoEnum.RECEBER && model.documentoFiscalEmitido) {
+        <div class="form-row fiscal-link">
+          <documento-fiscal-selector-component [(documentoId)]="model.documentoFiscalId" [disabled]="loading" />
+          <number-box-component label="Valor vinculado à nota" width="220px" [(dataField)]="model.valorDocumentoFiscal" [disabled]="loading" />
+          <small>A nota deve ser cadastrada previamente no módulo Fiscal.</small>
+        </div>
+      }
       @if (!id) {
         <div class="installment-option">
           <switch-component
@@ -344,6 +354,7 @@ import { RecorrenciaEditorComponent, ConfiguracaoRecorrencia } from '../../share
       }
       .section-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem}.danger-outline{border:1px solid #dc3545;background:#fff;color:#dc3545;border-radius:6px;padding:.5rem .8rem}.cancelled{display:flex;flex-direction:column;gap:.25rem;margin:1rem 0;padding:1rem;border:1px solid #efb8bd;background:#fff6f7;border-radius:8px;color:#842029}.cancelled small{color:#687080}.reversed{color:#687080;font-size:.85rem}.history article{display:flex;gap:.75rem;padding:.8rem 0;border-top:1px solid #eee}.history article div{display:flex;flex-direction:column}.history span,.history small{color:#687080}.history small{font-size:.78rem;margin-top:.2rem}
       .payment-total{display:inline-flex;flex-direction:column;margin-top:1rem;padding:.8rem 1rem;border:1px solid #dce2f5;border-radius:8px;background:#f8f9ff}.payment-total span,.payment-total small{color:#687080}.payment-total strong{font-size:1.2rem;color:#334bc4}
+      .fiscal-link{padding:1rem;border:1px solid #dce2f5;border-radius:8px;background:#f8f9ff}.fiscal-link small{max-width:260px;color:#687080}
       .empty {
         color: #687080;
         margin-top: 1rem;
@@ -410,6 +421,7 @@ export class LancamentoFinanceiroFormComponent
       observacao: '',
       baixarAutomaticamente: false,
       documentoFiscalEmitido: false,
+      valorDocumentoFiscal: 0,
     };
     this.pessoa = undefined;
   }
@@ -422,6 +434,7 @@ export class LancamentoFinanceiroFormComponent
             ...r.body,
             observacao: r.body.observacao ?? '',
             baixarAutomaticamente: false,
+            valorDocumentoFiscal: r.body.valorDocumentoFiscal ?? 0,
           };
           if (r.body.pessoaId)
             this.pessoa = { id: r.body.pessoaId, nomeRazaoSocial: r.body.pessoaNome } as PessoaDTO;
@@ -440,7 +453,17 @@ export class LancamentoFinanceiroFormComponent
     this.model.categoriaId = undefined;
     if (this.model.tipo !== TipoLancamentoEnum.RECEBER) {
       this.model.documentoFiscalEmitido = false;
+      this.model.documentoFiscalId = undefined;
+      this.model.valorDocumentoFiscal = 0;
     }
+  }
+  documentoFiscalChanged(enabled: boolean) {
+    if (enabled) {
+      this.model.valorDocumentoFiscal = this.model.valor;
+      return;
+    }
+    this.model.documentoFiscalId = undefined;
+    this.model.valorDocumentoFiscal = 0;
   }
   setPessoa(p?: PessoaDTO) {
     this.pessoa = p;
@@ -459,6 +482,8 @@ export class LancamentoFinanceiroFormComponent
     this.model.parcelas = [];
     if (enabled) {
       this.recorrente = false;
+      this.documentoFiscalChanged(false);
+      this.model.documentoFiscalEmitido = false;
       this.model.recorrencias = [];
       this.model.baixarAutomaticamente = false;
       this.automaticPaymentChanged(false);
@@ -469,6 +494,8 @@ export class LancamentoFinanceiroFormComponent
     this.model.periodicidadeRecorrencia = undefined;
     if (enabled) {
       this.parcelado = false;
+      this.documentoFiscalChanged(false);
+      this.model.documentoFiscalEmitido = false;
       this.model.parcelas = [];
       this.model.baixarAutomaticamente = false;
       this.automaticPaymentChanged(false);
@@ -492,6 +519,10 @@ export class LancamentoFinanceiroFormComponent
       !this.model.dataVencimento
     ) {
       this.alerts.warning('Preencha descrição, tipo, categoria, valor e datas.');
+      return false;
+    }
+    if (this.model.documentoFiscalEmitido && (!this.model.documentoFiscalId || !this.model.valorDocumentoFiscal)) {
+      this.alerts.warning('Selecione a nota fiscal e informe o valor vinculado.');
       return false;
     }
     if (this.parcelado) {
