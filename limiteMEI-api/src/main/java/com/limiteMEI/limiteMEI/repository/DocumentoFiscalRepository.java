@@ -9,4 +9,5 @@ public interface DocumentoFiscalRepository extends JpaRepository<DocumentoFiscal
     Optional<DocumentoFiscal> findByIdAndEmpresaIdAndExcluidoFalse(Long id, Long empresaId);
     boolean existsByEmpresaIdAndNumeroIgnoreCaseAndSerieIgnoreCaseAndExcluidoFalseAndIdNot(
             Long empresaId, String numero, String serie, Long id);
+    boolean existsByEmpresaIdAndChaveAcessoIgnoreCaseAndExcluidoFalse(Long empresaId, String chaveAcesso);
 }

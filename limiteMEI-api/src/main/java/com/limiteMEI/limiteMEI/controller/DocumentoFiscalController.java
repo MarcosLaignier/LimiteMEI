@@ -2,18 +2,22 @@ package com.limiteMEI.limiteMEI.controller;
 
 import com.limiteMEI.limiteMEI.dto.documentofiscal.*;
 import com.limiteMEI.limiteMEI.service.DocumentoFiscalService;
+import com.limiteMEI.limiteMEI.service.DocumentoFiscalXmlService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
 @RequestMapping("/documentos-fiscais")
 public class DocumentoFiscalController {
     private final DocumentoFiscalService service;
+    private final DocumentoFiscalXmlService xmlService;
 
-    public DocumentoFiscalController(DocumentoFiscalService service) {
+    public DocumentoFiscalController(DocumentoFiscalService service, DocumentoFiscalXmlService xmlService) {
         this.service = service;
+        this.xmlService = xmlService;
     }
 
     @GetMapping
@@ -35,4 +39,9 @@ public class DocumentoFiscalController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) { service.delete(id); }
+
+    @PostMapping(value = "/importar-xml", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public DocumentoFiscalXmlPreviewDTO importarXml(@RequestPart("arquivo") MultipartFile arquivo) {
+        return xmlService.importar(arquivo);
+    }
 }
