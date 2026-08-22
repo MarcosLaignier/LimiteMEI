@@ -323,7 +323,7 @@ export class RelatoriosComponent {
       return;
     }
     this.router.navigate(['/app/relatorios', tipo], {
-      queryParams: { inicio: this.inicioFluxo, fim: this.fimFluxo },
+      queryParams: { competencia: this.competenciaMei, inicio: this.inicioFluxo, fim: this.fimFluxo },
     });
   }
 

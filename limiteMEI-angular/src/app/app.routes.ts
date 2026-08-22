@@ -150,15 +150,67 @@ export const routes: Routes = [
       },
       {
         path: 'relatorios',
-        canActivate: [empresaAtivaGuard],
-        loadComponent: () =>
-          import('./pages/relatorios/relatorios.component').then((m) => m.RelatoriosComponent),
+        pathMatch: 'full',
+        redirectTo: 'relatorios/fluxo-caixa',
       },
       {
         path: 'relatorios/fluxo-caixa',
         canActivate: [empresaAtivaGuard],
         loadComponent: () =>
           import('./pages/relatorios/fluxo-caixa-relatorio.component').then((m) => m.FluxoCaixaRelatorioComponent),
+      },
+      {
+        path: 'relatorios/lancamentos',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-lancamentos.component').then((m) => m.RelatorioLancamentosComponent),
+        data: { relatorioTipo: 'lancamentos' },
+      },
+      {
+        path: 'relatorios/contas-receber',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-lancamentos.component').then((m) => m.RelatorioLancamentosComponent),
+        data: { relatorioTipo: 'contas-receber' },
+      },
+      {
+        path: 'relatorios/contas-pagar',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-lancamentos.component').then((m) => m.RelatorioLancamentosComponent),
+        data: { relatorioTipo: 'contas-pagar' },
+      },
+      {
+        path: 'relatorios/documentos-fiscais',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-documentos-fiscais.component').then((m) => m.RelatorioDocumentosFiscaisComponent),
+      },
+      {
+        path: 'relatorios/clientes',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-pessoas.component').then((m) => m.RelatorioPessoasComponent),
+        data: { papel: 'CLIENTE' },
+      },
+      {
+        path: 'relatorios/fornecedores',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-pessoas.component').then((m) => m.RelatorioPessoasComponent),
+        data: { papel: 'FORNECEDOR' },
+      },
+      {
+        path: 'relatorios/apuracao-anual',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-apuracao-anual.component').then((m) => m.RelatorioApuracaoAnualComponent),
+      },
+      {
+        path: 'relatorios/resumo-financeiro',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorio-resumo-financeiro.component').then((m) => m.RelatorioResumoFinanceiroComponent),
       },
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
     ],
