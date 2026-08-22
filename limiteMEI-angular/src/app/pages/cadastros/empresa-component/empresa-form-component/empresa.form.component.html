@@ -11,6 +11,37 @@
       </div>
     </div>
 
+    <div class="company-logo-panel mt-4">
+      <div class="company-logo-preview">
+        @if (logoPreview) {
+          <img [src]="logoPreview" alt="Logo da empresa">
+        } @else {
+          <div class="company-logo-placeholder">
+            <i class="bi bi-image"></i>
+            <span>Logo</span>
+          </div>
+        }
+      </div>
+      <div class="company-logo-content">
+        <label class="form-label">Logo da empresa</label>
+        <p>Imagem usada futuramente no cabeçalho dos relatórios. Use PNG, JPG ou WEBP até 1MB.</p>
+        <div class="company-logo-actions">
+          <button type="button" class="btn btn-outline-primary btn-sm" [disabled]="loading || removendoLogo"
+                  (click)="logoInput.click()">
+            <i class="bi bi-upload"></i> Selecionar imagem
+          </button>
+          @if (logoPreview) {
+            <button type="button" class="btn btn-outline-danger btn-sm" [disabled]="loading || removendoLogo"
+                    (click)="removerLogo()">
+              <i class="bi" [class.bi-trash]="!removendoLogo" [class.bi-arrow-repeat]="removendoLogo"></i>
+              {{removendoLogo ? 'Removendo...' : 'Remover'}}
+            </button>
+          }
+        </div>
+        <input #logoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onLogoSelected($event)">
+      </div>
+    </div>
+
     <div class="row gx-5 gy-4 mt-1 align-items-end company-identification-row">
       <text-box-component label="CNPJ" mask="cnpj" placeholder="XX.XXX.XXX/XXXX-XX"
                           width="245px" colClass="col-auto px-md-3" [disabled]="loading" [(dataField)]="model.cnpj"></text-box-component>

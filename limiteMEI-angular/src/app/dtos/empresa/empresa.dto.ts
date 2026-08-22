@@ -31,4 +31,7 @@ export class EmpresaDTO {
 
   @GridColumn({ label: 'Encerramento', type: 'date', ordem: 10, width: '140px' })
   dataEncerramento?: string;
+
+  possuiLogo?: boolean;
+  logoDataUrl?: string;
 }
