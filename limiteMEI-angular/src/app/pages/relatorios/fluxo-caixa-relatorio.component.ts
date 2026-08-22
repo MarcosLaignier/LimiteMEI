@@ -15,7 +15,7 @@ import { RelatorioService } from '../../services/relatorio.service';
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
 import { competenciaAtual, periodoDaCompetencia, periodoLabel } from '../../shared/components-commons/relatorio/report-period.utils';
 import { ReportViewComponent } from '../../shared/components-commons/relatorio/report-view.component';
-import { ReportColumn, ReportRow, ReportTotal } from '../../shared/components-commons/relatorio/report.types';
+import { ReportColumn, ReportFilter, ReportRow, ReportTotal } from '../../shared/components-commons/relatorio/report.types';
 
 @Component({
   standalone: true,
@@ -70,6 +70,7 @@ import { ReportColumn, ReportRow, ReportTotal } from '../../shared/components-co
       titulo="Relatório de fluxo de caixa"
       [subtitulo]="subtitulo"
       fileName="fluxo-caixa"
+      [filtros]="filtrosRelatorio"
       [colunas]="colunas"
       [linhas]="linhas"
       [totalizadores]="totalizadores" />
@@ -122,6 +123,18 @@ export class FluxoCaixaRelatorioComponent implements OnInit {
     if (this.tipo === TipoFluxoCaixaEnum.ENTRADA) return TipoMovimentoEnum.RECEITA;
     if (this.tipo === TipoFluxoCaixaEnum.SAIDA) return TipoMovimentoEnum.DESPESA;
     return undefined;
+  }
+
+  get filtrosRelatorio(): ReportFilter[] {
+    return [
+      { label: 'Competência', valor: this.competenciaLabel() },
+      { label: 'Período', valor: periodoLabel(this.inicio, this.fim) },
+      { label: 'Conta', valor: this.relatorio?.contaFinanceiraNome || 'Todas as contas' },
+      { label: 'Tipo', valor: this.tipo ? this.tipoLabels[this.tipo] : 'Todos' },
+      { label: 'Origem', valor: this.origem ? this.origemLabels[this.origem] : 'Todas' },
+      { label: 'Forma de pagamento', valor: this.formaPagamento ? this.formaLabels[this.formaPagamento] : 'Todas' },
+      { label: 'Categoria', valor: this.categoriaId ? `ID ${this.categoriaId}` : 'Todas' },
+    ];
   }
 
   competenciaAlterada(competencia: string) {
@@ -197,5 +210,10 @@ export class FluxoCaixaRelatorioComponent implements OnInit {
       { label: 'Saídas', valor: saidas, currency: true },
       { label: 'Saldo do período', valor: entradas - saidas, currency: true },
     ];
+  }
+
+  private competenciaLabel() {
+    const [ano, mes] = (this.competencia || '').split('-');
+    return ano && mes ? `${mes}/${ano}` : '';
   }
 }

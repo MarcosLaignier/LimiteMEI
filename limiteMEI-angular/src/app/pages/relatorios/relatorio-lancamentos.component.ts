@@ -10,7 +10,7 @@ import { SelectEnumComponent } from '../../shared/components-commons/infra/selec
 import { TextBoxComponent } from '../../shared/components-commons/infra/text-box-component/text.box.component';
 import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
 import { ReportViewComponent } from '../../shared/components-commons/relatorio/report-view.component';
-import { ReportColumn, ReportRow, ReportTotal, somaReport } from '../../shared/components-commons/relatorio/report.types';
+import { ReportColumn, ReportFilter, ReportRow, ReportTotal, somaReport } from '../../shared/components-commons/relatorio/report.types';
 import { competenciaAtual, periodoDaCompetencia, periodoLabel } from '../../shared/components-commons/relatorio/report-period.utils';
 import { LancamentoFinanceiroDTO } from '../../dtos/lancamento/lancamento.financeiro';
 import { PessoaDTO } from '../../dtos/pessoa/pessoa.dto';
@@ -92,6 +92,7 @@ type RelatorioLancamentoTipo = 'lancamentos' | 'contas-receber' | 'contas-pagar'
       [titulo]="titulo"
       [subtitulo]="subtitulo"
       [fileName]="fileName"
+      [filtros]="filtrosRelatorio"
       [colunas]="colunas"
       [linhas]="linhas"
       [totalizadores]="totalizadores" />
@@ -150,6 +151,21 @@ export class RelatorioLancamentosComponent implements OnInit {
     if (tipo === TipoLancamentoEnum.RECEBER) return TipoMovimentoEnum.RECEITA;
     if (tipo === TipoLancamentoEnum.PAGAR) return TipoMovimentoEnum.DESPESA;
     return undefined;
+  }
+
+  get filtrosRelatorio(): ReportFilter[] {
+    const tipoFiltro = this.tipoFixo ?? this.tipo;
+    return [
+      { label: 'Competência', valor: this.competenciaLabel() },
+      { label: 'Período', valor: periodoLabel(this.inicio, this.fim) },
+      { label: 'Tipo', valor: tipoFiltro ? (tipoFiltro === TipoLancamentoEnum.RECEBER ? 'Receber' : 'Pagar') : 'Todos' },
+      { label: 'Situação', valor: this.situacao ? (SITUACAO_LANCAMENTO_LABELS[this.situacao] ?? this.situacao) : 'Todas' },
+      { label: 'Categoria', valor: this.categoriaId ? `ID ${this.categoriaId}` : 'Todas' },
+      { label: 'Pessoa', valor: this.pessoa?.nomeRazaoSocial || 'Todas' },
+      { label: 'Valor mínimo', valor: this.valorMin ?? 'Não informado' },
+      { label: 'Valor máximo', valor: this.valorMax ?? 'Não informado' },
+      { label: 'Descrição', valor: this.descricao || 'Não informada' },
+    ];
   }
 
   configurarTipo() {
@@ -237,5 +253,10 @@ export class RelatorioLancamentosComponent implements OnInit {
       { label: 'Liquidado', valor: somaReport(this.linhas, 'liquidado'), currency: true },
       { label: 'Saldo aberto', valor: somaReport(this.linhas, 'saldo'), currency: true },
     ];
+  }
+
+  private competenciaLabel() {
+    const [ano, mes] = (this.competencia || '').split('-');
+    return ano && mes ? `${mes}/${ano}` : '';
   }
 }

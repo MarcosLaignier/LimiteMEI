@@ -7,7 +7,7 @@ import { SelectEnumComponent } from '../../shared/components-commons/infra/selec
 import { TextBoxComponent } from '../../shared/components-commons/infra/text-box-component/text.box.component';
 import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
 import { ReportViewComponent } from '../../shared/components-commons/relatorio/report-view.component';
-import { ReportColumn, ReportRow, ReportTotal, somaReport } from '../../shared/components-commons/relatorio/report.types';
+import { ReportColumn, ReportFilter, ReportRow, ReportTotal, somaReport } from '../../shared/components-commons/relatorio/report.types';
 import { competenciaAtual, periodoDaCompetencia, periodoLabel } from '../../shared/components-commons/relatorio/report-period.utils';
 import { DocumentoFiscalService } from '../../services/documento-fiscal.service';
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
@@ -35,7 +35,7 @@ import { SituacaoDocumentoFiscalEnum, SITUACAO_DOCUMENTO_FISCAL_LABELS, TipoDocu
         </div>
       </div>
     </section>
-    <report-view [loading]="loading" titulo="Documentos fiscais" [subtitulo]="subtitulo" fileName="documentos-fiscais" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
+    <report-view [loading]="loading" titulo="Documentos fiscais" [subtitulo]="subtitulo" fileName="documentos-fiscais" [filtros]="filtrosRelatorio" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
   `,
   styles: [`
     .filters{margin:1rem 0;padding:1.25rem;background:#fff;border:1px solid #e5e9ef;border-radius:12px}
@@ -64,6 +64,16 @@ export class RelatorioDocumentosFiscaisComponent implements OnInit {
     { key: 'valor', label: 'Valor', tipo: 'currency' }, { key: 'vinculado', label: 'Vinculado', tipo: 'currency' },
     { key: 'saldo', label: 'Saldo', tipo: 'currency' },
   ];
+
+  get filtrosRelatorio(): ReportFilter[] {
+    return [
+      { label: 'Competência', valor: this.competenciaLabel() },
+      { label: 'Período', valor: periodoLabel(this.inicio, this.fim) },
+      { label: 'Tipo', valor: this.tipo ? (TIPO_DOCUMENTO_FISCAL_LABELS[this.tipo] ?? this.tipo) : 'Todos' },
+      { label: 'Situação', valor: this.situacao ? (SITUACAO_DOCUMENTO_FISCAL_LABELS[this.situacao] ?? this.situacao) : 'Todas' },
+      { label: 'Cliente', valor: this.cliente || 'Todos' },
+    ];
+  }
 
   constructor(private route: ActivatedRoute, private service: DocumentoFiscalService, private alerts: AlertService,
               private changeDetector: ChangeDetectorRef) {}
@@ -127,5 +137,10 @@ export class RelatorioDocumentosFiscaisComponent implements OnInit {
         this.changeDetector.detectChanges();
       },
     });
+  }
+
+  private competenciaLabel() {
+    const [ano, mes] = (this.competencia || '').split('-');
+    return ano && mes ? `${mes}/${ano}` : '';
   }
 }

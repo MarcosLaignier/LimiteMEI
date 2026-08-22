@@ -1,1 +1,50 @@
 /* You can add global styles to this file, and also import other style files */
+
+@media print {
+  body:has(report-view) side-bar-component,
+  body:has(report-view) alert-component,
+  body:has(report-view) toolbar-filter,
+  body:has(report-view) .filters,
+  body:has(report-view) .screen-actions {
+    display: none !important;
+  }
+
+  body:has(report-view) .app-layout {
+    display: block !important;
+    min-height: auto !important;
+    background: #fff !important;
+  }
+
+  body:has(report-view) .app-content {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body:has(report-view) report-view {
+    display: block !important;
+  }
+
+  body:has(report-view) * {
+    box-shadow: none !important;
+  }
+
+  body:has(.sheet) side-bar-component,
+  body:has(.sheet) alert-component,
+  body:has(.sheet) toolbar-filter,
+  body:has(.sheet) .screen-actions {
+    display: none !important;
+  }
+
+  body:has(.sheet) .app-layout {
+    display: block !important;
+    min-height: auto !important;
+    background: #fff !important;
+  }
+
+  body:has(.sheet) .app-content {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}

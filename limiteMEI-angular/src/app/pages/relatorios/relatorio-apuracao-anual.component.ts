@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MonthYearBoxComponent } from '../../shared/components-commons/infra/month-year-box-component/month.year.box.component';
 import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
 import { ReportViewComponent } from '../../shared/components-commons/relatorio/report-view.component';
-import { ReportColumn, ReportRow, ReportTotal } from '../../shared/components-commons/relatorio/report.types';
+import { ReportColumn, ReportFilter, ReportRow, ReportTotal } from '../../shared/components-commons/relatorio/report.types';
 import { competenciaAtual } from '../../shared/components-commons/relatorio/report-period.utils';
 import { ApuracaoMeiService } from '../../services/apuracao-mei.service';
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
@@ -20,7 +20,7 @@ import { AlertService } from '../../shared/components-commons/infra/alert-compon
         <month-year-box-component label="Competência" width="210px" [(dataField)]="competencia" />
       </div>
     </section>
-    <report-view [loading]="loading" titulo="Apuração MEI anual" [subtitulo]="subtitulo" fileName="apuracao-mei-anual" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
+    <report-view [loading]="loading" titulo="Apuração MEI anual" [subtitulo]="subtitulo" fileName="apuracao-mei-anual" [filtros]="filtrosRelatorio" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
   `,
   styles: [`
     .filters{margin:1rem 0;padding:1.25rem;background:#fff;border:1px solid #e5e9ef;border-radius:12px}
@@ -38,6 +38,10 @@ export class RelatorioApuracaoAnualComponent implements OnInit {
     { key: 'total', label: 'Faturamento', tipo: 'currency' }, { key: 'acumulado', label: 'Acumulado', tipo: 'currency' },
     { key: 'percentual', label: 'Uso do teto', tipo: 'number' },
   ];
+
+  get filtrosRelatorio(): ReportFilter[] {
+    return [{ label: 'Ano', valor: String((this.competencia || competenciaAtual()).slice(0, 4)) }];
+  }
 
   constructor(private route: ActivatedRoute, private service: ApuracaoMeiService, private alerts: AlertService,
               private changeDetector: ChangeDetectorRef) {}

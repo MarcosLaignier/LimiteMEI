@@ -14,6 +14,11 @@ export interface ReportTotal {
   currency?: boolean;
 }
 
+export interface ReportFilter {
+  label: string;
+  valor?: string | number | null;
+}
+
 export function somaReport(linhas: ReportRow[], chave: string) {
   return linhas.reduce((total, linha) => total + Number(linha[chave] || 0), 0);
 }

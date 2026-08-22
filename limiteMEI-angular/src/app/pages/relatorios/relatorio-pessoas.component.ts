@@ -5,7 +5,7 @@ import { SelectEnumComponent } from '../../shared/components-commons/infra/selec
 import { TextBoxComponent } from '../../shared/components-commons/infra/text-box-component/text.box.component';
 import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
 import { ReportViewComponent } from '../../shared/components-commons/relatorio/report-view.component';
-import { ReportColumn, ReportRow, ReportTotal } from '../../shared/components-commons/relatorio/report.types';
+import { ReportColumn, ReportFilter, ReportRow, ReportTotal } from '../../shared/components-commons/relatorio/report.types';
 import { PessoaPapelService } from '../../services/pessoa-papel.service';
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
 import { PapelPessoaEnum } from '../../enums/papel.pessoa.enum';
@@ -28,7 +28,7 @@ import { TipoPessoaEnum, TIPO_PESSOA_LABELS } from '../../enums/tipo.pessoa.enum
         </div>
       </div>
     </section>
-    <report-view [loading]="loading" [titulo]="titulo" subtitulo="Pessoas vinculadas ao papel selecionado" [fileName]="fileName" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
+    <report-view [loading]="loading" [titulo]="titulo" subtitulo="Pessoas vinculadas ao papel selecionado" [fileName]="fileName" [filtros]="filtrosRelatorio" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
   `,
   styles: [`
     .filters{margin:1rem 0;padding:1.25rem;background:#fff;border:1px solid #e5e9ef;border-radius:12px}
@@ -52,6 +52,15 @@ export class RelatorioPessoasComponent implements OnInit {
     { key: 'nome', label: 'Nome / Razão social' }, { key: 'tipo', label: 'Tipo' },
     { key: 'documento', label: 'CPF / CNPJ' }, { key: 'email', label: 'E-mail' }, { key: 'telefone', label: 'Telefone' },
   ];
+
+  get filtrosRelatorio(): ReportFilter[] {
+    return [
+      { label: 'Papel', valor: this.titulo },
+      { label: 'Nome / Razão social', valor: this.nome || 'Todos' },
+      { label: 'Documento', valor: this.documento || 'Todos' },
+      { label: 'Tipo pessoa', valor: this.tipoPessoa ? (TIPO_PESSOA_LABELS[this.tipoPessoa] ?? this.tipoPessoa) : 'Todos' },
+    ];
+  }
 
   constructor(private route: ActivatedRoute, private service: PessoaPapelService,
               private alerts: AlertService, private changeDetector: ChangeDetectorRef) {}

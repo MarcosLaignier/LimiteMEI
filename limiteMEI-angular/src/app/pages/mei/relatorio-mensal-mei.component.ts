@@ -3,6 +3,8 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { RelatorioMensalMeiDTO } from '../../dtos/mei/apuracao-mei.dto';
 import { ApuracaoMeiService } from '../../services/apuracao-mei.service';
+import { AuthService } from '../../core/auth.service';
+import { EmpresaAtivaService } from '../../core/empresa-ativa.service';
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
 
 @Component({
@@ -12,7 +14,14 @@ import { AlertService } from '../../shared/components-commons/infra/alert-compon
     <div class="screen-actions"><button onclick="history.back()"><i class="bi bi-arrow-left"></i> Voltar</button><button class="primary" (click)="imprimir()"><i class="bi bi-printer"></i> Imprimir / Salvar PDF</button></div>
     @if (relatorio) {
       <main class="sheet">
-        <header><h1>RELATÓRIO MENSAL DAS RECEITAS BRUTAS</h1><div class="company-data"><span><strong>CNPJ:</strong> {{formatarCnpj(relatorio.cnpj)}}</span><span><strong>Razão social:</strong> {{relatorio.razaoSocial}}</span>@if(relatorio.nomeFantasia){<span><strong>Nome fantasia:</strong> {{relatorio.nomeFantasia}}</span>}<span><strong>Data de abertura:</strong> {{relatorio.dataAbertura|date:'dd/MM/yyyy':'UTC'}}</span><span><strong>Início no SIMEI:</strong> {{relatorio.dataInicioSimei|date:'dd/MM/yyyy':'UTC'}}</span><span><strong>Período de apuração:</strong> {{nomeMes(relatorio.mes)}} de {{relatorio.ano}}</span></div></header>
+        <header>
+          <div class="report-top">
+            @if(logoDataUrl){<img [src]="logoDataUrl" alt="Logo da empresa">}
+            <div><h1>RELATÓRIO MENSAL DAS RECEITAS BRUTAS</h1><p>Emitido em {{emitidoEm}} por {{usuarioNome}}</p></div>
+          </div>
+          <div class="company-data"><span><strong>CNPJ:</strong> {{formatarCnpj(relatorio.cnpj)}}</span><span><strong>Razão social:</strong> {{relatorio.razaoSocial}}</span>@if(relatorio.nomeFantasia){<span><strong>Nome fantasia:</strong> {{relatorio.nomeFantasia}}</span>}<span><strong>Data de abertura:</strong> {{relatorio.dataAbertura|date:'dd/MM/yyyy':'UTC'}}</span><span><strong>Início no SIMEI:</strong> {{relatorio.dataInicioSimei|date:'dd/MM/yyyy':'UTC'}}</span><span><strong>Período de apuração:</strong> {{nomeMes(relatorio.mes)}} de {{relatorio.ano}}</span></div>
+          <div class="report-filters"><strong>Filtros utilizados:</strong> Competência {{competenciaLabel}}</div>
+        </header>
         @if(!relatorio.situacao){<div class="draft">PRÉVIA — APURAÇÃO AINDA NÃO FECHADA</div>}
         <section><h2>RECEITA BRUTA MENSAL — REVENDA DE MERCADORIAS (COMÉRCIO)</h2><p><span>Com dispensa de emissão de documento fiscal</span><strong>{{relatorio.comercioSemDocumento|currency:'BRL'}}</strong></p><p><span>Com documento fiscal emitido</span><strong>{{relatorio.comercioComDocumento|currency:'BRL'}}</strong></p><p class="total"><span>Total das receitas com revenda de mercadorias</span><strong>{{relatorio.comercioSemDocumento+relatorio.comercioComDocumento|currency:'BRL'}}</strong></p></section>
         <section><h2>RECEITA BRUTA MENSAL — VENDA DE PRODUTOS INDUSTRIALIZADOS</h2><p><span>Com dispensa de emissão de documento fiscal</span><strong>{{relatorio.industriaSemDocumento|currency:'BRL'}}</strong></p><p><span>Com documento fiscal emitido</span><strong>{{relatorio.industriaComDocumento|currency:'BRL'}}</strong></p><p class="total"><span>Total das receitas com produtos industrializados</span><strong>{{relatorio.industriaSemDocumento+relatorio.industriaComDocumento|currency:'BRL'}}</strong></p></section>
@@ -28,14 +37,15 @@ import { AlertService } from '../../shared/components-commons/infra/alert-compon
     } @else { <div class="loading"><span class="spinner-border spinner-border-sm"></span> Gerando relatório...</div> }
   `,
   styles: [`
-    .screen-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-bottom:1rem}.screen-actions button{padding:.6rem 1rem;border:1px solid #ccd2df;border-radius:6px;background:#fff}.screen-actions .primary{border-color:#5570f1;background:#5570f1;color:#fff}.sheet{width:210mm;min-height:297mm;margin:auto;padding:14mm;background:#fff;color:#111;box-shadow:0 2px 14px #0002}.sheet header h1{text-align:center;font-size:18px}.company-data{display:grid!important;grid-template-columns:1fr 1fr;gap:5px 20px!important;margin:18px 0!important}.draft{text-align:center;padding:8px;border:2px solid #b77900;color:#8a5900;font-weight:700}.sheet section{margin-top:14px;border:1px solid #333}.sheet section h2{margin:0;padding:7px;background:#e9ecef;font-size:12px}.sheet section p{display:flex;justify-content:space-between;margin:0;padding:7px;border-top:1px solid #777;font-size:12px}.sheet section .total{font-weight:700;background:#f5f5f5}.grand-total,.year-total{display:flex;justify-content:space-between;margin-top:14px;padding:10px;border:2px solid #111;font-weight:700}.year-total{margin-top:0;border-top:0;background:#f5f5f5}.fiscal-appendix{break-before:auto;break-inside:auto}.fiscal-summary{display:grid;grid-template-columns:1fr 1fr}.fiscal-summary span{display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #aaa;font-size:10px}.fiscal-appendix table{width:100%;border-collapse:collapse;font-size:9px}.fiscal-appendix th,.fiscal-appendix td{padding:5px;border:1px solid #aaa;text-align:left}.fiscal-appendix>small{display:block;padding:6px}.no-documents{justify-content:center!important;color:#555}.sheet footer{margin-top:25px;font-size:11px}.signature{width:280px;margin:45px auto 20px;text-align:center}.signature span{display:block;border-top:1px solid #111}.signature p{margin-top:5px}.loading{text-align:center;padding:4rem}@media print{.screen-actions{display:none}.sheet{width:auto;min-height:auto;margin:0;padding:6mm;box-shadow:none}.fiscal-appendix{break-before:page}@page{size:A4;margin:8mm}}
+    .screen-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-bottom:1rem}.screen-actions button{padding:.6rem 1rem;border:1px solid #ccd2df;border-radius:6px;background:#fff}.screen-actions .primary{border-color:#5570f1;background:#5570f1;color:#fff}.sheet{width:210mm;min-height:297mm;margin:auto;padding:14mm;background:#fff;color:#111;box-shadow:0 2px 14px #0002}.report-top{display:grid;grid-template-columns:58px 1fr 58px;align-items:center;gap:10px}.report-top img{width:58px;height:58px;object-fit:contain}.sheet header h1{text-align:center;font-size:18px;margin:0}.sheet header p{text-align:center;margin:4px 0 0;font-size:10px}.company-data{display:grid!important;grid-template-columns:1fr 1fr;gap:5px 20px!important;margin:18px 0 8px!important}.report-filters{padding:6px;border:1px solid #999;font-size:10px}.draft{text-align:center;padding:8px;border:2px solid #b77900;color:#8a5900;font-weight:700}.sheet section{margin-top:14px;border:1px solid #333}.sheet section h2{margin:0;padding:7px;background:#e9ecef;font-size:12px}.sheet section p{display:flex;justify-content:space-between;margin:0;padding:7px;border-top:1px solid #777;font-size:12px}.sheet section .total{font-weight:700;background:#f5f5f5}.grand-total,.year-total{display:flex;justify-content:space-between;margin-top:14px;padding:10px;border:2px solid #111;font-weight:700}.year-total{margin-top:0;border-top:0;background:#f5f5f5}.fiscal-appendix{break-before:auto;break-inside:auto}.fiscal-summary{display:grid;grid-template-columns:1fr 1fr}.fiscal-summary span{display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #aaa;font-size:10px}.fiscal-appendix table{width:100%;border-collapse:collapse;font-size:9px}.fiscal-appendix th,.fiscal-appendix td{padding:5px;border:1px solid #aaa;text-align:left}.fiscal-appendix>small{display:block;padding:6px}.no-documents{justify-content:center!important;color:#555}.sheet footer{margin-top:25px;font-size:11px}.signature{width:280px;margin:45px auto 20px;text-align:center}.signature span{display:block;border-top:1px solid #111}.signature p{margin-top:5px}.loading{text-align:center;padding:4rem}@media print{.screen-actions{display:none}.sheet{width:auto;min-height:auto;margin:0;padding:6mm;box-shadow:none}.fiscal-appendix{break-before:page}@page{size:A4;margin:8mm}}
   `],
 })
 export class RelatorioMensalMeiComponent implements OnInit {
   relatorio?: RelatorioMensalMeiDTO;
   private readonly meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   constructor(private route: ActivatedRoute, private service: ApuracaoMeiService,
-              private alerts: AlertService, private changeDetector: ChangeDetectorRef) {}
+              private alerts: AlertService, private changeDetector: ChangeDetectorRef,
+              private auth: AuthService, private empresaAtiva: EmpresaAtivaService) {}
   ngOnInit() {
     const ano = Number(this.route.snapshot.paramMap.get('ano'));
     const mes = Number(this.route.snapshot.paramMap.get('mes'));
@@ -46,5 +56,18 @@ export class RelatorioMensalMeiComponent implements OnInit {
   }
   nomeMes(mes:number){return this.meses[mes-1];}
   formatarCnpj(cnpj:string){return cnpj?.replace(/^(..)(...)(...)(....)(..)$/, '$1.$2.$3/$4-$5') ?? '';}
-  imprimir(){window.print();}
+  get competenciaLabel(){return this.relatorio ? `${String(this.relatorio.mes).padStart(2,'0')}/${this.relatorio.ano}` : '';}
+  get usuarioNome(){return this.auth.user()?.nome || this.auth.user()?.email || 'Usuário não identificado';}
+  get emitidoEm(){return new Date().toLocaleString('pt-BR');}
+  get logoDataUrl(){return this.empresaAtiva.empresa()?.logoDataUrl;}
+  imprimir(){
+    const tituloOriginal = document.title;
+    document.title = `limite-mei_relatorio-mensal-mei_${this.competenciaLabel.replace('/','-')}_${this.timestampArquivo()}`;
+    window.print();
+    setTimeout(() => document.title = tituloOriginal);
+  }
+  private timestampArquivo(){
+    const data = new Date();
+    return `${data.getFullYear()}-${String(data.getMonth()+1).padStart(2,'0')}-${String(data.getDate()).padStart(2,'0')}_${String(data.getHours()).padStart(2,'0')}-${String(data.getMinutes()).padStart(2,'0')}`;
+  }
 }

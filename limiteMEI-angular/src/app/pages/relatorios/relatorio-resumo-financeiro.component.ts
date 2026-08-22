@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MonthYearBoxComponent } from '../../shared/components-commons/infra/month-year-box-component/month.year.box.component';
 import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
 import { ReportViewComponent } from '../../shared/components-commons/relatorio/report-view.component';
-import { ReportColumn, ReportRow, ReportTotal } from '../../shared/components-commons/relatorio/report.types';
+import { ReportColumn, ReportFilter, ReportRow, ReportTotal } from '../../shared/components-commons/relatorio/report.types';
 import { competenciaAtual } from '../../shared/components-commons/relatorio/report-period.utils';
 import { DashboardService } from '../../services/dashboard.service';
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
@@ -20,7 +20,7 @@ import { AlertService } from '../../shared/components-commons/infra/alert-compon
         <month-year-box-component label="Competência" width="210px" [(dataField)]="competencia" />
       </div>
     </section>
-    <report-view [loading]="loading" titulo="Resumo financeiro mensal" [subtitulo]="subtitulo" fileName="resumo-financeiro-mensal" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
+    <report-view [loading]="loading" titulo="Resumo financeiro mensal" [subtitulo]="subtitulo" fileName="resumo-financeiro-mensal" [filtros]="filtrosRelatorio" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
   `,
   styles: [`
     .filters{margin:1rem 0;padding:1.25rem;background:#fff;border:1px solid #e5e9ef;border-radius:12px}
@@ -34,6 +34,11 @@ export class RelatorioResumoFinanceiroComponent implements OnInit {
   linhas: ReportRow[] = [];
   totalizadores: ReportTotal[] = [];
   readonly colunas: ReportColumn[] = [{ key: 'indicador', label: 'Indicador' }, { key: 'valor', label: 'Valor', tipo: 'currency' }];
+
+  get filtrosRelatorio(): ReportFilter[] {
+    const [ano, mes] = (this.competencia || competenciaAtual()).split('-');
+    return [{ label: 'Competência', valor: ano && mes ? `${mes}/${ano}` : '' }];
+  }
 
   constructor(private route: ActivatedRoute, private service: DashboardService, private alerts: AlertService,
               private changeDetector: ChangeDetectorRef) {}
