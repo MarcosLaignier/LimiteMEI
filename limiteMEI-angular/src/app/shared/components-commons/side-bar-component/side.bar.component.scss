@@ -150,6 +150,23 @@
   opacity: 0.9;
 }
 
+.submenu-section {
+  margin: .65rem 1rem .2rem 2.25rem;
+  padding-top: .45rem;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  color: #8f96bd;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.submenu li:first-child .submenu-section {
+  margin-top: .2rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
 /* ================================
    CHEVRON
 ================================ */

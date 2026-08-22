@@ -9,6 +9,7 @@ interface MenuItem {
   route?: string;
   children?: MenuItem[];
   expanded?: boolean;
+  section?: boolean;
 }
 
 @Component({
@@ -40,10 +41,14 @@ export class SideBarComponent implements OnInit {
       label: 'Pessoas',
       icon: 'bi-people',
       children: [
+        {label: 'Cadastros', section: true},
         {label: 'Pessoas', icon: 'bi-person-vcard', route: '/app/cadastros/pessoa'},
         {label: 'Clientes', icon: 'bi-person-check', route: '/app/cadastros/cliente'},
         {label: 'Fornecedores', icon: 'bi-building-check', route: '/app/cadastros/fornecedor'},
-        {label: 'Funcionários', icon: 'bi-person-badge', route: '/app/cadastros/funcionario'}
+        {label: 'Funcionários', icon: 'bi-person-badge', route: '/app/cadastros/funcionario'},
+        {label: 'Relatórios', section: true},
+        { label: 'Relatório de clientes', icon: 'bi-file-earmark-person', route: '/app/relatorios/clientes' },
+        { label: 'Relatório de fornecedores', icon: 'bi-file-earmark-person', route: '/app/relatorios/fornecedores' }
       ]
     },
     {
@@ -59,8 +64,15 @@ export class SideBarComponent implements OnInit {
       label: 'Financeiro',
       icon: 'bi-cash-stack',
       children: [
+        { label: 'Operação', section: true },
         { label: 'Lançamentos', icon: 'bi-journal-plus', route: '/app/financeiro/lancamentos' },
-        { label: 'Monitor de lançamentos', icon: 'bi-display', route: '/app/financeiro/monitor-lancamentos' }
+        { label: 'Monitor de lançamentos', icon: 'bi-display', route: '/app/financeiro/monitor-lancamentos' },
+        { label: 'Relatórios', section: true },
+        { label: 'Relatório fluxo de caixa', icon: 'bi-file-earmark-bar-graph', route: '/app/relatorios/fluxo-caixa' },
+        { label: 'Relatório lançamentos', icon: 'bi-file-earmark-text', route: '/app/relatorios/lancamentos' },
+        { label: 'Relatório contas a receber', icon: 'bi-file-earmark-arrow-down', route: '/app/relatorios/contas-receber' },
+        { label: 'Relatório contas a pagar', icon: 'bi-file-earmark-arrow-up', route: '/app/relatorios/contas-pagar' },
+        { label: 'Relatório resumo financeiro', icon: 'bi-file-earmark-ruled', route: '/app/relatorios/resumo-financeiro' }
       ]
     },
 
@@ -68,31 +80,21 @@ export class SideBarComponent implements OnInit {
       label: 'MEI',
       icon: 'bi-graph-up-arrow',
       children: [
+        { label: 'Operação', section: true },
         { label: 'Apuração e limite', icon: 'bi-speedometer2', route: '/app/financeiro/mei/apuracao' },
-        { label: 'Histórico de apurações', icon: 'bi-calendar-check', route: '/app/financeiro/mei/historico' }
+        { label: 'Histórico de apurações', icon: 'bi-calendar-check', route: '/app/financeiro/mei/historico' },
+        { label: 'Relatórios', section: true },
+        { label: 'Relatório apuração anual', icon: 'bi-file-earmark-spreadsheet', route: '/app/relatorios/apuracao-anual' }
       ]
     },
     {
       label: 'Fiscal',
       icon: 'bi-receipt',
       children: [
-        { label: 'Documentos fiscais', icon: 'bi-file-earmark-text', route: '/app/fiscal/documentos' }
-      ]
-    },
-
-    {
-      label: 'Relatórios',
-      icon: 'bi-file-earmark-bar-graph',
-      children: [
-        { label: 'Fluxo de caixa', icon: 'bi-cash-coin', route: '/app/relatorios/fluxo-caixa' },
-        { label: 'Lançamentos', icon: 'bi-list-check', route: '/app/relatorios/lancamentos' },
-        { label: 'Contas a receber', icon: 'bi-arrow-down-circle', route: '/app/relatorios/contas-receber' },
-        { label: 'Contas a pagar', icon: 'bi-arrow-up-circle', route: '/app/relatorios/contas-pagar' },
-        { label: 'Documentos fiscais', icon: 'bi-receipt', route: '/app/relatorios/documentos-fiscais' },
-        { label: 'Clientes', icon: 'bi-person-lines-fill', route: '/app/relatorios/clientes' },
-        { label: 'Fornecedores', icon: 'bi-truck', route: '/app/relatorios/fornecedores' },
-        { label: 'Apuração MEI anual', icon: 'bi-speedometer2', route: '/app/relatorios/apuracao-anual' },
-        { label: 'Resumo financeiro', icon: 'bi-bar-chart', route: '/app/relatorios/resumo-financeiro' },
+        { label: 'Operação', section: true },
+        { label: 'Documentos fiscais', icon: 'bi-file-earmark-text', route: '/app/fiscal/documentos' },
+        { label: 'Relatórios', section: true },
+        { label: 'Relatório documentos fiscais', icon: 'bi-file-earmark-ruled', route: '/app/relatorios/documentos-fiscais' },
       ]
     },
 
@@ -149,7 +151,7 @@ export class SideBarComponent implements OnInit {
       }
 
       menu.expanded = menu.children.some(child =>
-        currentUrl.startsWith(child.route ?? '')
+        child.route && currentUrl.startsWith(child.route)
       );
     });
   }

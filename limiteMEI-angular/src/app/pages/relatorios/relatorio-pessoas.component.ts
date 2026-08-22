@@ -18,10 +18,14 @@ import { TipoPessoaEnum, TIPO_PESSOA_LABELS } from '../../enums/tipo.pessoa.enum
     <toolbar-filter [tituloPagina]="titulo" [listMode]="true" [showNew]="false" [loading]="loading" (filtrar)="carregar()" (limpar)="limparFiltros()" />
     <section class="filters">
       <header><span>FILTROS</span><h1>{{titulo}}</h1><p>Filtre por nome, documento e tipo de pessoa.</p></header>
-      <div class="filter-grid">
-        <text-box-component label="Nome / Razão social" width="435px" [(dataField)]="nome" />
-        <text-box-component label="CPF / CNPJ" width="240px" [(dataField)]="documento" />
-        <select-enum label="Tipo pessoa" width="220px" [enumObject]="tiposPessoa" [optionLabels]="tipoPessoaLabels" [(dataField)]="tipoPessoa" />
+      <div class="filter-stack">
+        <div class="filter-row">
+          <text-box-component label="Nome / Razão social" width="435px" [(dataField)]="nome" />
+        </div>
+        <div class="filter-row">
+          <text-box-component label="CPF / CNPJ" width="240px" [(dataField)]="documento" />
+          <select-enum label="Tipo pessoa" width="220px" [enumObject]="tiposPessoa" [optionLabels]="tipoPessoaLabels" [(dataField)]="tipoPessoa" />
+        </div>
       </div>
     </section>
     <report-view [loading]="loading" [titulo]="titulo" subtitulo="Pessoas vinculadas ao papel selecionado" [fileName]="fileName" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
@@ -29,7 +33,7 @@ import { TipoPessoaEnum, TIPO_PESSOA_LABELS } from '../../enums/tipo.pessoa.enum
   styles: [`
     .filters{margin:1rem 0;padding:1.25rem;background:#fff;border:1px solid #e5e9ef;border-radius:12px}
     header{margin-bottom:1rem}header span{font-size:.75rem;color:#5570f1;font-weight:800}h1{margin:.2rem 0;color:#203746;font-size:1.25rem}p{margin:0;color:#687080}
-    .filter-grid{display:flex;align-items:end;flex-wrap:wrap;gap:15px}
+    .filter-stack{display:flex;flex-direction:column;gap:15px}.filter-row{display:flex;align-items:end;flex-wrap:wrap;gap:15px}
   `]
 })
 export class RelatorioPessoasComponent implements OnInit {

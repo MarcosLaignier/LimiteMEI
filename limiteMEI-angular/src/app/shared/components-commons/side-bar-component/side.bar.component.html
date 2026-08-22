@@ -45,15 +45,19 @@
           <ul class="submenu" [class.show]="item.expanded">
             @for (sub of item.children; track sub) {
               <li class="nav-item">
-                <a
-                  class="nav-link sidebar-sublink d-flex align-items-center"
-                  [routerLink]="sub.route"
-                  routerLinkActive="active"
-                  (click)="onNavigate()">
+                @if (sub.section) {
+                  <div class="submenu-section link-text">{{ sub.label }}</div>
+                } @else {
+                  <a
+                    class="nav-link sidebar-sublink d-flex align-items-center"
+                    [routerLink]="sub.route"
+                    routerLinkActive="active"
+                    (click)="onNavigate()">
 
-                  <i class="bi {{ sub.icon }} sidebar-icon"></i>
-                  <span class="link-text ms-2">{{ sub.label }}</span>
-                </a>
+                    <i class="bi {{ sub.icon }} sidebar-icon"></i>
+                    <span class="link-text ms-2">{{ sub.label }}</span>
+                  </a>
+                }
               </li>
             }
           </ul>

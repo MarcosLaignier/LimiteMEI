@@ -16,13 +16,15 @@ import { AlertService } from '../../shared/components-commons/infra/alert-compon
     <toolbar-filter tituloPagina="Resumo financeiro mensal" [listMode]="true" [showNew]="false" [loading]="loading" (filtrar)="carregar()" (limpar)="limparFiltros()" />
     <section class="filters">
       <header><span>FILTROS</span><h1>Resumo financeiro mensal</h1><p>Indicadores financeiros consolidados por competência.</p></header>
-      <month-year-box-component label="Competência" width="210px" [(dataField)]="competencia" />
+      <div class="filter-row">
+        <month-year-box-component label="Competência" width="210px" [(dataField)]="competencia" />
+      </div>
     </section>
     <report-view [loading]="loading" titulo="Resumo financeiro mensal" [subtitulo]="subtitulo" fileName="resumo-financeiro-mensal" [colunas]="colunas" [linhas]="linhas" [totalizadores]="totalizadores" />
   `,
   styles: [`
     .filters{margin:1rem 0;padding:1.25rem;background:#fff;border:1px solid #e5e9ef;border-radius:12px}
-    header{margin-bottom:1rem}header span{font-size:.75rem;color:#5570f1;font-weight:800}h1{margin:.2rem 0;color:#203746;font-size:1.25rem}p{margin:0;color:#687080}
+    header{margin-bottom:1rem}header span{font-size:.75rem;color:#5570f1;font-weight:800}h1{margin:.2rem 0;color:#203746;font-size:1.25rem}p{margin:0;color:#687080}.filter-row{display:flex;align-items:end;flex-wrap:wrap;gap:15px}
   `]
 })
 export class RelatorioResumoFinanceiroComponent implements OnInit {
