@@ -82,6 +82,7 @@ export class SideBarComponent implements OnInit {
       children: [
         { label: 'Operação', section: true },
         { label: 'Apuração e limite', icon: 'bi-speedometer2', route: '/app/financeiro/mei/apuracao' },
+        { label: 'Obrigações MEI', icon: 'bi-calendar-event', route: '/app/financeiro/mei/obrigacoes' },
         { label: 'Histórico de apurações', icon: 'bi-calendar-check', route: '/app/financeiro/mei/historico' },
         { label: 'Relatórios', section: true },
         { label: 'Relatório apuração anual', icon: 'bi-file-earmark-spreadsheet', route: '/app/relatorios/apuracao-anual' }

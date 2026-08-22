@@ -16,9 +16,11 @@ export interface ConfiguracaoGeralDTO {
   contaPadraoBaixaId?: number;
   contaPadraoBaixaNome?: string;
   formaPagamentoPadrao?: string;
+  valorPadraoDas?: number;
 }
 
 export interface ConfiguracaoGeralUpdateDTO {
   contaPadraoBaixaId?: number;
   formaPagamentoPadrao?: string;
+  valorPadraoDas?: number;
 }

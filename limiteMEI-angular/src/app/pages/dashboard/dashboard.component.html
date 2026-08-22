@@ -43,6 +43,35 @@
         <div class="panel-actions vertical"><a class="full-link" routerLink="/app/financeiro/monitor-lancamentos">Abrir monitor</a><a class="full-link secondary" routerLink="/app/relatorios/contas-receber" [queryParams]="competenciaQueryParams">Ver contas a receber</a><a class="full-link secondary danger" routerLink="/app/relatorios/contas-pagar" [queryParams]="competenciaQueryParams">Ver contas a pagar</a></div>
       </div>
 
+      <div class="panel obligations">
+        <div class="panel-heading"><div><span>OBRIGAÇÕES MEI</span><h2>DAS mensal</h2></div></div>
+        @if(dashboard.obrigacaoMei.quantidadePagas || dashboard.obrigacaoMei.quantidadeEmAberto || dashboard.obrigacaoMei.quantidadeAtrasadas){
+          <div class="obligation-status" [class.late]="dashboard.obrigacaoMei.quantidadeAtrasadas">
+            <i class="bi" [class.bi-exclamation-triangle]="dashboard.obrigacaoMei.quantidadeAtrasadas" [class.bi-calendar-check]="!dashboard.obrigacaoMei.quantidadeAtrasadas"></i>
+            <div>
+              <strong>{{dashboard.obrigacaoMei.quantidadeAtrasadas ? 'Existe DAS atrasado' : 'DAS do exercício'}}</strong>
+              @if(dashboard.obrigacaoMei.vencimento){
+                <span>Próximo vencimento: {{dashboard.obrigacaoMei.vencimento|date:'dd/MM/yyyy':'UTC'}} · {{dashboard.obrigacaoMei.valor|currency:'BRL'}}</span>
+              }
+              <small>Exercício {{dashboard.ano}}</small>
+            </div>
+          </div>
+          <div class="das-chart" aria-label="Resumo DAS do exercício">
+            <i class="paid" [style.width.%]="percentualObrigacao(dashboard.obrigacaoMei.quantidadePagas)"></i>
+            <i class="open" [style.width.%]="percentualObrigacao(dashboard.obrigacaoMei.quantidadeEmAberto)"></i>
+            <i class="late" [style.width.%]="percentualObrigacao(dashboard.obrigacaoMei.quantidadeAtrasadas)"></i>
+          </div>
+          <div class="das-legend">
+            <span><i class="paid"></i>Pagas <strong>{{dashboard.obrigacaoMei.quantidadePagas}}</strong></span>
+            <span><i class="open"></i>Em aberto <strong>{{dashboard.obrigacaoMei.quantidadeEmAberto}}</strong></span>
+            <span><i class="late"></i>Atrasadas <strong>{{dashboard.obrigacaoMei.quantidadeAtrasadas}}</strong></span>
+          </div>
+        } @else {
+          <div class="empty"><i class="bi bi-calendar-plus"></i><span>Nenhuma referência DAS para o exercício {{dashboard.ano}}.</span></div>
+        }
+        <div class="panel-actions vertical"><a class="full-link" routerLink="/app/financeiro/mei/obrigacoes">Abrir obrigações</a></div>
+      </div>
+
       <div class="panel fiscal-dashboard">
         <div class="panel-heading"><div><span>FISCAL</span><h2>Documentos da competência</h2></div><a routerLink="/app/relatorios/documentos-fiscais" [queryParams]="competenciaQueryParams">Ver documentos <i class="bi bi-arrow-right"></i></a></div>
         <div class="fiscal-percentage"><span>Faturamento documentado</span><strong>{{dashboard.mei.conferenciaFiscal.percentualDocumentado|number:'1.2-2'}}%</strong></div>

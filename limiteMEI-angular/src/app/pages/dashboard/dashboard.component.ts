@@ -43,6 +43,11 @@ export class DashboardComponent implements OnInit {
     return Math.max(valor > 0 ? 8 : 2, Math.round(valor * 100 / maior));
   }
   saldoMes() { return (this.dashboard?.entradasMes??0)-(this.dashboard?.saidasMes??0); }
+  percentualObrigacao(valor: number) {
+    const obrigacao = this.dashboard?.obrigacaoMei;
+    const total = (obrigacao?.quantidadePagas ?? 0) + (obrigacao?.quantidadeEmAberto ?? 0) + (obrigacao?.quantidadeAtrasadas ?? 0);
+    return total ? Math.round((valor * 100) / total) : 0;
+  }
   get competenciaQueryParams() { return { competencia: this.competencia }; }
   get apuracaoQueryParams() {
     const [ano, mes] = this.competencia.split('-').map(Number);

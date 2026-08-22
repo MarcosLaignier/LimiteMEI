@@ -21,16 +21,19 @@ public class DashboardService {
     private final LancamentoFinanceiroRepository lancamentos;
     private final MovimentoFinanceiroMapper movimentoMapper;
     private final ApuracaoMeiService apuracaoMei;
+    private final ObrigacaoMeiService obrigacoesMei;
 
     public DashboardService(EmpresaAtualService empresaAtual, ContaFinanceiraRepository contas,
                             MovimentoFinanceiroRepository movimentos, LancamentoFinanceiroRepository lancamentos,
-                            MovimentoFinanceiroMapper movimentoMapper, ApuracaoMeiService apuracaoMei) {
+                            MovimentoFinanceiroMapper movimentoMapper, ApuracaoMeiService apuracaoMei,
+                            ObrigacaoMeiService obrigacoesMei) {
         this.empresaAtual = empresaAtual;
         this.contas = contas;
         this.movimentos = movimentos;
         this.lancamentos = lancamentos;
         this.movimentoMapper = movimentoMapper;
         this.apuracaoMei = apuracaoMei;
+        this.obrigacoesMei = obrigacoesMei;
     }
 
     public DashboardDTO carregar(int ano, int mes) {
@@ -57,7 +60,9 @@ public class DashboardService {
                 .quantidadeVencidos(Math.toIntExact(lancamentos.quantidadeVencidos(empresa.getId(), LocalDate.now())))
                 .contas(saldos).ultimasMovimentacoes(movimentos.findTop8ByEmpresaIdOrderByDataDescIdDesc(empresa.getId())
                         .stream().map(movimentoMapper::toDTO).toList())
-                .mei(apuracaoMei.apurar(ano, mes)).build();
+                .mei(apuracaoMei.apurar(ano, mes))
+                .obrigacaoMei(obrigacoesMei.dashboard(ano))
+                .build();
     }
 
     private BigDecimal saldoPendente(Long empresaId, TipoLancamentoEnum tipo, boolean vencido) {

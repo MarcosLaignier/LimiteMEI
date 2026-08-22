@@ -3,6 +3,8 @@ package com.limiteMEI.limiteMEI.dto.configuracao;
 import com.limiteMEI.limiteMEI.enums.FormaPagamentoEnum;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -13,4 +15,5 @@ public class ConfiguracaoGeralDTO {
     private Long contaPadraoBaixaId;
     private String contaPadraoBaixaNome;
     private FormaPagamentoEnum formaPagamentoPadrao;
+    private BigDecimal valorPadraoDas;
 }

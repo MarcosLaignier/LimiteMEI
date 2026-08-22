@@ -11,6 +11,8 @@ import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 public class ConfiguracaoGeralService {
     private final ConfiguracaoGeralRepository repository;
@@ -36,6 +38,7 @@ public class ConfiguracaoGeralService {
         ConfiguracaoGeral configuracao = getOrCreate(empresa);
         configuracao.setContaPadraoBaixa(contaPadrao(empresa, dto.getContaPadraoBaixaId()));
         configuracao.setFormaPagamentoPadrao(dto.getFormaPagamentoPadrao());
+        configuracao.setValorPadraoDas(valorPadraoDas(dto.getValorPadraoDas()));
         return toDTO(repository.save(configuracao));
     }
 
@@ -54,6 +57,14 @@ public class ConfiguracaoGeralService {
         return conta;
     }
 
+    private BigDecimal valorPadraoDas(BigDecimal valor) {
+        if (valor == null) return null;
+        if (valor.signum() < 0) {
+            throw new ApplicationException("O valor padrão do DAS não pode ser negativo");
+        }
+        return valor;
+    }
+
     private ConfiguracaoGeralDTO toDTO(ConfiguracaoGeral configuracao) {
         ContaFinanceira conta = configuracao.getContaPadraoBaixa();
         return ConfiguracaoGeralDTO.builder()
@@ -61,6 +72,7 @@ public class ConfiguracaoGeralService {
                 .contaPadraoBaixaId(conta == null ? null : conta.getId())
                 .contaPadraoBaixaNome(conta == null ? null : conta.getNome())
                 .formaPagamentoPadrao(configuracao.getFormaPagamentoPadrao())
+                .valorPadraoDas(configuracao.getValorPadraoDas())
                 .build();
     }
 }

@@ -26,4 +26,5 @@ public class DashboardDTO {
     private List<DashboardContaDTO> contas;
     private List<MovimentoFinanceiroDTO> ultimasMovimentacoes;
     private ApuracaoMeiDTO mei;
+    private DashboardObrigacaoMeiDTO obrigacaoMei;
 }

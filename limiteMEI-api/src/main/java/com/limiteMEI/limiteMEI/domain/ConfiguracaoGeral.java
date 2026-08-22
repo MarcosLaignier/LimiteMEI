@@ -4,6 +4,8 @@ import com.limiteMEI.limiteMEI.enums.FormaPagamentoEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "configuracao_geral")
 @Getter
@@ -27,4 +29,7 @@ public class ConfiguracaoGeral {
 
     @Enumerated(EnumType.STRING)
     private FormaPagamentoEnum formaPagamentoPadrao;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal valorPadraoDas;
 }

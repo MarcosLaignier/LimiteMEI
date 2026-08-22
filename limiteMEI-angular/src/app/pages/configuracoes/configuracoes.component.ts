@@ -7,6 +7,7 @@ import { FormaPagamentoEnum, FORMA_PAGAMENTO_LABELS } from '../../enums/forma.pa
 import { ConfiguracaoService } from '../../services/configuracao.service';
 import { ContaFinanceiraSelectorComponent } from '../../shared/components-commons/conta-financeira-selector-component/conta-financeira.selector.component';
 import { AlertService } from '../../shared/components-commons/infra/alert-component/alert.service';
+import { NumberBoxComponent } from '../../shared/components-commons/infra/number-box-component/number.box.component';
 import { SelectEnumComponent } from '../../shared/components-commons/infra/select-enum-component/select.enum.component';
 import { TabComponent } from '../../shared/components-commons/infra/tabs-component/tab.component';
 import { TabsComponent } from '../../shared/components-commons/infra/tabs-component/tabs.component';
@@ -21,6 +22,7 @@ import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-
     TabsComponent,
     TabComponent,
     ContaFinanceiraSelectorComponent,
+    NumberBoxComponent,
     SelectEnumComponent
   ],
   template: `
@@ -57,6 +59,13 @@ import { ToolbarComponent } from '../../shared/components-commons/infra/toolbar-
                 [enumObject]="formasPagamento"
                 [optionLabels]="formaPagamentoLabels"
                 [(dataField)]="gerais.formaPagamentoPadrao"
+                [disabled]="saving" />
+
+              <number-box-component
+                label="Valor padrão do DAS"
+                width="220px"
+                [dataField]="gerais.valorPadraoDas ?? 0"
+                (dataFieldChange)="gerais.valorPadraoDas = $event"
                 [disabled]="saving" />
             </div>
 
@@ -177,7 +186,8 @@ export class ConfiguracoesComponent implements OnInit {
       }))),
       gerais: this.service.atualizarGerais({
         contaPadraoBaixaId: this.gerais.contaPadraoBaixaId,
-        formaPagamentoPadrao: this.gerais.formaPagamentoPadrao || undefined
+        formaPagamentoPadrao: this.gerais.formaPagamentoPadrao || undefined,
+        valorPadraoDas: this.gerais.valorPadraoDas ?? undefined
       })
     }).pipe(finalize(() => {
       this.saving = false;

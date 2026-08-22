@@ -1,5 +1,6 @@
 import { MovimentoFinanceiroDTO } from '../movimento/movimento.financeiro';
 import { ApuracaoMeiDTO } from '../mei/apuracao-mei.dto';
+import { DashboardObrigacaoMeiDTO } from '../mei/obrigacao-mei.dto';
 
 export interface DashboardContaDTO {
   id: number;
@@ -22,4 +23,5 @@ export interface DashboardDTO {
   contas: DashboardContaDTO[];
   ultimasMovimentacoes: MovimentoFinanceiroDTO[];
   mei: ApuracaoMeiDTO;
+  obrigacaoMei: DashboardObrigacaoMeiDTO;
 }
