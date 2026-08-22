@@ -25,6 +25,8 @@ public class EmpresaDTO {
 
     private LocalDate dataAbertura;
 
+    private LocalDate dataInicioSimei;
+
     private TipoEmpresaEnum tipoEmpresa;
 
     private BigDecimal limiteAnual;

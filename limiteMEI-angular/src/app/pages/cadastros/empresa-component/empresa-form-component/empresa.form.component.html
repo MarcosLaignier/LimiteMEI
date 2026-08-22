@@ -19,6 +19,11 @@
     </div>
 
     <div class="row g-4 mt-1">
+      <date-box-component label="Início no SIMEI" colClass="col-auto" width="210px" [clearButton]="true"
+                          [disabled]="loading" [(dataField)]="model.dataInicioSimei"></date-box-component>
+    </div>
+
+    <div class="row g-4 mt-1">
       <text-box-component label="Razão Social" colClass="col-auto" [disabled]="loading" [(dataField)]="model.razaoSocial"></text-box-component>
     </div>
 

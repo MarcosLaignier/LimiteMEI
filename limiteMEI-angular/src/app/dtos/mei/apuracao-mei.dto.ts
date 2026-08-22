@@ -23,7 +23,8 @@ export interface ApuracaoMeiDTO {
   percentualUtilizado: number;
   projecaoAnual: number;
   mediaMensalDisponivel: number;
-  faixaAlerta: 'NORMAL' | 'ATENCAO_75' | 'ALERTA_80' | 'CRITICO_90' | 'EXCEDIDO_100';
+  faixaAlerta: 'NORMAL' | 'ATENCAO_70' | 'ATENCAO_75' | 'ALERTA_80' | 'CRITICO_90' | 'EXCEDIDO_100' | 'EXCEDIDO_120';
+  alertaLimite?: ConfiguracaoAlertaLimiteDTO;
   mesesLimite: number;
   quantidadePendencias: number;
   quantidadeLancamentosAbertos: number;
@@ -43,6 +44,7 @@ export interface RelatorioMensalMeiDTO {
   razaoSocial: string;
   nomeFantasia?: string;
   dataAbertura: string;
+  dataInicioSimei: string;
   ano: number;
   mes: number;
   situacao?: 'FECHADA';
@@ -87,7 +89,15 @@ export interface HistoricoApuracaoMeiDTO {
   limiteAplicavel: number;
   totalAno: number;
   percentualUtilizado: number;
+  alertaLimite?: ConfiguracaoAlertaLimiteDTO;
   meses: HistoricoApuracaoMeiItemDTO[];
+}
+
+export interface ConfiguracaoAlertaLimiteDTO {
+  id?: number;
+  percentual: number;
+  ativo: boolean;
+  obrigatorio: boolean;
 }
 
 export interface HistoricoApuracaoMeiItemDTO {

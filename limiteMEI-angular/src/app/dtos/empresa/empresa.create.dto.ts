@@ -5,6 +5,7 @@ export interface EmpresaCreateDTO {
   razaoSocial: string;
   nomeFantasia: string;
   dataAbertura: string;
+  dataInicioSimei: string;
   tipoEmpresa: TipoEmpresaEnum;
   ativo: boolean;
   dataEncerramento?: string;

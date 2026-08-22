@@ -15,6 +15,7 @@ public class RelatorioMensalMeiDTO {
     private String razaoSocial;
     private String nomeFantasia;
     private java.time.LocalDate dataAbertura;
+    private java.time.LocalDate dataInicioSimei;
     private Integer ano;
     private Integer mes;
     private SituacaoApuracaoMeiEnum situacao;

@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.service;
 
 import com.limiteMEI.limiteMEI.domain.*;
+import com.limiteMEI.limiteMEI.dto.configuracao.ConfiguracaoAlertaLimiteDTO;
 import com.limiteMEI.limiteMEI.dto.mei.ApuracaoMeiDTO;
 import com.limiteMEI.limiteMEI.dto.mei.HistoricoApuracaoMeiDTO;
 import com.limiteMEI.limiteMEI.enums.*;
@@ -22,8 +23,9 @@ class ApuracaoMeiServiceTest {
     private final EmpresaAtualService empresaAtual = mock(EmpresaAtualService.class);
     private final FechamentoApuracaoMeiRepository fechamentos = mock(FechamentoApuracaoMeiRepository.class);
     private final DocumentoFiscalRepository documentosFiscais = mock(DocumentoFiscalRepository.class);
+    private final ConfiguracaoAlertaLimiteService alertasLimite = mock(ConfiguracaoAlertaLimiteService.class);
     private final ApuracaoMeiService service = new ApuracaoMeiService(
-            repository, empresaAtual, fechamentos, documentosFiscais);
+            repository, empresaAtual, fechamentos, documentosFiscais, alertasLimite);
 
     @Test
     void deveSepararReceitasPorNaturezaEAcumularAteReferencia() {
@@ -49,12 +51,29 @@ class ApuracaoMeiServiceTest {
     void deveAplicarLimiteProporcionalNoAnoDeAbertura() {
         Empresa empresa = empresa(LocalDate.of(2026, 7, 15));
         when(empresaAtual.get()).thenReturn(empresa);
-        when(repository.findReceitasParaApuracaoMei(anyLong(), any(), any())).thenReturn(List.of());
+        when(repository.findReceitasParaApuracaoMei(anyLong(), any(), any())).thenReturn(List.of(
+                receita("1000.00", LocalDate.of(2026, 6, 1), NaturezaReceitaEnum.SERVICOS)));
 
         ApuracaoMeiDTO resultado = service.apurar(2026, 12);
 
         assertEquals(6, resultado.getMesesLimite());
         assertEquals(0, resultado.getLimiteAplicavel().compareTo(new BigDecimal("40500.00")));
+        assertEquals(0, resultado.getAcumuladoAno().compareTo(BigDecimal.ZERO));
+    }
+
+    @Test
+    void deveUsarInicioNoSimeiParaCalcularLimiteProporcional() {
+        Empresa empresa = empresa(LocalDate.of(2026, 2, 10));
+        empresa.setDataInicioSimei(LocalDate.of(2026, 7, 1));
+        when(empresaAtual.get()).thenReturn(empresa);
+        when(repository.findReceitasParaApuracaoMei(anyLong(), any(), any())).thenReturn(List.of(
+                receita("800.00", LocalDate.of(2026, 6, 1), NaturezaReceitaEnum.COMERCIO)));
+
+        ApuracaoMeiDTO resultado = service.apurar(2026, 12);
+
+        assertEquals(6, resultado.getMesesLimite());
+        assertEquals(0, resultado.getLimiteAplicavel().compareTo(new BigDecimal("40500.00")));
+        assertEquals(0, resultado.getAcumuladoAno().compareTo(BigDecimal.ZERO));
     }
 
     @Test
@@ -101,6 +120,10 @@ class ApuracaoMeiServiceTest {
         when(empresaAtual.get()).thenReturn(empresa);
         when(repository.findReceitasParaApuracaoMei(anyLong(), any(), any())).thenReturn(List.of(
                 receita("60750.00", LocalDate.of(2026, 1, 1), NaturezaReceitaEnum.COMERCIO)));
+        ConfiguracaoAlertaLimiteDTO alerta = ConfiguracaoAlertaLimiteDTO.builder()
+                .percentual(new BigDecimal("75.00")).ativo(true).obrigatorio(false).build();
+        when(alertasLimite.alertaAtual(any())).thenReturn(alerta);
+        when(alertasLimite.faixaAlerta(any(), eq(alerta))).thenReturn(FaixaAlertaMeiEnum.ATENCAO_75);
 
         ApuracaoMeiDTO resultado = service.apurar(2026, 1);
 

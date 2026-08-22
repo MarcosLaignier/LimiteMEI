@@ -47,9 +47,17 @@ public class EmpresaService extends BaseService<Empresa, Long, EmpresaCreateDTO,
 
     @Override
     protected void validate(Empresa empresa) {
+        if (empresa.getDataInicioSimei() != null && empresa.getDataAbertura() != null
+                && empresa.getDataInicioSimei().isBefore(empresa.getDataAbertura())) {
+            throw new ApplicationException("A data de início no SIMEI não pode ser anterior à data de abertura");
+        }
         if (empresa.getDataEncerramento() != null && empresa.getDataAbertura() != null
                 && empresa.getDataEncerramento().isBefore(empresa.getDataAbertura())) {
             throw new ApplicationException("A data de encerramento não pode ser anterior à data de abertura");
+        }
+        if (empresa.getDataEncerramento() != null && empresa.getDataInicioSimei() != null
+                && empresa.getDataEncerramento().isBefore(empresa.getDataInicioSimei())) {
+            throw new ApplicationException("A data de encerramento não pode ser anterior ao início no SIMEI");
         }
         super.validate(empresa);
     }

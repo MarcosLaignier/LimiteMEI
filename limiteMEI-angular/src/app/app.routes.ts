@@ -127,6 +127,27 @@ export const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'fiscal/documentos',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () => import('./pages/fiscal/documento-fiscal-list.component').then(m => m.DocumentoFiscalListComponent),
+      },
+      {
+        path: 'fiscal/documentos/create',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () => import('./pages/fiscal/documento-fiscal-form.component').then(m => m.DocumentoFiscalFormComponent),
+      },
+      {
+        path: 'fiscal/documentos/editar/:id',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () => import('./pages/fiscal/documento-fiscal-form.component').then(m => m.DocumentoFiscalFormComponent),
+      },
+      {
+        path: 'configuracoes',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/configuracoes/configuracoes.component').then((m) => m.ConfiguracoesComponent),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
     ],
   },

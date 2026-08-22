@@ -23,6 +23,10 @@ export class EmpresaCardComponent {
     const [ano, mes, dia] = (this.empresa.dataAbertura ?? '').split('-');
     return ano && mes && dia ? `${dia}/${mes}/${ano}` : this.empresa.dataAbertura;
   }
+  dataInicioSimeiFormatada(): string {
+    const [ano, mes, dia] = (this.empresa.dataInicioSimei ?? '').split('-');
+    return ano && mes && dia ? `${dia}/${mes}/${ano}` : 'Não informado';
+  }
   limiteFormatado(): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(this.empresa.limiteAnual);
   }

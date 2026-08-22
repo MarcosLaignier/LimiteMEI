@@ -10,6 +10,8 @@ import {
 } from '../../dtos/lancamento/lancamento.financeiro';
 import { LancamentoFinanceiroService } from '../../services/lancamento-financeiro.service';
 import { BaixaFinanceiraService } from '../../services/baixa-financeira.service';
+import { ConfiguracaoService } from '../../services/configuracao.service';
+import { ConfiguracaoGeralDTO } from '../../dtos/configuracao/configuracao.alerta.limite';
 import {
   BaixaFinanceiraCreateDTO,
   BaixaFinanceiraDTO,
@@ -141,7 +143,7 @@ import { DocumentoFiscalSelectorComponent } from '../../shared/components-common
       @if (model.tipo === tipoEnum.RECEBER && model.documentoFiscalEmitido) {
         <div class="form-row fiscal-link">
           <documento-fiscal-selector-component [(documentoId)]="model.documentoFiscalId" [disabled]="loading" />
-          <number-box-component label="Valor vinculado à nota" width="220px" [(dataField)]="model.valorDocumentoFiscal" [disabled]="loading" />
+          <number-box-component label="Valor a vincular" width="220px" [(dataField)]="model.valorDocumentoFiscal" [disabled]="loading" />
           <small>A nota deve ser cadastrada previamente no módulo Fiscal.</small>
         </div>
       }
@@ -380,6 +382,7 @@ export class LancamentoFinanceiroFormComponent
     BAIXA_REALIZADA: 'Baixa realizada', BAIXA_ESTORNADA: 'Baixa estornada'
   };
   baixa: BaixaFinanceiraCreateDTO = this.novaBaixa();
+  configuracaoGeral: ConfiguracaoGeralDTO = {};
   baixando = false;
   parcelado = false;
   recorrente = false;
@@ -388,6 +391,7 @@ export class LancamentoFinanceiroFormComponent
     router: Router,
     route: ActivatedRoute,
     private baixaService: BaixaFinanceiraService,
+    private configuracoes: ConfiguracaoService,
     private alerts: AlertService,
     private confirmDialog: ConfirmDialogService,
   ) {
@@ -396,11 +400,21 @@ export class LancamentoFinanceiroFormComponent
     this.clear();
   }
   ngOnInit() {
+    this.carregarConfiguracoes();
     this.initForm();
     if (this.route.snapshot.paramMap.get('id')) {
       this.carregarBaixas();
       this.carregarHistorico();
     }
+  }
+  carregarConfiguracoes() {
+    this.configuracoes.carregarGerais().subscribe({
+      next: configuracao => {
+        this.configuracaoGeral = configuracao ?? {};
+        this.baixa = this.novaBaixa();
+      },
+      error: () => this.configuracaoGeral = {},
+    });
   }
   get tipoCategoria() {
     return this.model.tipo === TipoLancamentoEnum.RECEBER
@@ -472,6 +486,10 @@ export class LancamentoFinanceiroFormComponent
   automaticPaymentChanged(enabled: boolean) {
     if (enabled) {
       this.model.dataLiquidacao = new Date().toISOString().slice(0, 10);
+      this.model.formaPagamento = this.model.formaPagamento
+        ?? this.configuracaoGeral?.formaPagamentoPadrao as FormaPagamentoEnum | undefined;
+      this.model.contaFinanceiraId = this.model.contaFinanceiraId
+        ?? this.configuracaoGeral?.contaPadraoBaixaId;
       return;
     }
     this.model.dataLiquidacao = undefined;
@@ -672,6 +690,8 @@ export class LancamentoFinanceiroFormComponent
       multa: 0,
       desconto: 0,
       dataLiquidacao: new Date().toISOString().slice(0, 10),
+      formaPagamento: this.configuracaoGeral?.formaPagamentoPadrao as FormaPagamentoEnum | undefined,
+      contaFinanceiraId: this.configuracaoGeral?.contaPadraoBaixaId,
     };
   }
 }

@@ -37,6 +37,8 @@ public class Empresa {
     @Column(nullable = false)
     private LocalDate dataAbertura;
 
+    private LocalDate dataInicioSimei;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoEmpresaEnum tipoEmpresa;

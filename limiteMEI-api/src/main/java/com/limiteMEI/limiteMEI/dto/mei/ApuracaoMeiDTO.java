@@ -6,6 +6,7 @@ import java.util.List;
 import java.time.LocalDateTime;
 import com.limiteMEI.limiteMEI.enums.SituacaoApuracaoMeiEnum;
 import com.limiteMEI.limiteMEI.enums.FaixaAlertaMeiEnum;
+import com.limiteMEI.limiteMEI.dto.configuracao.ConfiguracaoAlertaLimiteDTO;
 
 @Getter
 @Setter
@@ -28,6 +29,7 @@ public class ApuracaoMeiDTO {
     private BigDecimal projecaoAnual;
     private BigDecimal mediaMensalDisponivel;
     private FaixaAlertaMeiEnum faixaAlerta;
+    private ConfiguracaoAlertaLimiteDTO alertaLimite;
     private Integer mesesLimite;
     private Integer quantidadePendencias;
     private Integer quantidadeLancamentosAbertos;

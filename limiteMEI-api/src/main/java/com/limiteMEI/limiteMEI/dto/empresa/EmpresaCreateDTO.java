@@ -30,6 +30,9 @@ public class EmpresaCreateDTO {
     @NotNull(message = "A data de abertura é obrigatória")
     private LocalDate dataAbertura;
 
+    @NotNull(message = "A data de início no SIMEI é obrigatória")
+    private LocalDate dataInicioSimei;
+
     @NotNull(message = "O tipo da empresa é obrigatório")
     private TipoEmpresaEnum tipoEmpresa;
 

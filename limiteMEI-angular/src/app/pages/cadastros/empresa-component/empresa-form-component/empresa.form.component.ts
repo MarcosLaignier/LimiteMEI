@@ -83,8 +83,16 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
       this.alertService.warning('Informe um CNPJ válido com 14 caracteres e os dois dígitos verificadores numéricos.');
       return false;
     }
-    if (!ValidationUtils.requiredFields(this.model, ['dataAbertura', 'tipoEmpresa'])) {
-      this.alertService.warning('Informe a data de abertura e o tipo da empresa.');
+    if (!ValidationUtils.requiredFields(this.model, ['dataAbertura', 'dataInicioSimei', 'tipoEmpresa'])) {
+      this.alertService.warning('Informe a data de abertura, o início no SIMEI e o tipo da empresa.');
+      return false;
+    }
+    if (this.model.dataInicioSimei < this.model.dataAbertura) {
+      this.alertService.warning('A data de início no SIMEI não pode ser anterior à data de abertura.');
+      return false;
+    }
+    if (this.model.dataEncerramento && this.model.dataEncerramento < this.model.dataInicioSimei) {
+      this.alertService.warning('A data de encerramento não pode ser anterior ao início no SIMEI.');
       return false;
     }
     return true;
@@ -96,6 +104,7 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
       razaoSocial: '',
       nomeFantasia: '',
       dataAbertura: '',
+      dataInicioSimei: '',
       tipoEmpresa: TipoEmpresaEnum.MEI_GERAL,
       ativo: true
     };

@@ -5,6 +5,8 @@ import { LancamentoFinanceiroDTO } from '../../dtos/lancamento/lancamento.financ
 import { BaixaFinanceiraCreateDTO } from '../../dtos/lancamento/baixa.financeira';
 import { LancamentoFinanceiroService } from '../../services/lancamento-financeiro.service';
 import { BaixaFinanceiraService } from '../../services/baixa-financeira.service';
+import { ConfiguracaoService } from '../../services/configuracao.service';
+import { ConfiguracaoGeralDTO } from '../../dtos/configuracao/configuracao.alerta.limite';
 import { DateBoxComponent } from '../../shared/components-commons/infra/date-box-component/date.box.component';
 import { NumberBoxComponent } from '../../shared/components-commons/infra/number-box-component/number.box.component';
 import { SelectEnumComponent } from '../../shared/components-commons/infra/select-enum-component/select.enum.component';
@@ -48,6 +50,7 @@ export class LancamentoFinanceiroComponent implements OnInit {
   filtrados: LancamentoFinanceiroDTO[] = [];
   selecionado?: LancamentoFinanceiroDTO;
   baixa: BaixaFinanceiraCreateDTO = this.novaBaixa();
+  configuracaoGeral: ConfiguracaoGeralDTO = {};
   filtro: LancamentoFiltro = novoLancamentoFiltro();
   readonly tipos = TipoLancamentoEnum;
   readonly formas = FormaPagamentoEnum;
@@ -63,12 +66,20 @@ export class LancamentoFinanceiroComponent implements OnInit {
   constructor(
     private service: LancamentoFinanceiroService,
     private baixas: BaixaFinanceiraService,
+    private configuracoes: ConfiguracaoService,
     private alerts: AlertService,
     private confirmDialog: ConfirmDialogService,
     private router: Router,
   ) {}
   ngOnInit() {
+    this.carregarConfiguracoes();
     this.carregar();
+  }
+  carregarConfiguracoes() {
+    this.configuracoes.carregarGerais().subscribe({
+      next: configuracao => this.configuracaoGeral = configuracao ?? {},
+      error: () => this.configuracaoGeral = {},
+    });
   }
   get totalReceber() {
     return this.filtrados
@@ -269,7 +280,15 @@ export class LancamentoFinanceiroComponent implements OnInit {
     );
   }
   private novaBaixa(): BaixaFinanceiraCreateDTO {
-    return { valorPrincipal: 0, juros: 0, multa: 0, desconto: 0, dataLiquidacao: this.hoje() };
+    return {
+      valorPrincipal: 0,
+      juros: 0,
+      multa: 0,
+      desconto: 0,
+      dataLiquidacao: this.hoje(),
+      formaPagamento: this.configuracaoGeral?.formaPagamentoPadrao as FormaPagamentoEnum | undefined,
+      contaFinanceiraId: this.configuracaoGeral?.contaPadraoBaixaId,
+    };
   }
   private hoje() {
     const data = new Date();

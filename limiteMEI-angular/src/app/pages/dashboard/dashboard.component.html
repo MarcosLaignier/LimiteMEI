@@ -12,7 +12,7 @@
       <div class="panel mei-panel"><div class="panel-heading"><div><span>CONTROLE DO MEI</span><h2>Faturamento e teto</h2></div><a routerLink="/app/financeiro/mei/apuracao">Ver apuração <i class="bi bi-arrow-right"></i></a></div>
         <div class="mei-totals"><div><span>No mês</span><strong>{{dashboard.mei.totalMes|currency:'BRL'}}</strong></div><div><span>Acumulado anual</span><strong>{{dashboard.mei.acumuladoAno|currency:'BRL'}}</strong></div><div><span>Limite utilizado</span><strong>{{dashboard.mei.percentualUtilizado|number:'1.2-2'}}%</strong></div><div><span>Saldo disponível</span><strong>{{dashboard.mei.saldoDisponivel|currency:'BRL'}}</strong></div></div>
         <div class="limit-progress"><i [style.width.%]="dashboard.mei.percentualUtilizado>100?100:dashboard.mei.percentualUtilizado"></i></div>
-        <mei-limit-alert [percentual]="dashboard.mei.percentualUtilizado" [projecaoAnual]="dashboard.mei.projecaoAnual" />
+        <mei-limit-alert [percentual]="dashboard.mei.percentualUtilizado" [projecaoAnual]="dashboard.mei.projecaoAnual" [alerta]="dashboard.mei.alertaLimite" />
         <div class="chart"><div class="chart-bars">@for(item of dashboard.mei.meses;track item.mes){<div class="bar-column" [title]="(item.total|currency:'BRL')||''"><div class="bar-track"><i [style.height.%]="alturaBarra(item.total)" [class.current]="item.mes===dashboard.mei.mesReferencia"></i></div><span>{{meses[item.mes-1]}}</span></div>}</div></div>
       </div>
       <div class="panel"><div class="panel-heading"><div><span>MOVIMENTAÇÕES</span><h2>Últimas movimentações</h2></div><a routerLink="/app/financeiro/movimentacoes">Ver extrato <i class="bi bi-arrow-right"></i></a></div>

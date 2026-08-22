@@ -17,15 +17,18 @@ export class EmpresaDTO {
   @GridColumn({ label: 'Abertura', type: 'date', ordem: 5, width: '130px' })
   dataAbertura!: string;
 
-  @GridColumn({ label: 'Tipo', type: 'enum', ordem: 6, width: '180px' })
+  @GridColumn({ label: 'Início no SIMEI', type: 'date', ordem: 6, width: '140px' })
+  dataInicioSimei!: string;
+
+  @GridColumn({ label: 'Tipo', type: 'enum', ordem: 7, width: '180px' })
   tipoEmpresa!: TipoEmpresaEnum;
 
-  @GridColumn({ label: 'Limite anual', type: 'currency', ordem: 7, width: '160px' })
+  @GridColumn({ label: 'Limite anual', type: 'currency', ordem: 8, width: '160px' })
   limiteAnual!: number;
 
-  @GridColumn({ label: 'Ativa', type: 'boolean', ordem: 8, width: '90px' })
+  @GridColumn({ label: 'Ativa', type: 'boolean', ordem: 9, width: '90px' })
   ativo!: boolean;
 
-  @GridColumn({ label: 'Encerramento', type: 'date', ordem: 9, width: '140px' })
+  @GridColumn({ label: 'Encerramento', type: 'date', ordem: 10, width: '140px' })
   dataEncerramento?: string;
 }

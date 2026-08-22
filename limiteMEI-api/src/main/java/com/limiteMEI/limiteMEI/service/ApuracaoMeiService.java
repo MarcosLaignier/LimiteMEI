@@ -2,8 +2,8 @@ package com.limiteMEI.limiteMEI.service;
 
 import com.limiteMEI.limiteMEI.domain.*;
 import com.limiteMEI.limiteMEI.dto.mei.*;
+import com.limiteMEI.limiteMEI.dto.configuracao.ConfiguracaoAlertaLimiteDTO;
 import com.limiteMEI.limiteMEI.enums.NaturezaReceitaEnum;
-import com.limiteMEI.limiteMEI.enums.FaixaAlertaMeiEnum;
 import com.limiteMEI.limiteMEI.enums.SituacaoLancamentoEnum;
 import com.limiteMEI.limiteMEI.repository.LancamentoFinanceiroRepository;
 import com.limiteMEI.limiteMEI.repository.FechamentoApuracaoMeiRepository;
@@ -26,14 +26,17 @@ public class ApuracaoMeiService {
     private final EmpresaAtualService empresaAtual;
     private final FechamentoApuracaoMeiRepository fechamentos;
     private final DocumentoFiscalRepository documentosFiscais;
+    private final ConfiguracaoAlertaLimiteService alertasLimite;
 
     public ApuracaoMeiService(LancamentoFinanceiroRepository lancamentos, EmpresaAtualService empresaAtual,
                               FechamentoApuracaoMeiRepository fechamentos,
-                              DocumentoFiscalRepository documentosFiscais) {
+                              DocumentoFiscalRepository documentosFiscais,
+                              ConfiguracaoAlertaLimiteService alertasLimite) {
         this.lancamentos = lancamentos;
         this.empresaAtual = empresaAtual;
         this.fechamentos = fechamentos;
         this.documentosFiscais = documentosFiscais;
+        this.alertasLimite = alertasLimite;
     }
 
     public ApuracaoMeiDTO apurar(int ano, int mesReferencia) {
@@ -43,7 +46,7 @@ public class ApuracaoMeiService {
         Empresa empresa = empresaAtual.get();
         List<LancamentoFinanceiro> todos = lancamentos.findReceitasParaApuracaoMei(
                 empresa.getId(), LocalDate.of(ano, 1, 1), YearMonth.of(ano, mesReferencia).atEndOfMonth());
-        List<LancamentoFinanceiro> receitas = todos.stream().filter(this::incluido).toList();
+        List<LancamentoFinanceiro> receitas = todos.stream().filter(item -> incluido(item, empresa)).toList();
         List<ResumoMensalMeiDTO> meses = new ArrayList<>();
         for (int mes = 1; mes <= mesReferencia; mes++) {
             meses.add(resumirMes(receitas, mes));
@@ -56,7 +59,9 @@ public class ApuracaoMeiService {
                 .multiply(BigDecimal.valueOf(mesesLimite));
         BigDecimal percentual = limite.signum() == 0 ? BigDecimal.ZERO
                 : acumulado.multiply(CEM).divide(limite, 2, RoundingMode.HALF_UP);
-        int primeiroMes = empresa.getDataAbertura().getYear() == ano ? empresa.getDataAbertura().getMonthValue() : 1;
+        ConfiguracaoAlertaLimiteDTO alertaLimite = alertasLimite.alertaAtual(percentual);
+        LocalDate inicioSimei = inicioSimei(empresa);
+        int primeiroMes = inicioSimei.getYear() == ano ? inicioSimei.getMonthValue() : 1;
         int mesesDecorridos = Math.max(0, mesReferencia - primeiroMes + 1);
         BigDecimal projecao = mesesDecorridos == 0 ? BigDecimal.ZERO
                 : acumulado.divide(BigDecimal.valueOf(mesesDecorridos), 2, RoundingMode.HALF_UP)
@@ -67,7 +72,7 @@ public class ApuracaoMeiService {
                 : saldoDisponivel.divide(BigDecimal.valueOf(mesesRestantes), 2, RoundingMode.HALF_UP);
         List<DetalheApuracaoMeiDTO> detalhes = todos.stream()
                 .filter(item -> item.getDataCompetencia().getMonthValue() == mesReferencia)
-                .map(this::detalhar).toList();
+                .map(item -> detalhar(item, empresa)).toList();
         Optional<FechamentoApuracaoMei> fechamento = fechamentos
                 .findByEmpresaIdAndAnoAndMes(empresa.getId(), ano, mesReferencia);
         List<Integer> anterioresAbertas = competenciasAnterioresAbertas(empresa, ano, mesReferencia);
@@ -86,7 +91,8 @@ public class ApuracaoMeiService {
                 .acumuladoAno(acumulado).limiteAplicavel(limite)
                 .saldoDisponivel(saldoDisponivel).percentualUtilizado(percentual)
                 .projecaoAnual(projecao).mediaMensalDisponivel(mediaMensalDisponivel)
-                .faixaAlerta(faixaAlerta(percentual)).mesesLimite(mesesLimite)
+                .faixaAlerta(alertasLimite.faixaAlerta(percentual, alertaLimite))
+                .alertaLimite(alertaLimite).mesesLimite(mesesLimite)
                 .quantidadePendencias((int) detalhes.stream().filter(DetalheApuracaoMeiDTO::getPendenciaFiscal).count())
                 .quantidadeLancamentosAbertos(abertos).quantidadeLancamentosVencidos(vencidos)
                 .competenciasAnterioresAbertas(anterioresAbertas)
@@ -156,6 +162,7 @@ public class ApuracaoMeiService {
                 .orElse(apuracaoAtual.getAcumuladoAno());
         return RelatorioMensalMeiDTO.builder().cnpj(empresa.getCnpj()).razaoSocial(empresa.getRazaoSocial())
                 .nomeFantasia(empresa.getNomeFantasia()).dataAbertura(empresa.getDataAbertura())
+                .dataInicioSimei(inicioSimei(empresa))
                 .ano(ano).mes(mes).situacao(fechamento.map(FechamentoApuracaoMei::getSituacao).orElse(null))
                 .comercioComDocumento(valores.getComercioComDocumento())
                 .comercioSemDocumento(valores.getComercioSemDocumento())
@@ -173,7 +180,7 @@ public class ApuracaoMeiService {
         Empresa empresa = empresaAtual.get();
         List<LancamentoFinanceiro> receitas = lancamentos.findReceitasParaApuracaoMei(
                 empresa.getId(), LocalDate.of(ano, 1, 1), LocalDate.of(ano, 12, 31)).stream()
-                .filter(this::incluido).toList();
+                .filter(item -> incluido(item, empresa)).toList();
         Map<Integer, FechamentoApuracaoMei> porMes = new HashMap<>();
         fechamentos.findByEmpresaIdAndAnoOrderByMes(empresa.getId(), ano)
                 .forEach(item -> porMes.put(item.getMes(), item));
@@ -197,8 +204,9 @@ public class ApuracaoMeiService {
         }
         BigDecimal percentual = limite.signum() == 0 ? BigDecimal.ZERO
                 : acumulado.multiply(CEM).divide(limite, 2, RoundingMode.HALF_UP);
+        ConfiguracaoAlertaLimiteDTO alertaLimite = alertasLimite.alertaAtual(percentual);
         return HistoricoApuracaoMeiDTO.builder().ano(ano).limiteAplicavel(limite).totalAno(acumulado)
-                .percentualUtilizado(percentual).meses(itens).build();
+                .percentualUtilizado(percentual).alertaLimite(alertaLimite).meses(itens).build();
     }
 
     private ResumoMensalMeiDTO resumirMes(List<LancamentoFinanceiro> receitas, int mes) {
@@ -225,14 +233,15 @@ public class ApuracaoMeiService {
     }
 
     private int mesesLimite(Empresa empresa, int ano) {
-        if (empresa.getDataAbertura().getYear() > ano) return 0;
-        return empresa.getDataAbertura().getYear() == ano
-                ? 13 - empresa.getDataAbertura().getMonthValue() : 12;
+        LocalDate inicioSimei = inicioSimei(empresa);
+        if (inicioSimei.getYear() > ano) return 0;
+        return inicioSimei.getYear() == ano ? 13 - inicioSimei.getMonthValue() : 12;
     }
 
     private List<Integer> competenciasAnterioresAbertas(Empresa empresa, int ano, int mesReferencia) {
-        if (empresa.getDataAbertura().getYear() > ano) return List.of();
-        int primeiroMes = empresa.getDataAbertura().getYear() == ano ? empresa.getDataAbertura().getMonthValue() : 1;
+        LocalDate inicioSimei = inicioSimei(empresa);
+        if (inicioSimei.getYear() > ano) return List.of();
+        int primeiroMes = inicioSimei.getYear() == ano ? inicioSimei.getMonthValue() : 1;
         Map<Integer, SituacaoApuracaoMeiEnum> situacoes = new HashMap<>();
         fechamentos.findByEmpresaIdAndAnoOrderByMes(empresa.getId(), ano)
                 .forEach(item -> situacoes.put(item.getMes(), item.getSituacao()));
@@ -248,19 +257,11 @@ public class ApuracaoMeiService {
                 || item.getSituacao() == SituacaoLancamentoEnum.PARCIAL;
     }
 
-    private FaixaAlertaMeiEnum faixaAlerta(BigDecimal percentual) {
-        if (percentual.compareTo(new BigDecimal("100")) >= 0) return FaixaAlertaMeiEnum.EXCEDIDO_100;
-        if (percentual.compareTo(new BigDecimal("90")) >= 0) return FaixaAlertaMeiEnum.CRITICO_90;
-        if (percentual.compareTo(new BigDecimal("80")) >= 0) return FaixaAlertaMeiEnum.ALERTA_80;
-        if (percentual.compareTo(new BigDecimal("75")) >= 0) return FaixaAlertaMeiEnum.ATENCAO_75;
-        return FaixaAlertaMeiEnum.NORMAL;
+    private boolean incluido(LancamentoFinanceiro item, Empresa empresa) {
+        return motivoNaoInclusao(item, empresa) == null;
     }
 
-    private boolean incluido(LancamentoFinanceiro item) {
-        return motivoNaoInclusao(item) == null;
-    }
-
-    private String motivoNaoInclusao(LancamentoFinanceiro item) {
+    private String motivoNaoInclusao(LancamentoFinanceiro item, Empresa empresa) {
         if (Boolean.TRUE.equals(item.getExcluido())) return "Lançamento excluído";
         if (item.getSituacao() == com.limiteMEI.limiteMEI.enums.SituacaoLancamentoEnum.CANCELADO)
             return "Lançamento cancelado";
@@ -268,11 +269,13 @@ public class ApuracaoMeiService {
         if (!Boolean.TRUE.equals(item.getCategoria().getCompoeFaturamentoMei()))
             return "Categoria não compõe o faturamento do MEI";
         if (item.getCategoria().getNaturezaReceita() == null) return "Categoria sem natureza da receita";
+        if (item.getDataCompetencia().isBefore(inicioSimei(empresa)))
+            return "Competência anterior ao início no SIMEI";
         return null;
     }
 
-    private DetalheApuracaoMeiDTO detalhar(LancamentoFinanceiro item) {
-        String motivo = motivoNaoInclusao(item);
+    private DetalheApuracaoMeiDTO detalhar(LancamentoFinanceiro item, Empresa empresa) {
+        String motivo = motivoNaoInclusao(item, empresa);
         boolean pendenciaDocumento = motivo == null
                 && Boolean.TRUE.equals(item.getCategoria().getExigeDocumentoFiscal())
                 && !Boolean.TRUE.equals(item.getDocumentoFiscalEmitido());
@@ -287,7 +290,7 @@ public class ApuracaoMeiService {
 
     private List<LancamentoFinanceiro> receitasDoMes(Empresa empresa, int ano, int mes) {
         return lancamentos.findReceitasParaApuracaoMei(empresa.getId(), YearMonth.of(ano, mes).atDay(1),
-                YearMonth.of(ano, mes).atEndOfMonth()).stream().filter(this::incluido).toList();
+                YearMonth.of(ano, mes).atEndOfMonth()).stream().filter(item -> incluido(item, empresa)).toList();
     }
 
     private void preencherFotografia(FechamentoApuracaoMei fechamento, List<LancamentoFinanceiro> receitas) {
@@ -349,5 +352,9 @@ public class ApuracaoMeiService {
 
     private String usuarioAtual() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    private LocalDate inicioSimei(Empresa empresa) {
+        return empresa.getDataInicioSimei() == null ? empresa.getDataAbertura() : empresa.getDataInicioSimei();
     }
 }

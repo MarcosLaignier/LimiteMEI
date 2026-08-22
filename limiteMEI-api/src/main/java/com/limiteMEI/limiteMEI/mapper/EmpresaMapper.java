@@ -19,6 +19,7 @@ public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCre
                 .razaoSocial(empresa.getRazaoSocial())
                 .nomeFantasia(empresa.getNomeFantasia())
                 .dataAbertura(empresa.getDataAbertura())
+                .dataInicioSimei(empresa.getDataInicioSimei())
                 .tipoEmpresa(empresa.getTipoEmpresa())
                 .limiteAnual(empresa.getLimiteAnual())
                 .ativo(empresa.getAtivo())
@@ -34,6 +35,7 @@ public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCre
         empresa.setRazaoSocial(dto.getRazaoSocial());
         empresa.setNomeFantasia(dto.getNomeFantasia());
         empresa.setDataAbertura(dto.getDataAbertura());
+        empresa.setDataInicioSimei(dto.getDataInicioSimei());
         empresa.setTipoEmpresa(dto.getTipoEmpresa());
         empresa.setLimiteAnual(dto.getTipoEmpresa() != null ? dto.getTipoEmpresa().getLimiteAnual() : null);
         empresa.setAtivo(dto.getAtivo() == null ? true : dto.getAtivo());
@@ -48,6 +50,7 @@ public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCre
         empresa.setRazaoSocial(dto.getRazaoSocial());
         empresa.setNomeFantasia(dto.getNomeFantasia());
         empresa.setDataAbertura(dto.getDataAbertura());
+        empresa.setDataInicioSimei(dto.getDataInicioSimei());
         empresa.setTipoEmpresa(dto.getTipoEmpresa());
         empresa.setLimiteAnual(dto.getTipoEmpresa() != null ? dto.getTipoEmpresa().getLimiteAnual() : null);
         empresa.setAtivo(dto.getAtivo() == null ? empresa.getAtivo() : dto.getAtivo());

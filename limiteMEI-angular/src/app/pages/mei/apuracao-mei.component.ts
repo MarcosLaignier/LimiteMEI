@@ -27,7 +27,7 @@ import { MeiLimitAlertComponent } from '../../shared/components-commons/mei-limi
           <article [class.danger]="apuracao.saldoDisponivel < 0"><span>Saldo disponível</span><strong>{{apuracao.saldoDisponivel|currency:'BRL'}}</strong><small>Antes de atingir o teto</small></article>
         </div>
         @if(apuracao.situacaoFechamento==='FECHADA'){<div class="closed"><i class="bi bi-lock"></i><div><strong>Apuração fechada</strong><span>Fechada em {{apuracao.dataFechamento|date:'dd/MM/yyyy HH:mm'}} por {{apuracao.usuarioFechamento}}. O relatório usa a fotografia deste fechamento.</span></div></div>}@else if(apuracao.situacaoFechamento==='REABERTA'){<div class="reopened"><i class="bi bi-unlock"></i><div><strong>Apuração reaberta</strong><span>{{apuracao.motivoReabertura}}</span></div></div>}
-        <mei-limit-alert [percentual]="apuracao.percentualUtilizado" [projecaoAnual]="apuracao.projecaoAnual" />
+        <mei-limit-alert [percentual]="apuracao.percentualUtilizado" [projecaoAnual]="apuracao.projecaoAnual" [alerta]="apuracao.alertaLimite" />
         <div class="limit-card">
           <div><span>Uso do limite anual</span><strong>{{apuracao.percentualUtilizado|number:'1.2-2'}}%</strong></div>
           <div class="progress"><i [style.width.%]="percentualBarra" [class.warning]="apuracao.percentualUtilizado >= 75" [class.danger]="apuracao.percentualUtilizado >= 100"></i></div>

@@ -81,7 +81,7 @@ export class SideBarComponent implements OnInit {
     },
 
 
-    { label: 'Configurações', icon: 'bi-gear', route: '/configuracoes' }
+    { label: 'Configurações', icon: 'bi-gear', route: '/app/configuracoes' }
   ];
 
   constructor(private router: Router, public auth: AuthService) {}
