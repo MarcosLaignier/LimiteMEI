@@ -8,6 +8,7 @@ import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,11 +25,13 @@ public class BaixaFinanceiraService {
     private final MovimentoFinanceiroService movimentos;
     private final HistoricoFinanceiroService historico;
     private final ComposicaoBaixaCalculator calculadora;
+    private final PeriodoOperacionalService periodos;
 
     public BaixaFinanceiraService(BaixaFinanceiraRepository repository, LancamentoFinanceiroService lancamentos,
                                   EmpresaAtualService empresaAtual, ContaFinanceiraService contas,
                                   MovimentoFinanceiroService movimentos, HistoricoFinanceiroService historico,
-                                  ComposicaoBaixaCalculator calculadora) {
+                                  ComposicaoBaixaCalculator calculadora,
+                                  PeriodoOperacionalService periodos) {
         this.repository = repository;
         this.lancamentos = lancamentos;
         this.empresaAtual = empresaAtual;
@@ -36,6 +39,7 @@ public class BaixaFinanceiraService {
         this.movimentos = movimentos;
         this.historico = historico;
         this.calculadora = calculadora;
+        this.periodos = periodos;
     }
 
     public List<BaixaFinanceiraDTO> findAll(Long lancamentoId) {
@@ -50,6 +54,8 @@ public class BaixaFinanceiraService {
         }
         if (lancamento.getSituacao() == SituacaoLancamentoEnum.CANCELADO || lancamento.getSituacao() == SituacaoLancamentoEnum.LIQUIDADO)
             throw new ApplicationException("Este lançamento não aceita novas baixas");
+        periodos.validarAberto(lancamento.getEmpresa(), lancamento.getDataCompetencia(), "realizar baixas financeiras");
+        periodos.validarAberto(lancamento.getEmpresa(), dto.getDataLiquidacao(), "realizar baixas financeiras");
         ComposicaoBaixaCalculator.Resultado composicao = calculadora.calcular(dto.getValorPrincipal(),
                 dto.getJuros(), dto.getMulta(), dto.getDesconto());
         BigDecimal saldo = lancamento.getValor().subtract(lancamentos.total(lancamentoId));
@@ -85,6 +91,9 @@ public class BaixaFinanceiraService {
         if (!Boolean.TRUE.equals(baixa.getAtivo())) {
             throw new ApplicationException("Esta baixa já foi estornada");
         }
+        periodos.validarAberto(lancamento.getEmpresa(), lancamento.getDataCompetencia(), "estornar baixas financeiras");
+        periodos.validarAberto(lancamento.getEmpresa(), baixa.getDataLiquidacao(), "estornar baixas financeiras");
+        periodos.validarAberto(lancamento.getEmpresa(), LocalDate.now(), "estornar baixas financeiras");
         baixa.setAtivo(false);
         baixa.setDataEstorno(LocalDateTime.now());
         baixa.setMotivoEstorno(dto.getMotivo().trim());

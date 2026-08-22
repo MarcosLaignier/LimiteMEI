@@ -20,19 +20,19 @@ public class DocumentoFiscalService {
     private final LancamentoFinanceiroRepository lancamentosRepository;
     private final EmpresaAtualService empresaAtual;
     private final PessoaService pessoas;
-    private final FechamentoApuracaoMeiRepository fechamentos;
+    private final PeriodoOperacionalService periodos;
 
     public DocumentoFiscalService(DocumentoFiscalRepository repository,
                                   DocumentoFiscalLancamentoRepository vinculos,
                                   LancamentoFinanceiroRepository lancamentosRepository,
                                   EmpresaAtualService empresaAtual, PessoaService pessoas,
-                                  FechamentoApuracaoMeiRepository fechamentos) {
+                                  PeriodoOperacionalService periodos) {
         this.repository = repository;
         this.vinculos = vinculos;
         this.lancamentosRepository = lancamentosRepository;
         this.empresaAtual = empresaAtual;
         this.pessoas = pessoas;
-        this.fechamentos = fechamentos;
+        this.periodos = periodos;
     }
 
     @Transactional(readOnly = true)
@@ -153,11 +153,7 @@ public class DocumentoFiscalService {
     }
 
     private void validarPeriodoAberto(LocalDate competencia) {
-        if (competencia == null) return;
-        boolean fechado = fechamentos.findByEmpresaIdAndAnoAndMes(empresaAtual.get().getId(), competencia.getYear(),
-                        competencia.getMonthValue()).map(item -> item.getSituacao() == SituacaoApuracaoMeiEnum.FECHADA)
-                .orElse(false);
-        if (fechado) throw new ApplicationException("A competência está fechada. Reabra a apuração antes de alterar documentos fiscais");
+        periodos.validarAberto(empresaAtual.get(), competencia, "alterar documentos fiscais");
     }
 
     private DocumentoFiscal findOwned(Long id) {

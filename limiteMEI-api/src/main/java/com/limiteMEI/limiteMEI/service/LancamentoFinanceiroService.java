@@ -32,7 +32,7 @@ public class LancamentoFinanceiroService {
     private final HistoricoFinanceiroService historico;
     private final ParcelamentoValidator parcelamentoValidator;
     private final RecorrenciaValidator recorrenciaValidator;
-    private final FechamentoApuracaoMeiRepository fechamentosMei;
+    private final PeriodoOperacionalService periodos;
     private final DocumentoFiscalService documentosFiscais;
 
     public LancamentoFinanceiroService(LancamentoFinanceiroRepository repository, BaixaFinanceiraRepository baixas,
@@ -41,7 +41,7 @@ public class LancamentoFinanceiroService {
                                        MovimentoFinanceiroService movimentos, HistoricoFinanceiroService historico,
                                        ParcelamentoValidator parcelamentoValidator,
                                        RecorrenciaValidator recorrenciaValidator,
-                                       FechamentoApuracaoMeiRepository fechamentosMei,
+                                       PeriodoOperacionalService periodos,
                                        DocumentoFiscalService documentosFiscais) {
         this.repository = repository;
         this.baixas = baixas;
@@ -54,7 +54,7 @@ public class LancamentoFinanceiroService {
         this.historico = historico;
         this.parcelamentoValidator = parcelamentoValidator;
         this.recorrenciaValidator = recorrenciaValidator;
-        this.fechamentosMei = fechamentosMei;
+        this.periodos = periodos;
         this.documentosFiscais = documentosFiscais;
     }
 
@@ -535,12 +535,6 @@ public class LancamentoFinanceiroService {
     }
 
     private void validarPeriodoAberto(Empresa empresa, java.time.LocalDate competencia) {
-        if (competencia == null) return;
-        boolean fechado = fechamentosMei.findByEmpresaIdAndAnoAndMes(empresa.getId(),
-                        competencia.getYear(), competencia.getMonthValue())
-                .map(item -> item.getSituacao() == SituacaoApuracaoMeiEnum.FECHADA).orElse(false);
-        if (fechado) {
-            throw new ApplicationException("A apuração desta competência está fechada. Reabra o mês antes de alterar lançamentos");
-        }
+        periodos.validarAberto(empresa, competencia, "alterar lançamentos financeiros");
     }
 }

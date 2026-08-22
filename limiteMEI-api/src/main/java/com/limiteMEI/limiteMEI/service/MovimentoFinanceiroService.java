@@ -21,16 +21,19 @@ public class MovimentoFinanceiroService extends BaseService<MovimentoFinanceiro,
     private final EmpresaAtualService empresaAtual;
     private final ContaFinanceiraService contas;
     private final CategoriaService categorias;
+    private final PeriodoOperacionalService periodos;
 
     public MovimentoFinanceiroService(MovimentoFinanceiroRepository repository, MovimentoFinanceiroMapper mapper,
                                       GenericUniqueValidator validator, EmpresaAtualService empresaAtual,
-                                      ContaFinanceiraService contas, CategoriaService categorias) {
+                                      ContaFinanceiraService contas, CategoriaService categorias,
+                                      PeriodoOperacionalService periodos) {
         super(validator);
         this.repository = repository;
         this.mapper = mapper;
         this.empresaAtual = empresaAtual;
         this.contas = contas;
         this.categorias = categorias;
+        this.periodos = periodos;
     }
 
     @Override
@@ -41,6 +44,7 @@ public class MovimentoFinanceiroService extends BaseService<MovimentoFinanceiro,
     @Override
     public MovimentoFinanceiroDTO save(MovimentoFinanceiroCreateDTO dto) {
         validarOrigemManual(dto.getOrigem());
+        periodos.validarAberto(empresaAtual.get(), dto.getData(), "criar movimentações financeiras");
         MovimentoFinanceiro entity = mapper.toEntity(dto);
         prepararManual(entity, dto);
         return mapper.toDTO(repository.save(entity));
@@ -50,9 +54,11 @@ public class MovimentoFinanceiroService extends BaseService<MovimentoFinanceiro,
     public MovimentoFinanceiroDTO update(Long id, MovimentoFinanceiroCreateDTO dto) {
         MovimentoFinanceiro entity = findOwned(id);
         validarEditavel(entity);
+        periodos.validarAberto(entity.getEmpresa(), entity.getData(), "alterar movimentações financeiras");
         validarOrigemManual(dto.getOrigem());
         mapper.updateEntity(entity, dto);
         prepararManual(entity, dto);
+        periodos.validarAberto(entity.getEmpresa(), entity.getData(), "alterar movimentações financeiras");
         return mapper.toDTO(repository.save(entity));
     }
 
@@ -60,6 +66,7 @@ public class MovimentoFinanceiroService extends BaseService<MovimentoFinanceiro,
     public void delete(Long id) {
         MovimentoFinanceiro entity = findOwned(id);
         validarEditavel(entity);
+        periodos.validarAberto(entity.getEmpresa(), entity.getData(), "excluir movimentações financeiras");
         repository.delete(entity);
     }
 
@@ -82,6 +89,7 @@ public class MovimentoFinanceiroService extends BaseService<MovimentoFinanceiro,
     }
 
     public List<MovimentoFinanceiroDTO> transferir(TransferenciaFinanceiraDTO dto) {
+        periodos.validarAberto(empresaAtual.get(), dto.getData(), "criar transferências financeiras");
         if (dto.getContaOrigemId().equals(dto.getContaDestinoId()))
             throw new ApplicationException("As contas de origem e destino devem ser diferentes");
         ContaFinanceira origem = contas.findOwnedEntity(dto.getContaOrigemId());
@@ -100,10 +108,13 @@ public class MovimentoFinanceiroService extends BaseService<MovimentoFinanceiro,
     public void excluirTransferencia(String transferenciaId) {
         List<MovimentoFinanceiro> movimentos = repository.findByTransferenciaIdAndEmpresaId(transferenciaId, empresaAtual.get().getId());
         if (movimentos.size() != 2) throw new ApplicationException("Transferência financeira não encontrada");
+        movimentos.forEach(item -> periodos.validarAberto(item.getEmpresa(), item.getData(), "excluir transferências financeiras"));
         repository.deleteAll(movimentos);
     }
 
     public MovimentoFinanceiro gerarPorBaixa(BaixaFinanceira baixa) {
+        periodos.validarAberto(baixa.getLancamento().getEmpresa(), baixa.getDataLiquidacao(),
+                "gerar movimentações financeiras por baixa");
         TipoFluxoCaixaEnum tipo = baixa.getLancamento().getTipo() == TipoLancamentoEnum.RECEBER
                 ? TipoFluxoCaixaEnum.ENTRADA : TipoFluxoCaixaEnum.SAIDA;
         MovimentoFinanceiro movimento = MovimentoFinanceiro.builder()
@@ -128,6 +139,8 @@ public class MovimentoFinanceiroService extends BaseService<MovimentoFinanceiro,
         if (Boolean.TRUE.equals(original.getEstornado())) {
             throw new ApplicationException("Esta baixa já foi estornada");
         }
+        periodos.validarAberto(original.getEmpresa(), original.getData(), "estornar movimentações financeiras");
+        periodos.validarAberto(original.getEmpresa(), LocalDate.now(), "estornar movimentações financeiras");
         original.setEstornado(true);
         repository.save(original);
         MovimentoFinanceiro estorno = MovimentoFinanceiro.builder()
