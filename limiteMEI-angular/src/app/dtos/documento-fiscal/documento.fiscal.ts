@@ -5,6 +5,7 @@ export interface DocumentoFiscalVinculoDTO { lancamentoId:number; descricao:stri
 export interface DocumentoFiscalVinculoCreateDTO { lancamentoId:number; valorVinculado:number; }
 export interface DocumentoFiscalCreateDTO { tipo:TipoDocumentoFiscalEnum; numero:string; serie:string; chaveAcesso:string; dataEmissao:string; valorTotal:number; situacao:SituacaoDocumentoFiscalEnum; clienteId?:number; observacao:string; vinculos:DocumentoFiscalVinculoCreateDTO[]; }
 export interface DocumentoFiscalXmlPreviewDTO { tipo:TipoDocumentoFiscalEnum; numero:string; serie?:string; chaveAcesso?:string; dataEmissao:string; valorTotal:number; clienteId?:number; clienteNome?:string; clienteDocumento?:string; clienteEncontrado:boolean; }
+export interface RelatorioDocumentoFiscalFiltroDTO { inicio?:string; fim?:string; tipo?:TipoDocumentoFiscalEnum; situacao?:SituacaoDocumentoFiscalEnum; cliente?:string; }
 export class DocumentoFiscalDTO {
   @GridColumn({label:'Código',type:'number',ordem:1,width:'90px'}) id!:number;
   @GridColumn({label:'Tipo',type:'enum',ordem:2,width:'110px',enumLabels:TIPO_DOCUMENTO_FISCAL_LABELS}) tipo!:TipoDocumentoFiscalEnum;

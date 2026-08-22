@@ -1,6 +1,8 @@
 package com.limiteMEI.limiteMEI.repository;
 
 import com.limiteMEI.limiteMEI.domain.MovimentoFinanceiro;
+import com.limiteMEI.limiteMEI.enums.FormaPagamentoEnum;
+import com.limiteMEI.limiteMEI.enums.OrigemMovimentoEnum;
 import com.limiteMEI.limiteMEI.enums.TipoFluxoCaixaEnum;
 import com.limiteMEI.limiteMEI.utils.BaseRepository;
 import org.springframework.data.jpa.repository.*;
@@ -34,9 +36,18 @@ public interface MovimentoFinanceiroRepository extends BaseRepository<MovimentoF
 
     @Query("select m from MovimentoFinanceiro m where m.empresa.id = :empresaId " +
             "and (:contaId is null or m.contaFinanceira.id = :contaId) " +
-            "and m.data between :inicio and :fim order by m.data asc, m.id asc")
+            "and m.data between :inicio and :fim " +
+            "and (:tipo is null or m.tipo = :tipo) " +
+            "and (:origem is null or m.origem = :origem) " +
+            "and (:formaPagamento is null or m.formaPagamento = :formaPagamento) " +
+            "and (:categoriaId is null or m.categoria.id = :categoriaId) " +
+            "order by m.data asc, m.id asc")
     List<MovimentoFinanceiro> relatorioFluxoCaixa(@Param("empresaId") Long empresaId,
                                                   @Param("contaId") Long contaId,
                                                   @Param("inicio") LocalDate inicio,
-                                                  @Param("fim") LocalDate fim);
+                                                  @Param("fim") LocalDate fim,
+                                                  @Param("tipo") TipoFluxoCaixaEnum tipo,
+                                                  @Param("origem") OrigemMovimentoEnum origem,
+                                                  @Param("formaPagamento") FormaPagamentoEnum formaPagamento,
+                                                  @Param("categoriaId") Long categoriaId);
 }

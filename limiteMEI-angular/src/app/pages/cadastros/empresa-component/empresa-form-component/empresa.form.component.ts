@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of, switchMap } from 'rxjs';
 import { BaseFormCrud } from '../../../../shared/components-commons/core/base.form.crud';
 import { ToolbarComponent } from '../../../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
 import { TextBoxComponent } from '../../../../shared/components-commons/infra/text-box-component/text.box.component';
@@ -26,6 +27,9 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
   protected routeBase = '/app/cadastros/empresa';
   protected readonly tipoEmpresaEnum = TipoEmpresaEnum;
   protected readonly tipoEmpresaLabels = TIPO_EMPRESA_LABELS;
+  logoPreview?: string;
+  logoFile?: File;
+  removendoLogo = false;
 
   constructor(service: EmpresaService, router: Router, route: ActivatedRoute,
               private empresaAtiva: EmpresaAtivaService) {
@@ -36,6 +40,23 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
 
   ngOnInit(): void {
     this.initForm();
+  }
+
+  override loadById(id: number): void {
+    this.loading = true;
+    this.service.getById(id).subscribe({
+      next: res => {
+        if (res.body) {
+          this.model = { ...res.body } as unknown as EmpresaCreateDTO;
+          this.logoPreview = res.body.logoDataUrl;
+        }
+        this.loading = false;
+      },
+      error: err => {
+        this.loading = false;
+        this.alertService.error(this.errorMessage(err, 'Não foi possível carregar a empresa.'));
+      }
+    });
   }
 
   get limiteAnual(): number {
@@ -51,6 +72,8 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
 
   override clear(): void {
     this.setInitialModel();
+    this.logoPreview = undefined;
+    this.logoFile = undefined;
   }
 
   onAtivoChange(ativo: boolean): void {
@@ -72,6 +95,79 @@ export class EmpresaFormComponent extends BaseFormCrud<EmpresaDTO, EmpresaCreate
     }
 
     super.afterSave(saved);
+  }
+
+  override save(): void {
+    if (this.loading) return;
+    if (!this.validateSave()) return;
+
+    this.loading = true;
+    const request$ = this.id
+      ? this.service.update(this.id, this.model)
+      : this.service.create(this.model);
+
+    request$.pipe(
+      switchMap(response => {
+        const empresa = response.body;
+        if (!empresa?.id || !this.logoFile) return of(empresa);
+        return this.service.salvarLogo(empresa.id, this.logoFile);
+      })
+    ).subscribe({
+      next: empresa => {
+        this.loading = false;
+        this.logoFile = undefined;
+        this.alertService.success(this.id ? 'Empresa atualizada com sucesso.' : 'Empresa cadastrada com sucesso.');
+        this.afterSave(empresa ?? undefined);
+      },
+      error: err => {
+        this.loading = false;
+        this.alertService.error(this.errorMessage(err, 'Não foi possível salvar a empresa.'));
+      }
+    });
+  }
+
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      this.alertService.warning('A logo deve ser PNG, JPG ou WEBP.');
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      this.alertService.warning('A logo deve ter no máximo 1MB.');
+      return;
+    }
+    this.logoFile = file;
+    const reader = new FileReader();
+    reader.onload = () => this.logoPreview = String(reader.result);
+    reader.readAsDataURL(file);
+  }
+
+  removerLogo(): void {
+    if (!this.id) {
+      this.logoFile = undefined;
+      this.logoPreview = undefined;
+      return;
+    }
+    if (this.removendoLogo || this.loading) return;
+    this.removendoLogo = true;
+    this.service.removerLogo(Number(this.id)).subscribe({
+      next: empresa => {
+        this.removendoLogo = false;
+        this.logoFile = undefined;
+        this.logoPreview = empresa.logoDataUrl;
+        if (this.empresaAtiva.empresa()?.id === empresa.id) {
+          this.empresaAtiva.atualizarSeAtiva(empresa);
+        }
+        this.alertService.success('Logo removida com sucesso.');
+      },
+      error: err => {
+        this.removendoLogo = false;
+        this.alertService.error(this.errorMessage(err, 'Não foi possível remover a logo.'));
+      }
+    });
   }
 
   override validateSave(): boolean {

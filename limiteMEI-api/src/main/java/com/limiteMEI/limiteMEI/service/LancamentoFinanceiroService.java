@@ -2,6 +2,7 @@ package com.limiteMEI.limiteMEI.service;
 
 import com.limiteMEI.limiteMEI.domain.*;
 import com.limiteMEI.limiteMEI.dto.lancamento.*;
+import com.limiteMEI.limiteMEI.dto.relatorio.RelatorioLancamentoFiltroDTO;
 import com.limiteMEI.limiteMEI.enums.*;
 import com.limiteMEI.limiteMEI.repository.*;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
@@ -59,6 +60,28 @@ public class LancamentoFinanceiroService {
 
     public List<LancamentoFinanceiroDTO> findAll() {
         return repository.findByEmpresaIdAndExcluidoFalseOrderByDataVencimentoDesc(empresaAtual.get().getId()).stream().map(this::toDTO).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LancamentoFinanceiroDTO> relatorio(RelatorioLancamentoFiltroDTO filtro) {
+        String descricaoFiltro = filtro.getDescricao() == null || filtro.getDescricao().isBlank()
+                ? null
+                : filtro.getDescricao().trim();
+        return repository.relatorioLancamentos(
+                        empresaAtual.get().getId(),
+                        filtro.getInicio(),
+                        filtro.getFim(),
+                        filtro.getTipo(),
+                        filtro.getSituacao(),
+                        filtro.getCategoriaId(),
+                        filtro.getPessoaId(),
+                        filtro.getValorMin(),
+                        filtro.getValorMax(),
+                        descricaoFiltro
+                )
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     public LancamentoFinanceiroDTO getById(Long id) {

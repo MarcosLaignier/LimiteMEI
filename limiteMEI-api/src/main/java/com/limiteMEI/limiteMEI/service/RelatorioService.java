@@ -4,6 +4,7 @@ import com.limiteMEI.limiteMEI.domain.ContaFinanceira;
 import com.limiteMEI.limiteMEI.domain.Empresa;
 import com.limiteMEI.limiteMEI.domain.MovimentoFinanceiro;
 import com.limiteMEI.limiteMEI.dto.relatorio.RelatorioFluxoCaixaDTO;
+import com.limiteMEI.limiteMEI.dto.relatorio.RelatorioFluxoCaixaFiltroDTO;
 import com.limiteMEI.limiteMEI.enums.TipoFluxoCaixaEnum;
 import com.limiteMEI.limiteMEI.mapper.MovimentoFinanceiroMapper;
 import com.limiteMEI.limiteMEI.repository.MovimentoFinanceiroRepository;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,24 +34,30 @@ public class RelatorioService {
         this.movimentoMapper = movimentoMapper;
     }
 
-    public RelatorioFluxoCaixaDTO fluxoCaixa(LocalDate inicio, LocalDate fim, Long contaFinanceiraId) {
-        if (inicio == null || fim == null) {
+    public RelatorioFluxoCaixaDTO fluxoCaixa(RelatorioFluxoCaixaFiltroDTO filtro) {
+        if (filtro.getInicio() == null || filtro.getFim() == null) {
             throw new ApplicationException("Informe o período do relatório");
         }
-        if (fim.isBefore(inicio)) {
+        if (filtro.getFim().isBefore(filtro.getInicio())) {
             throw new ApplicationException("A data final não pode ser anterior à data inicial");
         }
         Empresa empresa = empresaAtual.get();
-        ContaFinanceira conta = contaFinanceiraId == null ? null : contas.findOwnedEntity(contaFinanceiraId);
+        ContaFinanceira conta = filtro.getContaFinanceiraId() == null ? null : contas.findOwnedEntity(filtro.getContaFinanceiraId());
         List<MovimentoFinanceiro> itens = movimentos.relatorioFluxoCaixa(empresa.getId(),
-                Optional.ofNullable(conta).map(ContaFinanceira::getId).orElse(null), inicio, fim);
+                Optional.ofNullable(conta).map(ContaFinanceira::getId).orElse(null),
+                filtro.getInicio(),
+                filtro.getFim(),
+                filtro.getTipo(),
+                filtro.getOrigem(),
+                filtro.getFormaPagamento(),
+                filtro.getCategoriaId());
         BigDecimal entradas = total(itens, TipoFluxoCaixaEnum.ENTRADA);
         BigDecimal saidas = total(itens, TipoFluxoCaixaEnum.SAIDA);
         return RelatorioFluxoCaixaDTO.builder()
                 .empresa(Optional.ofNullable(empresa.getNomeFantasia()).filter(nome -> !nome.isBlank()).orElse(empresa.getRazaoSocial()))
                 .cnpj(empresa.getCnpj())
-                .inicio(inicio)
-                .fim(fim)
+                .inicio(filtro.getInicio())
+                .fim(filtro.getFim())
                 .contaFinanceiraId(conta == null ? null : conta.getId())
                 .contaFinanceiraNome(conta == null ? "Todas as contas" : conta.getNome())
                 .totalEntradas(entradas)

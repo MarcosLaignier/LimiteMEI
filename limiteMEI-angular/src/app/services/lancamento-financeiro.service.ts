@@ -6,6 +6,7 @@ import {
   LancamentoFinanceiroDTO,
   HistoricoFinanceiroDTO,
   GrupoLancamentoUpdateDTO,
+  RelatorioLancamentoFiltroDTO,
 } from '../dtos/lancamento/lancamento.financeiro';
 @Injectable({ providedIn: 'root' })
 export class LancamentoFinanceiroService extends BaseService<
@@ -18,6 +19,10 @@ export class LancamentoFinanceiroService extends BaseService<
 
   cancelar(id: number, motivo: string) {
     return this.http.post<LancamentoFinanceiroDTO>(`${this.url}/${id}/cancelamento`, { motivo });
+  }
+
+  relatorio(filtro: RelatorioLancamentoFiltroDTO) {
+    return this.http.post<LancamentoFinanceiroDTO[]>(`${this.url}/relatorio`, filtro);
   }
 
   historico(id: number) {

@@ -70,6 +70,19 @@ export interface ItemGrupoLancamentoUpdateDTO {
   dataCompetencia: string;
   dataVencimento: string;
 }
+
+export interface RelatorioLancamentoFiltroDTO {
+  inicio?: string;
+  fim?: string;
+  tipo?: TipoLancamentoEnum;
+  situacao?: SituacaoLancamentoEnum;
+  categoriaId?: number;
+  pessoaId?: number;
+  valorMin?: number;
+  valorMax?: number;
+  descricao?: string;
+}
+
 export class LancamentoFinanceiroDTO {
   @GridColumn({ label: 'Código', type: 'number', ordem: 1, width: '90px' }) id!: number;
   @GridColumn({ label: 'Descrição', type: 'texto', ordem: 2 }) descricao!: string;

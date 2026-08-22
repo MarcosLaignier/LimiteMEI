@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.controller;
 
 import com.limiteMEI.limiteMEI.dto.lancamento.*;
+import com.limiteMEI.limiteMEI.dto.relatorio.RelatorioLancamentoFiltroDTO;
 import com.limiteMEI.limiteMEI.service.LancamentoFinanceiroService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
@@ -15,6 +16,10 @@ public class LancamentoFinanceiroController {
 
     @GetMapping
     public List<LancamentoFinanceiroDTO> findAll() { return service.findAll(); }
+    @PostMapping("/relatorio")
+    public List<LancamentoFinanceiroDTO> relatorio(@RequestBody RelatorioLancamentoFiltroDTO filtro) {
+        return service.relatorio(filtro);
+    }
     @GetMapping("/{id}")
     public LancamentoFinanceiroDTO getById(@PathVariable Long id) { return service.getById(id); }
     @PostMapping

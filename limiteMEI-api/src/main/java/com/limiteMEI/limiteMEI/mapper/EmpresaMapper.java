@@ -6,6 +6,8 @@ import com.limiteMEI.limiteMEI.dto.empresa.EmpresaCreateDTO;
 import com.limiteMEI.limiteMEI.utils.BaseMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
+
 @Component
 public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCreateDTO> {
 
@@ -24,6 +26,8 @@ public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCre
                 .limiteAnual(empresa.getLimiteAnual())
                 .ativo(empresa.getAtivo())
                 .dataEncerramento(empresa.getDataEncerramento())
+                .possuiLogo(empresa.getLogoConteudo() != null && empresa.getLogoConteudo().length > 0)
+                .logoDataUrl(toLogoDataUrl(empresa))
                 .build();
     }
 
@@ -59,5 +63,12 @@ public class EmpresaMapper implements BaseMapper<Empresa, EmpresaDTO, EmpresaCre
 
     private String normalizeCnpj(String cnpj) {
         return cnpj == null ? null : cnpj.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+    }
+
+    private String toLogoDataUrl(Empresa empresa) {
+        if (empresa.getLogoConteudo() == null || empresa.getLogoConteudo().length == 0 || empresa.getLogoContentType() == null) {
+            return null;
+        }
+        return "data:" + empresa.getLogoContentType() + ";base64," + Base64.getEncoder().encodeToString(empresa.getLogoConteudo());
     }
 }

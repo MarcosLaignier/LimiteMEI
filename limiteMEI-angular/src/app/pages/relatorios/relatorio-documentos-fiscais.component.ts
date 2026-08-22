@@ -94,15 +94,14 @@ export class RelatorioDocumentosFiscaisComponent implements OnInit {
 
   carregar() {
     this.loading = true;
-    this.service.getAll().subscribe({
-      next: r => {
-        const clienteFiltro = this.cliente.trim().toLowerCase();
-        const itens = (r.body ?? []).filter(item =>
-          (!this.inicio || item.dataEmissao >= this.inicio) &&
-          (!this.fim || item.dataEmissao <= this.fim) &&
-          (!this.tipo || item.tipo === this.tipo) &&
-          (!this.situacao || item.situacao === this.situacao) &&
-          (!clienteFiltro || (item.clienteNome ?? '').toLowerCase().includes(clienteFiltro)));
+    this.service.relatorio({
+      inicio: this.inicio,
+      fim: this.fim,
+      tipo: this.tipo,
+      situacao: this.situacao,
+      cliente: this.cliente,
+    }).subscribe({
+      next: itens => {
         this.subtitulo = periodoLabel(this.inicio, this.fim);
         this.linhas = itens.map(item => ({
           emissao: item.dataEmissao,

@@ -11,10 +11,15 @@ import com.limiteMEI.limiteMEI.utils.validate.GenericUniqueValidator;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class EmpresaService extends BaseService<Empresa, Long, EmpresaCreateDTO, EmpresaDTO> {
+    private static final long TAMANHO_MAXIMO_LOGO = 1024 * 1024;
+    private static final Set<String> CONTENT_TYPES_LOGO = Set.of("image/png", "image/jpeg", "image/webp");
 
     private final EmpresaRepository repository;
     private final EmpresaMapper mapper;
@@ -106,6 +111,27 @@ public class EmpresaService extends BaseService<Empresa, Long, EmpresaCreateDTO,
         afterDelete(empresa);
     }
 
+    public EmpresaDTO salvarLogo(Long id, MultipartFile arquivo) {
+        Empresa empresa = findOwned(id);
+        validarLogo(arquivo);
+        try {
+            empresa.setLogoConteudo(arquivo.getBytes());
+            empresa.setLogoContentType(arquivo.getContentType());
+            empresa.setLogoNome(arquivo.getOriginalFilename());
+            return mapper.toDTO(repository.save(empresa));
+        } catch (IOException e) {
+            throw new ApplicationException("Não foi possível ler o arquivo da logo");
+        }
+    }
+
+    public EmpresaDTO removerLogo(Long id) {
+        Empresa empresa = findOwned(id);
+        empresa.setLogoConteudo(null);
+        empresa.setLogoContentType(null);
+        empresa.setLogoNome(null);
+        return mapper.toDTO(repository.save(empresa));
+    }
+
     private Empresa findOwned(Long id) {
         return repository.findByIdAndUsuarioEmail(id, currentEmail())
                 .orElseThrow(() -> new ApplicationException("Empresa não encontrada"));
@@ -113,5 +139,17 @@ public class EmpresaService extends BaseService<Empresa, Long, EmpresaCreateDTO,
 
     private String currentEmail() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    private void validarLogo(MultipartFile arquivo) {
+        if (arquivo == null || arquivo.isEmpty()) {
+            throw new ApplicationException("Selecione uma imagem para a logo");
+        }
+        if (arquivo.getSize() > TAMANHO_MAXIMO_LOGO) {
+            throw new ApplicationException("A logo deve ter no máximo 1MB");
+        }
+        if (!CONTENT_TYPES_LOGO.contains(arquivo.getContentType())) {
+            throw new ApplicationException("A logo deve ser PNG, JPG ou WEBP");
+        }
     }
 }

@@ -194,20 +194,18 @@ export class RelatorioLancamentosComponent implements OnInit {
 
   carregar() {
     this.loading = true;
-    this.service.getAll().subscribe({
-      next: r => {
-        const tipoFiltro = this.tipoFixo ?? this.tipo;
-        const descricaoFiltro = this.descricao.trim().toLowerCase();
-        const itens = (r.body ?? []).filter(item =>
-          (!tipoFiltro || item.tipo === tipoFiltro) &&
-          (!this.situacao || item.situacao === this.situacao) &&
-          (!this.categoriaId || item.categoriaId === this.categoriaId) &&
-          (!this.pessoa?.id || item.pessoaId === this.pessoa.id) &&
-          (!this.inicio || item.dataVencimento >= this.inicio) &&
-          (!this.fim || item.dataVencimento <= this.fim) &&
-          (this.valorMin === undefined || item.valor >= this.valorMin) &&
-          (this.valorMax === undefined || item.valor <= this.valorMax) &&
-          (!descricaoFiltro || item.descricao.toLowerCase().includes(descricaoFiltro)));
+    this.service.relatorio({
+      inicio: this.inicio,
+      fim: this.fim,
+      tipo: this.tipoFixo ?? this.tipo,
+      situacao: this.situacao,
+      categoriaId: this.categoriaId,
+      pessoaId: this.pessoa?.id,
+      valorMin: this.valorMin,
+      valorMax: this.valorMax,
+      descricao: this.descricao,
+    }).subscribe({
+      next: itens => {
         this.montarLinhas(itens);
         this.loading = false;
         this.changeDetector.detectChanges();

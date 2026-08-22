@@ -8,6 +8,7 @@ import java.util.*;
 import java.time.LocalDate;
 import java.math.BigDecimal;
 import com.limiteMEI.limiteMEI.enums.TipoLancamentoEnum;
+import com.limiteMEI.limiteMEI.enums.SituacaoLancamentoEnum;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,6 +25,32 @@ public interface LancamentoFinanceiroRepository extends JpaRepository<Lancamento
 
     List<LancamentoFinanceiro> findByRecorrenciaIdAndEmpresaIdAndExcluidoFalseOrderByNumeroRecorrencia(
             String recorrenciaId, Long empresaId);
+
+    @Query("""
+            select l from LancamentoFinanceiro l
+            where l.empresa.id = :empresaId
+              and l.excluido = false
+              and (:inicio is null or l.dataVencimento >= :inicio)
+              and (:fim is null or l.dataVencimento <= :fim)
+              and (:tipo is null or l.tipo = :tipo)
+              and (:situacao is null or l.situacao = :situacao)
+              and (:categoriaId is null or l.categoria.id = :categoriaId)
+              and (:pessoaId is null or l.pessoa.id = :pessoaId)
+              and (:valorMin is null or l.valor >= :valorMin)
+              and (:valorMax is null or l.valor <= :valorMax)
+              and (:descricao is null or lower(l.descricao) like lower(concat('%', :descricao, '%')))
+            order by l.dataVencimento desc, l.id desc
+            """)
+    List<LancamentoFinanceiro> relatorioLancamentos(@Param("empresaId") Long empresaId,
+                                                     @Param("inicio") LocalDate inicio,
+                                                     @Param("fim") LocalDate fim,
+                                                     @Param("tipo") TipoLancamentoEnum tipo,
+                                                     @Param("situacao") SituacaoLancamentoEnum situacao,
+                                                     @Param("categoriaId") Long categoriaId,
+                                                     @Param("pessoaId") Long pessoaId,
+                                                     @Param("valorMin") BigDecimal valorMin,
+                                                     @Param("valorMax") BigDecimal valorMax,
+                                                     @Param("descricao") String descricao);
 
     @Query("""
             select l from LancamentoFinanceiro l

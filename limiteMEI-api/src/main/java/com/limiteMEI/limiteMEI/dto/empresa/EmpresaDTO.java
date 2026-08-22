@@ -34,4 +34,8 @@ public class EmpresaDTO {
     private Boolean ativo;
 
     private LocalDate dataEncerramento;
+
+    private Boolean possuiLogo;
+
+    private String logoDataUrl;
 }

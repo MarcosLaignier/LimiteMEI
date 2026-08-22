@@ -72,14 +72,12 @@ export class RelatorioPessoasComponent implements OnInit {
 
   carregar() {
     this.loading = true;
-    this.service.listar(this.papel).subscribe({
-      next: r => {
-        const nomeFiltro = this.nome.trim().toLowerCase();
-        const documentoFiltro = this.documento.trim().toLowerCase();
-        const itens = (r.body ?? []).filter(item =>
-          (!nomeFiltro || item.nomeRazaoSocial.toLowerCase().includes(nomeFiltro)) &&
-          (!documentoFiltro || (item.cpfCnpj ?? '').toLowerCase().includes(documentoFiltro)) &&
-          (!this.tipoPessoa || item.tipoPessoa === this.tipoPessoa));
+    this.service.relatorio(this.papel, {
+      nome: this.nome,
+      documento: this.documento,
+      tipoPessoa: this.tipoPessoa,
+    }).subscribe({
+      next: itens => {
         this.linhas = itens.map(item => ({
           nome: item.nomeRazaoSocial,
           tipo: TIPO_PESSOA_LABELS[item.tipoPessoa] ?? item.tipoPessoa,

@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.controller;
 
 import com.limiteMEI.limiteMEI.dto.documentofiscal.*;
+import com.limiteMEI.limiteMEI.dto.relatorio.RelatorioDocumentoFiscalFiltroDTO;
 import com.limiteMEI.limiteMEI.service.DocumentoFiscalService;
 import com.limiteMEI.limiteMEI.service.DocumentoFiscalXmlService;
 import jakarta.validation.Valid;
@@ -22,6 +23,11 @@ public class DocumentoFiscalController {
 
     @GetMapping
     public List<DocumentoFiscalDTO> findAll() { return service.findAll(); }
+
+    @PostMapping("/relatorio")
+    public List<DocumentoFiscalDTO> relatorio(@RequestBody RelatorioDocumentoFiscalFiltroDTO filtro) {
+        return service.relatorio(filtro);
+    }
 
     @GetMapping("/{id}")
     public DocumentoFiscalDTO getById(@PathVariable Long id) { return service.getById(id); }

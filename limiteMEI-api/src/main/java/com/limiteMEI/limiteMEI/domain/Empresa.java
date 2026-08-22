@@ -51,4 +51,12 @@ public class Empresa {
 
     private LocalDate dataEncerramento;
 
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] logoConteudo;
+
+    private String logoContentType;
+
+    private String logoNome;
+
 }

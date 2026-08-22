@@ -148,7 +148,15 @@ export class FluxoCaixaRelatorioComponent implements OnInit {
       return;
     }
     this.loading = true;
-    this.service.fluxoCaixa(this.inicio, this.fim, this.contaFinanceiraId).subscribe({
+    this.service.fluxoCaixa({
+      inicio: this.inicio,
+      fim: this.fim,
+      contaFinanceiraId: this.contaFinanceiraId,
+      tipo: this.tipo,
+      origem: this.origem,
+      formaPagamento: this.formaPagamento,
+      categoriaId: this.categoriaId,
+    }).subscribe({
       next: relatorio => {
         this.relatorio = relatorio;
         this.montarLinhas(relatorio);

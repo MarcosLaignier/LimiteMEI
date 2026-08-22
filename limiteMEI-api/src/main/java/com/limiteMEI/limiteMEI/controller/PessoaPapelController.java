@@ -1,6 +1,7 @@
 package com.limiteMEI.limiteMEI.controller;
 
 import com.limiteMEI.limiteMEI.dto.pessoa.PessoaDTO;
+import com.limiteMEI.limiteMEI.dto.relatorio.RelatorioPessoaFiltroDTO;
 import com.limiteMEI.limiteMEI.enums.PapelPessoaEnum;
 import com.limiteMEI.limiteMEI.service.PessoaPapelService;
 import org.springframework.http.*;
@@ -20,6 +21,14 @@ public class PessoaPapelController {
     @GetMapping("/{papel}")
     public ResponseEntity<List<PessoaDTO>> listar(@PathVariable PapelPessoaEnum papel) {
         return ResponseEntity.ok(service.listar(papel));
+    }
+
+    @PostMapping("/{papel}/relatorio")
+    public ResponseEntity<List<PessoaDTO>> relatorio(
+            @PathVariable PapelPessoaEnum papel,
+            @RequestBody RelatorioPessoaFiltroDTO filtro
+    ) {
+        return ResponseEntity.ok(service.relatorio(papel, filtro));
     }
 
     @PostMapping("/{papel}/{pessoaId}")

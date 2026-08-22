@@ -2,6 +2,7 @@ package com.limiteMEI.limiteMEI.service;
 
 import com.limiteMEI.limiteMEI.domain.*;
 import com.limiteMEI.limiteMEI.dto.documentofiscal.*;
+import com.limiteMEI.limiteMEI.dto.relatorio.RelatorioDocumentoFiscalFiltroDTO;
 import com.limiteMEI.limiteMEI.enums.*;
 import com.limiteMEI.limiteMEI.repository.*;
 import com.limiteMEI.limiteMEI.utils.validate.ApplicationException;
@@ -37,6 +38,20 @@ public class DocumentoFiscalService {
     @Transactional(readOnly = true)
     public List<DocumentoFiscalDTO> findAll() {
         return repository.findByEmpresaIdAndExcluidoFalseOrderByDataEmissaoDescIdDesc(empresaAtual.get().getId())
+                .stream().map(this::toDTO).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DocumentoFiscalDTO> relatorio(RelatorioDocumentoFiscalFiltroDTO filtro) {
+        String clienteFiltro = filtro.getCliente() == null || filtro.getCliente().isBlank() ? null : filtro.getCliente().trim();
+        return repository.relatorioDocumentos(
+                        empresaAtual.get().getId(),
+                        filtro.getInicio(),
+                        filtro.getFim(),
+                        filtro.getTipo(),
+                        filtro.getSituacao(),
+                        clienteFiltro
+                )
                 .stream().map(this::toDTO).toList();
     }
 
