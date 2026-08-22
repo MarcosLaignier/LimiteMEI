@@ -1,29 +1,69 @@
 <toolbar-filter tituloPagina="Dashboard" [listMode]="true" [showNew]="false" [loading]="loading" (filtrar)="carregar()" (limpar)="periodoAtual()" />
-<header class="welcome"><div><span>VISÃO GERAL</span><h1>Olá, {{ auth.user()?.nome || 'empreendedor' }}!</h1><p>@if(dashboard){Acompanhe agora os números da {{dashboard.empresa}}.}@else{Carregando a visão financeira da sua empresa.}</p></div><month-year-box-component label="Competência" [clearButton]="false" [(dataField)]="competencia" /></header>
+
+<header class="welcome">
+  <div>
+    <span>VISÃO GERAL</span>
+    <h1>Olá, {{ auth.user()?.nome || 'empreendedor' }}!</h1>
+    <p>@if(dashboard){Acompanhe agora os números da {{dashboard.empresa}}.}@else{Carregando a visão financeira da sua empresa.}</p>
+  </div>
+  <month-year-box-component label="Competência" [clearButton]="false" [(dataField)]="competencia" />
+</header>
+
 @if(dashboard){
   <section class="summary-cards">
-    <article class="balance"><i class="bi bi-wallet2"></i><div><span>Saldo em caixa e bancos</span><strong>{{dashboard.saldoTotal|currency:'BRL'}}</strong><small>{{dashboard.contas.length}} conta(s) ativa(s)</small></div></article>
-    <article><i class="bi bi-arrow-down-circle entry"></i><div><span>Entradas no mês</span><strong>{{dashboard.entradasMes|currency:'BRL'}}</strong><small>Fluxo realizado</small></div></article>
-    <article><i class="bi bi-arrow-up-circle exit"></i><div><span>Saídas no mês</span><strong>{{dashboard.saidasMes|currency:'BRL'}}</strong><small>Fluxo realizado</small></div></article>
-    <article [class.negative]="saldoMes()<0"><i class="bi bi-graph-up"></i><div><span>Resultado do mês</span><strong>{{saldoMes()|currency:'BRL'}}</strong><small>Entradas menos saídas</small></div></article>
+    <article class="balance"><i class="bi bi-wallet2"></i><div><span>Saldo em caixa e bancos</span><strong>{{dashboard.saldoTotal|currency:'BRL'}}</strong><small>{{dashboard.contas.length}} conta(s) ativa(s)</small><a class="card-action" routerLink="/app/relatorios/fluxo-caixa" [queryParams]="competenciaQueryParams">Ver fluxo de caixa</a></div></article>
+    <article><i class="bi bi-arrow-down-circle entry"></i><div><span>Entradas no mês</span><strong>{{dashboard.entradasMes|currency:'BRL'}}</strong><small>Fluxo realizado</small><a class="card-action" routerLink="/app/relatorios/fluxo-caixa" [queryParams]="competenciaQueryParams">Ver fluxo de caixa</a></div></article>
+    <article><i class="bi bi-arrow-up-circle exit"></i><div><span>Saídas no mês</span><strong>{{dashboard.saidasMes|currency:'BRL'}}</strong><small>Fluxo realizado</small><a class="card-action" routerLink="/app/relatorios/fluxo-caixa" [queryParams]="competenciaQueryParams">Ver fluxo de caixa</a></div></article>
+    <article [class.negative]="saldoMes()<0"><i class="bi bi-graph-up"></i><div><span>Resultado do mês</span><strong>{{saldoMes()|currency:'BRL'}}</strong><small>Entradas menos saídas</small><a class="card-action" routerLink="/app/relatorios/resumo-financeiro" [queryParams]="competenciaQueryParams">Ver resumo financeiro</a></div></article>
   </section>
+
   <section class="workspace">
     <div class="main-column">
-      <div class="panel mei-panel"><div class="panel-heading"><div><span>CONTROLE DO MEI</span><h2>Faturamento e teto</h2></div><a routerLink="/app/financeiro/mei/apuracao">Ver apuração <i class="bi bi-arrow-right"></i></a></div>
+      <div class="panel mei-panel">
+        <div class="panel-heading"><div><span>CONTROLE DO MEI</span><h2>Faturamento e teto</h2></div><a routerLink="/app/financeiro/mei/apuracao" [queryParams]="apuracaoQueryParams">Ver apuração <i class="bi bi-arrow-right"></i></a></div>
         <div class="mei-totals"><div><span>No mês</span><strong>{{dashboard.mei.totalMes|currency:'BRL'}}</strong></div><div><span>Acumulado anual</span><strong>{{dashboard.mei.acumuladoAno|currency:'BRL'}}</strong></div><div><span>Limite utilizado</span><strong>{{dashboard.mei.percentualUtilizado|number:'1.2-2'}}%</strong></div><div><span>Saldo disponível</span><strong>{{dashboard.mei.saldoDisponivel|currency:'BRL'}}</strong></div></div>
         <div class="limit-progress"><i [style.width.%]="dashboard.mei.percentualUtilizado>100?100:dashboard.mei.percentualUtilizado"></i></div>
         <mei-limit-alert [percentual]="dashboard.mei.percentualUtilizado" [projecaoAnual]="dashboard.mei.projecaoAnual" [alerta]="dashboard.mei.alertaLimite" />
+        <div class="panel-actions"><a class="full-link" routerLink="/app/financeiro/mei/apuracao" [queryParams]="apuracaoQueryParams">Ver apuração MEI</a><a class="full-link secondary" routerLink="/app/relatorios/apuracao-anual" [queryParams]="competenciaQueryParams">Relatório anual</a></div>
         <div class="chart"><div class="chart-bars">@for(item of dashboard.mei.meses;track item.mes){<div class="bar-column" [title]="(item.total|currency:'BRL')||''"><div class="bar-track"><i [style.height.%]="alturaBarra(item.total)" [class.current]="item.mes===dashboard.mei.mesReferencia"></i></div><span>{{meses[item.mes-1]}}</span></div>}</div></div>
       </div>
-      <div class="panel"><div class="panel-heading"><div><span>MOVIMENTAÇÕES</span><h2>Últimas movimentações</h2></div><a routerLink="/app/financeiro/movimentacoes">Ver extrato <i class="bi bi-arrow-right"></i></a></div>
+
+      <div class="panel">
+        <div class="panel-heading"><div><span>MOVIMENTAÇÕES</span><h2>Últimas movimentações</h2></div><a routerLink="/app/relatorios/fluxo-caixa" [queryParams]="competenciaQueryParams">Ver fluxo de caixa <i class="bi bi-arrow-right"></i></a></div>
         @if(dashboard.ultimasMovimentacoes.length){<div class="movements">@for(item of dashboard.ultimasMovimentacoes;track item.id){<div><i class="movement-icon bi" [class.bi-arrow-down-left]="item.tipo==='ENTRADA'" [class.bi-arrow-up-right]="item.tipo==='SAIDA'" [class.out]="item.tipo==='SAIDA'"></i><span><strong>{{item.descricao}}</strong><small>{{item.contaFinanceiraNome}} · {{item.data|date:'dd/MM/yyyy':'UTC'}}</small></span><b [class.out-value]="item.tipo==='SAIDA'">{{item.tipo==='SAIDA'?'-':'+'}} {{item.valor|currency:'BRL'}}</b></div>}</div>}@else{<div class="empty"><i class="bi bi-arrow-left-right"></i><span>Nenhuma movimentação registrada.</span></div>}
       </div>
     </div>
+
     <aside>
-      <div class="panel pending"><div class="panel-heading"><div><span>COMPROMISSOS</span><h2>A pagar e receber</h2></div></div><div class="pending-row"><span>A receber</span><strong class="entry-text">{{dashboard.contasReceber|currency:'BRL'}}</strong></div><div class="pending-row"><span>A pagar</span><strong class="exit-text">{{dashboard.contasPagar|currency:'BRL'}}</strong></div><div class="overdue"><i class="bi bi-exclamation-circle"></i><div><strong>{{dashboard.quantidadeVencidos}} vencido(s)</strong><span>A receber: {{dashboard.vencidoReceber|currency:'BRL'}}<br>A pagar: {{dashboard.vencidoPagar|currency:'BRL'}}</span></div></div><a class="full-link" routerLink="/app/financeiro/monitor-lancamentos">Abrir monitor</a></div>
-      <div class="panel fiscal-dashboard"><div class="panel-heading"><div><span>FISCAL</span><h2>Documentos da competência</h2></div><a routerLink="/app/fiscal/documentos">Ver notas <i class="bi bi-arrow-right"></i></a></div><div class="fiscal-percentage"><span>Faturamento documentado</span><strong>{{dashboard.mei.conferenciaFiscal.percentualDocumentado|number:'1.2-2'}}%</strong></div><div class="fiscal-progress"><i [style.width.%]="dashboard.mei.conferenciaFiscal.percentualDocumentado>100?100:dashboard.mei.conferenciaFiscal.percentualDocumentado"></i></div><div class="fiscal-numbers"><span><strong>{{dashboard.mei.conferenciaFiscal.quantidadeEmitidos}}</strong> emitida(s)</span><span><strong>{{dashboard.mei.conferenciaFiscal.quantidadeCancelados}}</strong> cancelada(s)</span></div>@if(dashboard.mei.conferenciaFiscal.quantidadePendencias||dashboard.mei.conferenciaFiscal.quantidadeDivergencias){<div class="fiscal-alert"><i class="bi bi-exclamation-triangle"></i><span><strong>{{dashboard.mei.conferenciaFiscal.quantidadePendencias+dashboard.mei.conferenciaFiscal.quantidadeDivergencias}} ponto(s) para conferir</strong><small>{{dashboard.mei.conferenciaFiscal.quantidadePendencias}} pendência(s) · {{dashboard.mei.conferenciaFiscal.quantidadeDivergencias}} divergência(s)</small></span></div>}<a class="full-link secondary" routerLink="/app/financeiro/mei/apuracao">Abrir conferência fiscal</a></div>
-      <div class="panel"><div class="panel-heading"><div><span>CONTAS</span><h2>Saldos por conta</h2></div></div>@if(dashboard.contas.length){<div class="accounts">@for(conta of dashboard.contas;track conta.id){<div><span><i class="bi bi-bank"></i>{{conta.nome}}</span><strong>{{conta.saldo|currency:'BRL'}}</strong></div>}</div>}@else{<div class="empty"><span>Nenhuma conta cadastrada.</span></div>}<a class="full-link secondary" routerLink="/app/financeiro/contas">Gerenciar contas</a></div>
-      <div class="panel shortcuts"><div class="panel-heading"><div><span>ATALHOS</span><h2>Ações rápidas</h2></div></div><a routerLink="/app/financeiro/lancamentos/create"><i class="bi bi-plus-circle"></i>Novo lançamento</a><a routerLink="/app/financeiro/movimentacoes"><i class="bi bi-arrow-left-right"></i>Nova movimentação</a><a routerLink="/app/financeiro/mei/historico"><i class="bi bi-calendar-check"></i>Histórico do MEI</a></div>
+      <div class="panel pending">
+        <div class="panel-heading"><div><span>COMPROMISSOS</span><h2>A pagar e receber</h2></div></div>
+        <div class="pending-row"><span>A receber</span><strong class="entry-text">{{dashboard.contasReceber|currency:'BRL'}}</strong></div>
+        <div class="pending-row"><span>A pagar</span><strong class="exit-text">{{dashboard.contasPagar|currency:'BRL'}}</strong></div>
+        <div class="overdue"><i class="bi bi-exclamation-circle"></i><div><strong>{{dashboard.quantidadeVencidos}} vencido(s)</strong><span>A receber: {{dashboard.vencidoReceber|currency:'BRL'}}<br>A pagar: {{dashboard.vencidoPagar|currency:'BRL'}}</span></div></div>
+        <div class="panel-actions vertical"><a class="full-link" routerLink="/app/financeiro/monitor-lancamentos">Abrir monitor</a><a class="full-link secondary" routerLink="/app/relatorios/contas-receber" [queryParams]="competenciaQueryParams">Ver contas a receber</a><a class="full-link secondary danger" routerLink="/app/relatorios/contas-pagar" [queryParams]="competenciaQueryParams">Ver contas a pagar</a></div>
+      </div>
+
+      <div class="panel fiscal-dashboard">
+        <div class="panel-heading"><div><span>FISCAL</span><h2>Documentos da competência</h2></div><a routerLink="/app/relatorios/documentos-fiscais" [queryParams]="competenciaQueryParams">Ver documentos <i class="bi bi-arrow-right"></i></a></div>
+        <div class="fiscal-percentage"><span>Faturamento documentado</span><strong>{{dashboard.mei.conferenciaFiscal.percentualDocumentado|number:'1.2-2'}}%</strong></div>
+        <div class="fiscal-progress"><i [style.width.%]="dashboard.mei.conferenciaFiscal.percentualDocumentado>100?100:dashboard.mei.conferenciaFiscal.percentualDocumentado"></i></div>
+        <div class="fiscal-numbers"><span><strong>{{dashboard.mei.conferenciaFiscal.quantidadeEmitidos}}</strong> emitida(s)</span><span><strong>{{dashboard.mei.conferenciaFiscal.quantidadeCancelados}}</strong> cancelada(s)</span></div>
+        @if(dashboard.mei.conferenciaFiscal.quantidadePendencias||dashboard.mei.conferenciaFiscal.quantidadeDivergencias){<div class="fiscal-alert"><i class="bi bi-exclamation-triangle"></i><span><strong>{{dashboard.mei.conferenciaFiscal.quantidadePendencias+dashboard.mei.conferenciaFiscal.quantidadeDivergencias}} ponto(s) para conferir</strong><small>{{dashboard.mei.conferenciaFiscal.quantidadePendencias}} pendência(s) · {{dashboard.mei.conferenciaFiscal.quantidadeDivergencias}} divergência(s)</small></span></div>}
+        <div class="panel-actions vertical"><a class="full-link" routerLink="/app/relatorios/documentos-fiscais" [queryParams]="competenciaQueryParams">Ver documentos fiscais</a><a class="full-link secondary" routerLink="/app/financeiro/mei/apuracao" [queryParams]="apuracaoQueryParams">Abrir conferência fiscal</a></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading"><div><span>CONTAS</span><h2>Saldos por conta</h2></div></div>
+        @if(dashboard.contas.length){<div class="accounts">@for(conta of dashboard.contas;track conta.id){<div><span><i class="bi bi-bank"></i>{{conta.nome}}</span><strong>{{conta.saldo|currency:'BRL'}}</strong></div>}</div>}@else{<div class="empty"><span>Nenhuma conta cadastrada.</span></div>}
+        <a class="full-link secondary" routerLink="/app/financeiro/contas">Gerenciar contas</a>
+      </div>
+
+      <div class="panel shortcuts">
+        <div class="panel-heading"><div><span>ATALHOS</span><h2>Ações rápidas</h2></div></div>
+        <a routerLink="/app/financeiro/lancamentos/create"><i class="bi bi-plus-circle"></i>Novo lançamento</a>
+        <a routerLink="/app/financeiro/movimentacoes"><i class="bi bi-arrow-left-right"></i>Nova movimentação</a>
+        <a routerLink="/app/financeiro/mei/historico"><i class="bi bi-calendar-check"></i>Histórico do MEI</a>
+      </div>
     </aside>
   </section>
 } @else if(loading){<div class="dashboard-loading"><span class="spinner-border spinner-border-sm"></span> Carregando indicadores...</div>}
