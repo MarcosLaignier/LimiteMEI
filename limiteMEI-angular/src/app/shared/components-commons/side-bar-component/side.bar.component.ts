@@ -80,7 +80,21 @@ export class SideBarComponent implements OnInit {
       ]
     },
 
-    { label: 'Relatórios', icon: 'bi-file-earmark-bar-graph', route: '/app/relatorios' },
+    {
+      label: 'Relatórios',
+      icon: 'bi-file-earmark-bar-graph',
+      children: [
+        { label: 'Fluxo de caixa', icon: 'bi-cash-coin', route: '/app/relatorios/fluxo-caixa' },
+        { label: 'Lançamentos', icon: 'bi-list-check', route: '/app/relatorios/lancamentos' },
+        { label: 'Contas a receber', icon: 'bi-arrow-down-circle', route: '/app/relatorios/contas-receber' },
+        { label: 'Contas a pagar', icon: 'bi-arrow-up-circle', route: '/app/relatorios/contas-pagar' },
+        { label: 'Documentos fiscais', icon: 'bi-receipt', route: '/app/relatorios/documentos-fiscais' },
+        { label: 'Clientes', icon: 'bi-person-lines-fill', route: '/app/relatorios/clientes' },
+        { label: 'Fornecedores', icon: 'bi-truck', route: '/app/relatorios/fornecedores' },
+        { label: 'Apuração MEI anual', icon: 'bi-speedometer2', route: '/app/relatorios/apuracao-anual' },
+        { label: 'Resumo financeiro', icon: 'bi-bar-chart', route: '/app/relatorios/resumo-financeiro' },
+      ]
+    },
 
     { label: 'Configurações', icon: 'bi-gear', route: '/app/configuracoes' }
   ];

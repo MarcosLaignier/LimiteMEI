@@ -3,15 +3,36 @@
 ================================ */
 .sidebar {
   width: 260px;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background: linear-gradient(180deg, #1b1f3b, #141736);
   color: #cfd3ff;
   position: fixed;
   left: 0;
   top: 0;
   z-index: 999;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
   overflow-x: hidden;
   transition: width 0.3s ease, transform 0.3s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(123, 130, 255, .55) transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(123, 130, 255, .45);
+  border-radius: 999px;
+}
+
+.sidebar-menu {
+  flex: 0 0 auto;
+  overflow: visible;
+  padding-bottom: .75rem;
 }
 
 /* ================================
@@ -120,7 +141,7 @@
 }
 
 .submenu.show {
-  max-height: 500px;
+  max-height: 680px;
 }
 
 .submenu .nav-link {
