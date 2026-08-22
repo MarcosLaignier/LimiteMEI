@@ -5,7 +5,9 @@ import {
   MovimentoFinanceiroDTO,
   TransferenciaFinanceiraDTO,
 } from '../../../dtos/movimento/movimento.financeiro';
+import { ConfiguracaoGeralDTO } from '../../../dtos/configuracao/configuracao.alerta.limite';
 import { MovimentoFinanceiroService } from '../../../services/movimento-financeiro.service';
+import { ConfiguracaoService } from '../../../services/configuracao.service';
 import { ToolbarComponent } from '../../../shared/components-commons/infra/toolbar-filter-component/toolbar.component';
 import { TabsComponent } from '../../../shared/components-commons/infra/tabs-component/tabs.component';
 import { TabComponent } from '../../../shared/components-commons/infra/tabs-component/tab.component';
@@ -55,6 +57,7 @@ export class MovimentoFinanceiroComponent implements OnInit {
   saldo = 0;
   movimentos: MovimentoFinanceiroDTO[] = [];
   manual: MovimentoFinanceiroCreateDTO = this.novoManual();
+  configuracaoGeral: ConfiguracaoGeralDTO = {};
   transferencia: TransferenciaFinanceiraDTO = this.novaTransferencia();
   readonly origens = {
     APORTE: 'APORTE',
@@ -70,10 +73,22 @@ export class MovimentoFinanceiroComponent implements OnInit {
   readonly formaLabels = FORMA_PAGAMENTO_LABELS;
   constructor(
     private service: MovimentoFinanceiroService,
+    private configuracoes: ConfiguracaoService,
     private alerts: AlertService,
     private confirmDialog: ConfirmDialogService,
   ) {}
-  ngOnInit() {}
+  ngOnInit() {
+    this.carregarConfiguracoes();
+  }
+  carregarConfiguracoes() {
+    this.configuracoes.carregarGerais().subscribe({
+      next: configuracao => {
+        this.configuracaoGeral = configuracao ?? {};
+        this.manual = this.novoManual();
+      },
+      error: () => this.configuracaoGeral = {},
+    });
+  }
   get tipoCategoriaManual() {
     const tipo = this.tipoManual();
     return tipo === TipoFluxoCaixaEnum.ENTRADA
@@ -204,7 +219,14 @@ export class MovimentoFinanceiroComponent implements OnInit {
     return this.manual.tipo;
   }
   private novoManual(): MovimentoFinanceiroCreateDTO {
-    return { descricao: '', valor: 0, data: this.hoje(), observacao: '' };
+    return {
+      descricao: '',
+      valor: 0,
+      data: this.hoje(),
+      observacao: '',
+      formaPagamento: this.configuracaoGeral?.formaPagamentoPadrao as FormaPagamentoEnum | undefined,
+      contaFinanceiraId: this.configuracaoGeral?.contaPadraoBaixaId,
+    };
   }
   private novaTransferencia(): TransferenciaFinanceiraDTO {
     return { valor: 0, data: this.hoje(), descricao: 'Transferência entre contas', observacao: '' };

@@ -31,4 +31,12 @@ public interface MovimentoFinanceiroRepository extends BaseRepository<MovimentoF
             "and m.tipo = :tipo and m.data between :inicio and :fim")
     BigDecimal totalPeriodo(@Param("empresaId") Long empresaId, @Param("tipo") TipoFluxoCaixaEnum tipo,
                             @Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
+
+    @Query("select m from MovimentoFinanceiro m where m.empresa.id = :empresaId " +
+            "and (:contaId is null or m.contaFinanceira.id = :contaId) " +
+            "and m.data between :inicio and :fim order by m.data asc, m.id asc")
+    List<MovimentoFinanceiro> relatorioFluxoCaixa(@Param("empresaId") Long empresaId,
+                                                  @Param("contaId") Long contaId,
+                                                  @Param("inicio") LocalDate inicio,
+                                                  @Param("fim") LocalDate fim);
 }

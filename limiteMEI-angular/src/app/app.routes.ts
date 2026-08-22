@@ -148,6 +148,18 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/configuracoes/configuracoes.component').then((m) => m.ConfiguracoesComponent),
       },
+      {
+        path: 'relatorios',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/relatorios.component').then((m) => m.RelatoriosComponent),
+      },
+      {
+        path: 'relatorios/fluxo-caixa',
+        canActivate: [empresaAtivaGuard],
+        loadComponent: () =>
+          import('./pages/relatorios/fluxo-caixa-relatorio.component').then((m) => m.FluxoCaixaRelatorioComponent),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
     ],
   },

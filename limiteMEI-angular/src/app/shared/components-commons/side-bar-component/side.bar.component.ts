@@ -80,6 +80,7 @@ export class SideBarComponent implements OnInit {
       ]
     },
 
+    { label: 'Relatórios', icon: 'bi-file-earmark-bar-graph', route: '/app/relatorios' },
 
     { label: 'Configurações', icon: 'bi-gear', route: '/app/configuracoes' }
   ];
