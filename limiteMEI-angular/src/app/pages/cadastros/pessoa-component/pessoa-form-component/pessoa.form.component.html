@@ -1,1 +1,99 @@
-<toolbar-filter tituloPagina="Pessoa" [listMode]="false" [loading]="loading" (salvar)="save()" (limpar)="clear()"></toolbar-filter><section class="person-form"><div class="card"><div class="card-body p-4"><header><i class="bi bi-person-vcard"></i><div><h2>Dados da pessoa</h2><p>Este cadastro poderá ser reutilizado como cliente, fornecedor ou funcionário.</p></div></header><div class="fields"><select-enum label="Tipo de pessoa" colClass="" width="240px" [enumObject]="tipoPessoaEnum" [optionLabels]="tipoPessoaLabels" [(dataField)]="model.tipoPessoa"></select-enum><text-box-component label="Nome / Razão social" colClass="" [(dataField)]="model.nomeRazaoSocial"></text-box-component><text-box-component label="Nome fantasia" colClass="" [(dataField)]="model.nomeFantasia"></text-box-component><text-box-component label="CPF / CNPJ" colClass="" width="245px" [mask]="model.tipoPessoa===tipoPessoaEnum.FISICA?'cpf':'cnpj'" [(dataField)]="model.cpfCnpj"></text-box-component><text-box-component label="E-mail" colClass="" [(dataField)]="model.email"></text-box-component><text-box-component label="Telefone" colClass="" width="220px" mask="telefone" [(dataField)]="model.telefone"></text-box-component><div class="status"><span>Situação</span><switch-component label="Pessoa ativa" [(dataField)]="model.ativo"></switch-component></div></div></div></div></section>
+<toolbar-filter tituloPagina="Pessoa" [listMode]="false" [loading]="loading" (salvar)="save()" (limpar)="clear()"></toolbar-filter>
+
+<section class="person-form">
+  <div class="card">
+    <div class="card-body p-4">
+      <header>
+        <i class="bi bi-person-vcard"></i>
+        <div>
+          <h2>Dados da pessoa</h2>
+          <p>Este cadastro poderá ser reutilizado como cliente, fornecedor ou funcionário.</p>
+        </div>
+      </header>
+
+      <div class="form-section">
+        <h3>Identificação</h3>
+        <div class="fields identification-row">
+          <select-enum label="Tipo de pessoa" colClass="" width="220px" [enumObject]="tipoPessoaEnum" [optionLabels]="tipoPessoaLabels" [(dataField)]="model.tipoPessoa"></select-enum>
+          <text-box-component label="CPF / CNPJ" colClass="" width="245px" [mask]="model.tipoPessoa===tipoPessoaEnum.FISICA?'cpf':'cnpj'" [(dataField)]="model.cpfCnpj"></text-box-component>
+          <div class="status">
+            <span>Situação</span>
+            <switch-component label="Pessoa ativa" [(dataField)]="model.ativo"></switch-component>
+          </div>
+        </div>
+        <div class="role-box">
+          <span>Usar também como:</span>
+          <switch-component
+            *ngFor="let papel of papeisCadastro"
+            [label]="papelLabels[papel]"
+            [dataField]="possuiPapel(papel)"
+            (dataFieldChange)="setPapel(papel,$event)"
+            [disabled]="loading">
+          </switch-component>
+          <small>Marque aqui para a pessoa já aparecer nas telas de cliente ou fornecedor.</small>
+        </div>
+        <div class="fields name-row">
+          <text-box-component label="Nome / Razão social" colClass="" width="481px" [(dataField)]="model.nomeRazaoSocial"></text-box-component>
+        </div>
+        <div class="fields">
+          <text-box-component label="Nome fantasia" colClass="" width="481px" [(dataField)]="model.nomeFantasia"></text-box-component>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Contato</h3>
+        <div class="fields">
+          <text-box-component label="E-mail" colClass="" [(dataField)]="model.email"></text-box-component>
+        </div>
+        <div class="fields">
+          <text-box-component label="Telefone" colClass="" width="210px" mask="telefone" [(dataField)]="model.telefone"></text-box-component>
+          <text-box-component label="Telefone alternativo" colClass="" width="210px" mask="telefone" [(dataField)]="model.telefoneAlternativo"></text-box-component>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Endereço</h3>
+        <div class="fields">
+          <text-box-component label="CEP" colClass="" width="150px" mask="cep" [(dataField)]="model.cep"></text-box-component>
+        </div>
+        <div class="fields">
+          <text-box-component label="Endereço" colClass="" [(dataField)]="model.endereco"></text-box-component>
+          <text-box-component label="Número" colClass="" width="120px" [(dataField)]="model.numero"></text-box-component>
+        </div>
+        <div class="fields">
+          <text-box-component label="Bairro" colClass="" width="280px" [(dataField)]="model.bairro"></text-box-component>
+          <text-box-component label="Cidade" colClass="" width="280px" [(dataField)]="model.cidade"></text-box-component>
+        </div>
+        <div class="fields">
+          <select-enum label="UF" colClass="" width="150px" [enumObject]="ufEnum" [optionLabels]="ufLabels" [(dataField)]="model.uf"></select-enum>
+          <text-box-component label="Complemento" colClass="" width="280px" [(dataField)]="model.complemento"></text-box-component>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Comercial</h3>
+        <div class="fields">
+          <text-box-component label="Responsável" colClass="" [(dataField)]="model.responsavel"></text-box-component>
+        </div>
+        <label class="textarea-field">
+          <span>Observações comerciais:</span>
+          <textarea [(ngModel)]="model.observacoesComerciais" [disabled]="loading" rows="3"></textarea>
+        </label>
+      </div>
+
+      <div class="form-section">
+        <h3>Dados bancários</h3>
+        <p class="section-help">Use principalmente para fornecedores. Estes dados ficam na pessoa para reaproveitamento futuro.</p>
+        <div class="fields">
+          <select-enum label="Banco" colClass="" width="280px" [enumObject]="bancoEnum" [optionLabels]="bancoLabels" [(dataField)]="model.banco"></select-enum>
+          <text-box-component label="Agência" colClass="" width="180px" [(dataField)]="model.agencia"></text-box-component>
+          <text-box-component label="Conta" colClass="" width="220px" [(dataField)]="model.conta"></text-box-component>
+          <select-enum label="Tipo de conta" colClass="" width="220px" [enumObject]="tipoContaEnum" [optionLabels]="tipoContaLabels" [(dataField)]="model.tipoConta"></select-enum>
+        </div>
+        <div class="fields">
+          <text-box-component label="Chave Pix" colClass="" [(dataField)]="model.chavePix"></text-box-component>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,2 +1,30 @@
+import {BancoEnum} from '../../enums/banco.enum';
+import {TipoContaFinanceiraEnum} from '../../enums/tipo.conta.financeira.enum';
 import {TipoPessoaEnum} from '../../enums/tipo.pessoa.enum';
-export interface PessoaCreateDTO{tipoPessoa:TipoPessoaEnum;nomeRazaoSocial:string;nomeFantasia:string;cpfCnpj:string;email:string;telefone:string;ativo:boolean;}
+import {UfEnum} from '../../enums/uf.enum';
+import {PapelPessoaEnum} from '../../enums/papel.pessoa.enum';
+export interface PessoaCreateDTO{
+  tipoPessoa:TipoPessoaEnum;
+  nomeRazaoSocial:string;
+  nomeFantasia:string;
+  cpfCnpj:string;
+  email:string;
+  telefone:string;
+  telefoneAlternativo:string;
+  responsavel:string;
+  cep:string;
+  endereco:string;
+  numero:string;
+  complemento:string;
+  bairro:string;
+  cidade:string;
+  uf?:UfEnum;
+  observacoesComerciais:string;
+  banco?:BancoEnum;
+  agencia:string;
+  conta:string;
+  tipoConta?:TipoContaFinanceiraEnum;
+  chavePix:string;
+  ativo:boolean;
+  papeis:PapelPessoaEnum[];
+}

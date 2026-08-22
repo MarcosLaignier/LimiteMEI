@@ -12,6 +12,7 @@ import {
   TipoContaFinanceiraEnum,
   TIPO_CONTA_FINANCEIRA_LABELS,
 } from '../../../enums/tipo.conta.financeira.enum';
+import { BancoEnum, BANCO_LABELS } from '../../../enums/banco.enum';
 @Component({
   standalone: true,
   imports: [
@@ -32,6 +33,8 @@ export class ContaFinanceiraFormComponent
   protected routeBase = '/app/financeiro/contas';
   readonly tipos = TipoContaFinanceiraEnum;
   readonly tipoLabels = TIPO_CONTA_FINANCEIRA_LABELS;
+  readonly bancos = BancoEnum;
+  readonly bancoLabels = BANCO_LABELS;
   constructor(service: ContaFinanceiraService, router: Router, route: ActivatedRoute) {
     super(router, route);
     this.service = service;
@@ -43,7 +46,7 @@ export class ContaFinanceiraFormComponent
   override clear() {
     this.model = {
       nome: '',
-      instituicao: '',
+      instituicao: undefined,
       agencia: '',
       numeroConta: '',
       saldoInicial: 0,

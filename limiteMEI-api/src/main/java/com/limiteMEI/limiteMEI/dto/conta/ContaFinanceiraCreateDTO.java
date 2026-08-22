@@ -1,5 +1,6 @@
 package com.limiteMEI.limiteMEI.dto.conta;
 
+import com.limiteMEI.limiteMEI.enums.BancoEnum;
 import com.limiteMEI.limiteMEI.enums.TipoContaFinanceiraEnum;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -15,7 +16,7 @@ public class ContaFinanceiraCreateDTO {
     private String nome;
     @NotNull
     private TipoContaFinanceiraEnum tipo;
-    private String instituicao;
+    private BancoEnum instituicao;
     private String agencia;
     private String numeroConta;
     private BigDecimal saldoInicial;

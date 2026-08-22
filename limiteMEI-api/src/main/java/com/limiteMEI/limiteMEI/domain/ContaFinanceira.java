@@ -1,5 +1,6 @@
 package com.limiteMEI.limiteMEI.domain;
 
+import com.limiteMEI.limiteMEI.enums.BancoEnum;
 import com.limiteMEI.limiteMEI.enums.TipoContaFinanceiraEnum;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,8 +29,9 @@ public class ContaFinanceira {
     @Column(nullable = false)
     private TipoContaFinanceiraEnum tipo;
 
-    @Column(length = 100)
-    private String instituicao;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 40)
+    private BancoEnum instituicao;
 
     @Column(length = 20)
     private String agencia;

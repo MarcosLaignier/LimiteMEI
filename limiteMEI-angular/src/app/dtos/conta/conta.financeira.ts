@@ -3,10 +3,11 @@ import {
   TipoContaFinanceiraEnum,
   TIPO_CONTA_FINANCEIRA_LABELS,
 } from '../../enums/tipo.conta.financeira.enum';
+import { BancoEnum, BANCO_LABELS } from '../../enums/banco.enum';
 export interface ContaFinanceiraCreateDTO {
   nome: string;
   tipo?: TipoContaFinanceiraEnum;
-  instituicao: string;
+  instituicao?: BancoEnum;
   agencia: string;
   numeroConta: string;
   saldoInicial: number;
@@ -23,8 +24,8 @@ export class ContaFinanceiraDTO {
     enumLabels: TIPO_CONTA_FINANCEIRA_LABELS,
   })
   tipo!: TipoContaFinanceiraEnum;
-  @GridColumn({ label: 'Instituição', type: 'texto', ordem: 4, width: '200px' })
-  instituicao?: string;
+  @GridColumn({ label: 'Banco', type: 'enum', ordem: 4, width: '220px', enumLabels: BANCO_LABELS })
+  instituicao?: BancoEnum;
   @GridColumn({ label: 'Agência', type: 'texto', ordem: 5, width: '110px' }) agencia?: string;
   @GridColumn({ label: 'Conta', type: 'texto', ordem: 6, width: '140px' }) numeroConta?: string;
   @GridColumn({ label: 'Saldo inicial', type: 'currency', ordem: 7, width: '150px' })
